@@ -1,0 +1,438 @@
+{
+  "version": 1,
+  "contactEmail": "xiaohei@xiaohei.co",
+  "pages": {
+    "home": {
+      "text_01": {
+        "en": "Skip to content",
+        "zh": "跳至正文"
+      },
+      "text_02": {
+        "en": "a security notebook",
+        "zh": "安全研究笔记"
+      },
+      "text_03": {
+        "en": "Notebook",
+        "zh": "笔记"
+      },
+      "text_04": {
+        "en": "About",
+        "zh": "关于我"
+      },
+      "text_05": {
+        "en": "Contact ↗",
+        "zh": "联系 ↗"
+      },
+      "text_06": {
+        "en": "Red team practitioner.\nCloud & AI security.",
+        "zh": "红队从业者。\n云与 AI 安全。"
+      },
+      "text_07": {
+        "en": "8 years exploring how identities, systems and trust connect.",
+        "zh": "8 年红队经验，关注身份、系统与信任之间的关系。"
+      },
+      "text_08": {
+        "en": "More about me →",
+        "zh": "更多关于我 →"
+      },
+      "text_09": {
+        "en": "RESEARCH INTERESTS",
+        "zh": "研究方向"
+      },
+      "text_10": {
+        "en": "Cloud & hybrid cloud",
+        "zh": "云与混合云"
+      },
+      "text_11": {
+        "en": "LLM infrastructure",
+        "zh": "大模型基础设施"
+      },
+      "text_12": {
+        "en": "Agents & guardrails",
+        "zh": "Agent 与 AI 围栏"
+      },
+      "text_13": {
+        "en": "SAY HELLO",
+        "zh": "联系我"
+      },
+      "text_14": {
+        "en": "Open to new opportunities.",
+        "zh": "正在寻找新的工作机会。"
+      },
+      "text_15": {
+        "en": "THE NOTEBOOK",
+        "zh": "个人笔记"
+      },
+      "text_16": {
+        "en": "Security, from my perspective.",
+        "zh": "从我的视角，记录安全。"
+      },
+      "text_17": {
+        "en": "A place for notes on red teaming, cloud environments and AI systems.",
+        "zh": "记录红队、云环境与 AI 系统安全的地方。"
+      },
+      "text_18": {
+        "en": "Writing",
+        "zh": "文章"
+      },
+      "text_19": {
+        "en": "01 entry",
+        "zh": "01 篇"
+      },
+      "text_20": {
+        "en": "October 19, 2026",
+        "zh": "2026 年 10 月 19 日"
+      },
+      "text_21": {
+        "en": "Introduction",
+        "zh": "个人介绍"
+      },
+      "text_22": {
+        "en": "Hello, I’m LISG.",
+        "zh": "你好，我是 LISG。"
+      },
+      "text_23": {
+        "en": "A short introduction to my background in red teaming, the systems I focus on, and what this notebook is for.",
+        "zh": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。"
+      },
+      "text_24": {
+        "en": "Read the introduction →",
+        "zh": "阅读介绍 →"
+      },
+      "text_25": {
+        "en": "A NOTE ON WHAT’S NEXT",
+        "zh": "关于接下来的内容"
+      },
+      "text_26": {
+        "en": "Technical posts will appear here as they are added. For now, you can explore my background and areas of expertise.",
+        "zh": "技术文章将在更新后出现在这里。目前可以先了解我的背景与专业方向。"
+      },
+      "text_27": {
+        "en": "What I focus on",
+        "zh": "我关注的方向"
+      },
+      "text_28": {
+        "en": "Research interests",
+        "zh": "研究兴趣"
+      },
+      "text_29": {
+        "en": "Identity & trust",
+        "zh": "身份与信任"
+      },
+      "text_30": {
+        "en": "Active Directory, domain controllers, domains and forests.",
+        "zh": "Active Directory、域控、域与域林。"
+      },
+      "text_31": {
+        "en": "Across cloud boundaries",
+        "zh": "跨越云端边界"
+      },
+      "text_32": {
+        "en": "AWS, Azure, GCP and lateral movement in hybrid environments.",
+        "zh": "AWS、Azure、GCP 与混合环境横向移动。"
+      },
+      "text_33": {
+        "en": "Models, agents & infrastructure",
+        "zh": "模型、智能体与基础设施"
+      },
+      "text_34": {
+        "en": "LLM security, agent behavior and AI guardrails.",
+        "zh": "大模型安全、智能体行为与 AI 围栏。"
+      },
+      "text_35": {
+        "en": "Personal notes on identity, cloud and AI security.",
+        "zh": "关于身份、云与 AI 安全的个人记录。"
+      },
+      "text_36": {
+        "en": "Back to top ↑",
+        "zh": "返回顶部 ↑"
+      }
+    },
+    "about": {
+      "text_01": {
+        "en": "Skip to content",
+        "zh": "跳至正文"
+      },
+      "text_02": {
+        "en": "a security notebook",
+        "zh": "安全研究笔记"
+      },
+      "text_03": {
+        "en": "Notebook",
+        "zh": "笔记"
+      },
+      "text_04": {
+        "en": "About",
+        "zh": "关于我"
+      },
+      "text_05": {
+        "en": "Contact ↗",
+        "zh": "联系 ↗"
+      },
+      "text_06": {
+        "en": "← Back to the notebook",
+        "zh": "← 返回笔记"
+      },
+      "text_07": {
+        "en": "ABOUT THE AUTHOR",
+        "zh": "关于作者"
+      },
+      "text_08": {
+        "en": "Red Team & AI Security",
+        "zh": "红队与 AI 安全"
+      },
+      "text_09": {
+        "en": "8 years of red team experience across enterprise identity, cloud environments and AI systems.",
+        "zh": "8 年红队经验，专注企业身份、云环境与 AI 系统安全。"
+      },
+      "text_10": {
+        "en": "My expertise spans Active Directory and domain controller security, lateral movement in cloud and hybrid-cloud environments, large language models and their infrastructure, agent security and AI guardrails.",
+        "zh": "精通 Active Directory 与域控安全、云与混合云横向移动、大模型及其基础设施安全，以及 Agent 安全与 AI 围栏。"
+      },
+      "text_11": {
+        "en": "Expertise",
+        "zh": "核心能力"
+      },
+      "text_12": {
+        "en": "Active Directory & domain security",
+        "zh": "Active Directory 与域安全"
+      },
+      "text_13": {
+        "en": "Expertise in AD and domain controller security. Strong understanding of domains, domain trees, forests and their trust relationships.",
+        "zh": "精通 AD 与域控安全，熟悉域、域树、域林及其信任关系。"
+      },
+      "text_14": {
+        "en": "Cloud & hybrid-cloud security",
+        "zh": "云与混合云安全"
+      },
+      "text_15": {
+        "en": "Expertise in lateral movement across AWS, Azure, GCP and hybrid-cloud environments, with a focus on identity, permissions and cross-environment trust.",
+        "zh": "精通 AWS、Azure、GCP 及混合云环境中的横向移动，关注身份、权限与跨环境信任。"
+      },
+      "text_16": {
+        "en": "LLM & infrastructure security",
+        "zh": "大模型与基础设施安全"
+      },
+      "text_17": {
+        "en": "Expertise in large language model security and the infrastructure supporting model execution, viewed as one connected system.",
+        "zh": "精通大模型与支撑模型运行的基础设施安全，从整体系统视角分析安全边界。"
+      },
+      "text_18": {
+        "en": "Agent security & AI guardrails",
+        "zh": "Agent 安全与 AI 围栏"
+      },
+      "text_19": {
+        "en": "Expertise in agent security and AI guardrails, including trust boundaries between model output, tool use and actions in connected systems.",
+        "zh": "精通 Agent 安全与 AI 围栏，关注模型输出、工具调用和关联系统中的行动之间的信任边界。"
+      },
+      "text_20": {
+        "en": "Adversarial experience",
+        "zh": "对抗经验"
+      },
+      "text_21": {
+        "en": "High-intensity adversarial engagements with AWS, Azure and GCP security expert teams, supported by 8 years of red team experience.",
+        "zh": "拥有 8 年红队经验，与 AWS、Azure、GCP 安全专家团队开展过高强度攻防对抗。"
+      },
+      "text_22": {
+        "en": "Certifications",
+        "zh": "专业认证"
+      },
+      "text_23": {
+        "en": "Google Machine Learning Engineer",
+        "zh": "谷歌机器学习工程师"
+      },
+      "text_24": {
+        "en": "Claude Architect — Professional",
+        "zh": "Claude 架构师专业级"
+      },
+      "text_25": {
+        "en": "Get in touch",
+        "zh": "联系我"
+      },
+      "text_26": {
+        "en": "I’m currently looking for opportunities in red teaming, cloud security, and AI or agent security.",
+        "zh": "目前正在寻找红队、云安全、AI 或 Agent 安全方向的工作机会。"
+      },
+      "text_27": {
+        "en": "Personal notes on identity, cloud and AI security.",
+        "zh": "关于身份、云与 AI 安全的个人记录。"
+      },
+      "text_28": {
+        "en": "Back to top ↑",
+        "zh": "返回顶部 ↑"
+      }
+    },
+    "hello": {
+      "text_01": {
+        "en": "Skip to content",
+        "zh": "跳至正文"
+      },
+      "text_02": {
+        "en": "a security notebook",
+        "zh": "安全研究笔记"
+      },
+      "text_03": {
+        "en": "Notebook",
+        "zh": "笔记"
+      },
+      "text_04": {
+        "en": "About",
+        "zh": "关于我"
+      },
+      "text_05": {
+        "en": "Contact ↗",
+        "zh": "联系 ↗"
+      },
+      "text_06": {
+        "en": "← All writing",
+        "zh": "← 全部文章"
+      },
+      "text_07": {
+        "en": "October 19, 2026",
+        "zh": "2026 年 10 月 19 日"
+      },
+      "text_08": {
+        "en": "Introduction",
+        "zh": "个人介绍"
+      },
+      "text_09": {
+        "en": "Hello, I’m LISG.",
+        "zh": "你好，我是 LISG。"
+      },
+      "text_10": {
+        "en": "A short introduction to my background in red teaming, the systems I focus on, and what this notebook is for.",
+        "zh": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。"
+      },
+      "text_11": {
+        "en": "I’m LISG, a red team practitioner with 8 years of experience. My work focuses on enterprise identity, cloud and hybrid-cloud environments, and the security of AI systems.",
+        "zh": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。"
+      },
+      "text_12": {
+        "en": "The systems I work with",
+        "zh": "我关注的系统"
+      },
+      "text_13": {
+        "en": "I work across Active Directory and domain controller security, with a strong understanding of domains, domain trees, forests and their trust relationships. I also specialize in lateral movement across AWS, Azure, GCP and hybrid-cloud environments.",
+        "zh": "我精通 Active Directory 与域控安全，熟悉域、域树、域林及其信任关系，也精通 AWS、Azure、GCP 及混合云环境中的横向移动。"
+      },
+      "text_14": {
+        "en": "My areas of expertise also include large language models and the infrastructure that supports them, agent security and AI guardrails. I’m interested in how trust passes between components, particularly when model output becomes a tool call or an action.",
+        "zh": "我的专业领域还包括大模型及其基础设施、Agent 安全与 AI 围栏。我关注信任如何在组件之间传递，尤其是模型输出转变为工具调用或实际行动的时候。"
+      },
+      "text_15": {
+        "en": "My experience includes high-intensity adversarial engagements with AWS, Azure and GCP security expert teams.",
+        "zh": "我的经历包括与 AWS、Azure、GCP 安全专家团队开展高强度攻防对抗。"
+      },
+      "text_16": {
+        "en": "About this notebook",
+        "zh": "关于这个笔记站"
+      },
+      "text_17": {
+        "en": "This notebook is a home for writing about those interests. Technical articles will be added over time; this first entry is simply an introduction to the person behind the site.",
+        "zh": "这个笔记站用于记录这些方向的思考。技术文章会在后续逐步更新；这篇开篇介绍，先让你认识网站背后的我。"
+      },
+      "text_18": {
+        "en": "I’m currently looking for new opportunities in red teaming, cloud security, and AI or agent security. If that overlaps with what you’re working on, feel free to get in touch.",
+        "zh": "目前，我正在寻找红队、云安全、AI 或 Agent 安全方向的新机会。如果与你正在做的事情相关，欢迎联系。"
+      },
+      "text_19": {
+        "en": "Background & certifications →",
+        "zh": "背景与认证 →"
+      },
+      "text_20": {
+        "en": "Personal notes on identity, cloud and AI security.",
+        "zh": "关于身份、云与 AI 安全的个人记录。"
+      },
+      "text_21": {
+        "en": "Back to top ↑",
+        "zh": "返回顶部 ↑"
+      }
+    }
+  },
+  "posts": [
+    {
+      "id": "hello-lisg",
+      "date": "2026-10-19",
+      "title": {
+        "en": "你好，我是 LISG。",
+        "zh": "你好，我是 LISG。"
+      },
+      "summary": {
+        "en": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。",
+        "zh": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。"
+      },
+      "category": {
+        "en": "个人介绍",
+        "zh": "个人介绍"
+      },
+      "body": [
+        {
+          "type": "paragraph",
+          "text": {
+            "en": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。",
+            "zh": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。"
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "en": "我关注的系统",
+            "zh": "我关注的系统"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "en": "我精通 Active Directory 与域控安全，熟悉域、域树、域林及其信任关系，也精通 AWS、Azure、GCP 及混合云环境中的横向移动。",
+            "zh": "我精通 Active Directory 与域控安全，熟悉域、域树、域林及其信任关系，也精通 AWS、Azure、GCP 及混合云环境中的横向移动。"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "en": "我的专业领域还包括大模型及其基础设施、Agent 安全与 AI 围栏。我关注信任如何在组件之间传递，尤其是模型输出转变为工具调用或实际行动的时候。",
+            "zh": "我的专业领域还包括大模型及其基础设施、Agent 安全与 AI 围栏。我关注信任如何在组件之间传递，尤其是模型输出转变为工具调用或实际行动的时候。"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "en": "我的经历包括与 AWS、Azure、GCP 安全专家团队开展高强度攻防对抗。",
+            "zh": "我的经历包括与 AWS、Azure、GCP 安全专家团队开展高强度攻防对抗。"
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "en": "关于这个笔记站",
+            "zh": "关于这个笔记站"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "en": "这个笔记站用于记录这些方向的思考。技术文章会在后续逐步更新；这篇开篇介绍，先让你认识网站背后的我。",
+            "zh": "这个笔记站用于记录这些方向的思考。技术文章会在后续逐步更新；这篇开篇介绍，先让你认识网站背后的我。"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "en": "目前，我正在寻找红队、云安全、AI 或 Agent 安全方向的新机会。如果与你正在做的事情相关，欢迎联系。",
+            "zh": "目前，我正在寻找红队、云安全、AI 或 Agent 安全方向的新机会。如果与你正在做的事情相关，欢迎联系。"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "en": "联系邮箱：xiaohei@xiaohei.co",
+            "zh": "联系邮箱：xiaohei@xiaohei.co"
+          }
+        }
+      ],
+      "sourcePath": "posts/hello-lisg.md"
+    }
+  ]
+}
