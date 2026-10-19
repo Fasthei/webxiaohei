@@ -24,4 +24,16 @@ class Tests(unittest.TestCase):
  def test_code_is_preserved(self):self.assertEqual(m.blocks('```html\n<script>alert(1)</script>\n```')[0]['text']['zh'],'<script>alert(1)</script>')
  def test_unclosed_fence(self):
   with self.assertRaises(ValueError):m.blocks('```python\nprint(1)')
+ def test_english_companion_merges_into_one_article(self):
+  self.write('2026-10-19-note.md','# 中文\n\n中文正文')
+  self.write('2026-10-19-note.en.md','# English\n\nEnglish body')
+  m.build(self.root)
+  posts=json.loads((self.root/'content/site.json').read_text())['posts']
+  self.assertEqual(len(posts),1)
+  self.assertEqual(posts[0]['title'],{'zh':'中文','en':'English'})
+  self.assertEqual(posts[0]['body'][0]['text'],{'zh':'中文正文','en':'English body'})
+ def test_misaligned_translation_fails(self):
+  self.write('2026-10-19-note.md','# 中文\n\n正文')
+  self.write('2026-10-19-note.en.md','# English\n\n## Heading\n\nBody')
+  with self.assertRaises(ValueError):m.build(self.root)
 if __name__=='__main__':unittest.main()

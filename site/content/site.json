@@ -354,81 +354,81 @@
       "id": "hello-lisg",
       "date": "2026-10-19",
       "title": {
-        "en": "你好，我是 LISG。",
-        "zh": "你好，我是 LISG。"
+        "zh": "你好，我是 LISG。",
+        "en": "Hello, I'm LISG."
       },
       "summary": {
-        "en": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。",
-        "zh": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。"
+        "zh": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。",
+        "en": "An introduction to my red team background, the security areas I focus on, and what I plan to share in this notebook."
       },
       "category": {
-        "en": "个人介绍",
-        "zh": "个人介绍"
+        "zh": "个人介绍",
+        "en": "About me"
       },
       "body": [
         {
           "type": "paragraph",
           "text": {
-            "en": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。",
-            "zh": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。"
+            "zh": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。",
+            "en": "I'm LISG, a red team practitioner with eight years of experience focused on enterprise identity, cloud and hybrid environments, and AI system security."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "en": "我关注的系统",
-            "zh": "我关注的系统"
+            "zh": "我关注的系统",
+            "en": "The systems I focus on"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "en": "我精通 Active Directory 与域控安全，熟悉域、域树、域林及其信任关系，也精通 AWS、Azure、GCP 及混合云环境中的横向移动。",
-            "zh": "我精通 Active Directory 与域控安全，熟悉域、域树、域林及其信任关系，也精通 AWS、Azure、GCP 及混合云环境中的横向移动。"
+            "zh": "我精通 Active Directory 与域控安全，熟悉域、域树、域林及其信任关系，也精通 AWS、Azure、GCP 及混合云环境中的横向移动。",
+            "en": "I specialize in Active Directory and domain controller security, including domains, domain trees, forests, and their trust relationships. I also specialize in lateral movement across AWS, Azure, GCP, and hybrid cloud environments."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "en": "我的专业领域还包括大模型及其基础设施、Agent 安全与 AI 围栏。我关注信任如何在组件之间传递，尤其是模型输出转变为工具调用或实际行动的时候。",
-            "zh": "我的专业领域还包括大模型及其基础设施、Agent 安全与 AI 围栏。我关注信任如何在组件之间传递，尤其是模型输出转变为工具调用或实际行动的时候。"
+            "zh": "我的专业领域还包括大模型及其基础设施、Agent 安全与 AI 围栏。我关注信任如何在组件之间传递，尤其是模型输出转变为工具调用或实际行动的时候。",
+            "en": "My work also covers large language models and their infrastructure, agent security, and AI guardrails. I focus on how trust passes between components, especially when model output becomes a tool call or an action in the real world."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "en": "我的经历包括与 AWS、Azure、GCP 安全专家团队开展高强度攻防对抗。",
-            "zh": "我的经历包括与 AWS、Azure、GCP 安全专家团队开展高强度攻防对抗。"
+            "zh": "我的经历包括与 AWS、Azure、GCP 安全专家团队开展高强度攻防对抗。",
+            "en": "My experience includes intensive adversarial exercises with security expert teams from AWS, Azure, and GCP."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "en": "关于这个笔记站",
-            "zh": "关于这个笔记站"
+            "zh": "关于这个笔记站",
+            "en": "About this notebook"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "en": "这个笔记站用于记录这些方向的思考。技术文章会在后续逐步更新；这篇开篇介绍，先让你认识网站背后的我。",
-            "zh": "这个笔记站用于记录这些方向的思考。技术文章会在后续逐步更新；这篇开篇介绍，先让你认识网站背后的我。"
+            "zh": "这个笔记站用于记录这些方向的思考。技术文章会在后续逐步更新；这篇开篇介绍，先让你认识网站背后的我。",
+            "en": "This notebook is where I record my thinking on these topics. Technical articles will follow over time; this opening introduction is a chance to meet the person behind the site."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "en": "目前，我正在寻找红队、云安全、AI 或 Agent 安全方向的新机会。如果与你正在做的事情相关，欢迎联系。",
-            "zh": "目前，我正在寻找红队、云安全、AI 或 Agent 安全方向的新机会。如果与你正在做的事情相关，欢迎联系。"
+            "zh": "目前，我正在寻找红队、云安全、AI 或 Agent 安全方向的新机会。如果与你正在做的事情相关，欢迎联系。",
+            "en": "I'm currently looking for new opportunities in red teaming, cloud security, AI security, or agent security. If that connects with your work, I'd be glad to hear from you."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "en": "联系邮箱：xiaohei@xiaohei.co",
-            "zh": "联系邮箱：xiaohei@xiaohei.co"
+            "zh": "联系邮箱：xiaohei@xiaohei.co",
+            "en": "Contact: xiaohei@xiaohei.co"
           }
         }
       ],

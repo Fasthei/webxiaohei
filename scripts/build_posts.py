@@ -98,13 +98,38 @@ def parse(path, root=ROOT):
     summary = meta.get('summary') or next((item['text']['zh'][:160] for item in body if item['type'] == 'paragraph'), title)
     return {'id': post_id, 'date': date, 'title': bilingual(title), 'summary': bilingual(summary), 'category': bilingual(meta.get('category', '研究笔记')), 'body': body, 'sourcePath': 'posts/' + relative}
 
+def merge_translation(original, translated, path='article'):
+    """Merge aligned English Markdown without changing the Chinese article."""
+    if isinstance(original, dict):
+        if not isinstance(translated, dict) or original.keys() != translated.keys():
+            raise ValueError(f'{path}: translation structure differs')
+        if set(original) == {'en', 'zh'}:
+            return {'zh': original['zh'], 'en': translated['en']}
+        return {key: merge_translation(value, translated[key], f'{path}/{key}')
+                for key, value in original.items()}
+    if isinstance(original, list):
+        if not isinstance(translated, list) or len(original) != len(translated):
+            raise ValueError(f'{path}: translation block count differs')
+        return [merge_translation(a, b, f'{path}/{i}')
+                for i, (a, b) in enumerate(zip(original, translated))]
+    if original != translated:
+        raise ValueError(f'{path}: translation structure differs')
+    return original
+
 def build(root=ROOT):
     content_path = root / 'content/site.json'
     content = json.loads(content_path.read_text())
     posts, seen = [], set()
     for path in sorted((root / 'posts').rglob('*.md')):
+        if path.name.endswith('.en.md'): continue
         post = parse(path, root)
         if post is None: continue
+        translation_path = path.with_suffix('.en.md')
+        if translation_path.exists():
+            translated = parse(translation_path, root)
+            if translated is None: raise ValueError(f'{translation_path.name}: translation cannot be a draft')
+            for field in ('title', 'summary', 'category', 'body'):
+                post[field] = merge_translation(post[field], translated[field], field)
         if post['id'] in seen: raise ValueError(f"文章 slug 重复: {post['id']}")
         seen.add(post['id']); posts.append(post)
     content['posts'] = sorted(posts, key=lambda p: (p['date'], p['id']), reverse=True)

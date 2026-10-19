@@ -77,3 +77,7 @@ draft: false
 `site/` 保存网站页面与资源。Azure 工作流在每次推送到 main 时运行文章测试并从 `posts/` 生成内容，再将最新 `content/site.json` 复制到 `site/content/site.json` 并部署整个 `site/`。Azure 网站从同域读取文章，不依赖浏览器访问 GitHub API。
 
 `app_location: site`、`skip_app_build: true`、`output_location: ""` 用于直接发布静态文件。部署凭据继续使用现有 GitHub Actions Secret。
+
+### English articles
+
+为 `posts/name.md` 添加 `posts/name.en.md` 可提供英文标题、摘要、分类及正文。两份文章应使用相同的段落、标题和列表结构；代码块保持一致。生成器会校验结构并合并为同一篇双语文章，不会把英文稿作为第二篇文章发布。没有英文稿时保留原文。
