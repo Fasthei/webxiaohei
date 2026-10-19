@@ -1,0 +1,70 @@
+{
+  "verified_on": "2026-10-19",
+  "artwork": "Original site display artwork, not official issuer-issued digital badges. No personal verification IDs or dates are asserted.",
+  "certifications": [
+    {
+      "id": "oscp",
+      "en": "OffSec Certified Professional (OSCP)",
+      "zh": "OffSec 认证专业人员（OSCP）",
+      "code": "OSCP",
+      "issuer": "OffSec",
+      "url": "https://www.offsec.com/courses/pen-200/"
+    },
+    {
+      "id": "osep",
+      "en": "OffSec Experienced Penetration Tester (OSEP)",
+      "zh": "OffSec 资深渗透测试专家（OSEP）",
+      "code": "OSEP",
+      "issuer": "OffSec",
+      "url": "https://www.offsec.com/courses/pen-300/"
+    },
+    {
+      "id": "osai",
+      "en": "OffSec AI Red Teamer (OSAI)",
+      "zh": "OffSec AI 红队专家（OSAI）",
+      "code": "OSAI",
+      "issuer": "OffSec",
+      "url": "https://www.offsec.com/courses/ai-300/"
+    },
+    {
+      "id": "google-ml",
+      "en": "Google Cloud Certified — Professional Machine Learning Engineer",
+      "zh": "Google Cloud 认证专业机器学习工程师",
+      "code": "Professional",
+      "issuer": "Google Cloud",
+      "url": "https://cloud.google.com/learn/certification/machine-learning-engineer"
+    },
+    {
+      "id": "aws-genai",
+      "en": "AWS Certified Generative AI Developer — Professional",
+      "zh": "AWS 认证生成式 AI 开发者 — 专业级",
+      "code": "AIP-C01",
+      "issuer": "Amazon Web Services",
+      "url": "https://aws.amazon.com/certification/certified-generative-ai-developer-professional/"
+    },
+    {
+      "id": "microsoft-ai",
+      "en": "Microsoft Certified: Multi-Agent AI Solutions Expert",
+      "zh": "微软认证：多智能体 AI 解决方案专家",
+      "code": "AI-500",
+      "issuer": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/credentials/certifications/multi-agent-ai-solutions-expert/"
+    },
+    {
+      "id": "fortinet-nse8",
+      "en": "Fortinet Network Security Expert 8 — Cybersecurity Expert",
+      "zh": "Fortinet 网络安全专家 8 级 — 网络安全专家认证",
+      "code": "NSE 8",
+      "issuer": "Fortinet",
+      "url": "https://training.fortinet.com/local/staticpage/view.php?page=nse_8"
+    },
+    {
+      "id": "claude-architect",
+      "en": "Claude Certified Architect: Professional",
+      "zh": "Claude 认证架构师：专业级",
+      "code": "Professional",
+      "issuer": "Anthropic",
+      "url": "https://claude.com/resources/articles/four-role-based-claude-certifications"
+    }
+  ]
+}

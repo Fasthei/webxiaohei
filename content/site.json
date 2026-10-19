@@ -238,12 +238,12 @@
         "zh": "专业认证"
       },
       "text_23": {
-        "en": "Google Machine Learning Engineer",
-        "zh": "谷歌机器学习工程师"
+        "en": "Google Cloud Certified — Professional Machine Learning Engineer",
+        "zh": "Google Cloud 认证专业机器学习工程师"
       },
       "text_24": {
-        "en": "Claude Architect — Professional",
-        "zh": "Claude 架构师专业级"
+        "en": "Claude Certified Architect: Professional",
+        "zh": "Claude 认证架构师：专业级"
       },
       "text_25": {
         "en": "Get in touch",
@@ -260,6 +260,34 @@
       "text_28": {
         "en": "Back to top ↑",
         "zh": "返回顶部 ↑"
+      },
+      "cert_oscp": {
+        "en": "OffSec Certified Professional (OSCP)",
+        "zh": "OffSec 认证专业人员（OSCP）"
+      },
+      "cert_osep": {
+        "en": "OffSec Experienced Penetration Tester (OSEP)",
+        "zh": "OffSec 资深渗透测试专家（OSEP）"
+      },
+      "cert_osai": {
+        "en": "OffSec AI Red Teamer (OSAI)",
+        "zh": "OffSec AI 红队专家（OSAI）"
+      },
+      "cert_aws": {
+        "en": "AWS Certified Generative AI Developer — Professional",
+        "zh": "AWS 认证生成式 AI 开发者 — 专业级"
+      },
+      "cert_microsoft": {
+        "en": "Microsoft Certified: Multi-Agent AI Solutions Expert",
+        "zh": "微软认证：多智能体 AI 解决方案专家"
+      },
+      "cert_fortinet": {
+        "en": "Fortinet Network Security Expert 8 — Cybersecurity Expert",
+        "zh": "Fortinet 网络安全专家 8 级 — 网络安全专家认证"
+      },
+      "cert_badge_note": {
+        "en": "Custom display badges. Links open official certification information, not personal verification records.",
+        "zh": "站内展示徽章。链接指向官方认证说明，非个人证书验证记录。"
       }
     },
     "hello": {

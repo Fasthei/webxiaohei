@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="132" viewBox="0 0 120 132" role="img" aria-labelledby="title desc">
+<title id="title">AWS Certified Generative AI Developer — Professional — display badge</title><desc id="desc">Original LISG website badge. Not an issuer verification badge.</desc>
+<path d="M60 4 110 29v63l-50 35L10 92V29Z" fill="#fbfaf6" stroke="#71508a" stroke-width="1.5"/>
+<path d="m60 11 44 22v55l-44 31-44-31V33Z" fill="#71508a" fill-opacity=".07" stroke="#71508a" stroke-opacity=".25"/>
+<path d="M31 46h58M31 88h58" stroke="#71508a" stroke-opacity=".35"/>
+<g fill="#71508a" text-anchor="middle" font-family="Arial,Helvetica,sans-serif">
+<text x="60" y="35" font-size="8" letter-spacing=".7">AWS</text>
+<text x="60" y="73" font-size="16" font-weight="700" letter-spacing=".3">GEN AI</text>
+<text x="60" y="101" font-size="6" letter-spacing=".2">PROFESSIONAL</text>
+</g></svg>
