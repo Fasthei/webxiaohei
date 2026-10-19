@@ -1,51 +1,73 @@
-# LISG 网站内容
+# LISG 网站文章
 
 网站：https://www.xiaohei.co
 
-这个仓库维护网站文字和新增文章。现有域名及 Sites 托管不变。
+## 写文章 → 推送 GitHub → 网站自动更新
 
-## 修改已有内容
+1. 在 `posts/` 文件夹创建 Markdown 文件，例如 `posts/2026-10-20-my-note.md`。
+2. 写好文章，推送或在 GitHub 网页提交到 `main` 分支。
+3. GitHub Actions 中的 **Publish Markdown articles** 自动生成文章列表。
+4. 工作流成功后，刷新网站即可看到文章。GitHub 的队列和缓存可能带来几分钟延迟。
 
-1. 打开 `content/site.json`，点击 GitHub 的编辑按钮。
-2. 搜索你想修改的原文，编辑对应的 `zh`（中文）和 `en`（英文）文字。保留 `text_XX` 键名。
-3. 提交到 `main` 分支，然后刷新网站。网站每次加载会读取该文件；GitHub 的缓存可能让更新延迟几分钟。已打开的页面需要刷新。
+**不用手工编辑 JSON，不用重新部署网站，不用提供 Token，不用电脑一直运行。**
 
-字段说明：
+你可以在 GitHub 网页点击 `posts` → `Add file` → `Create new file` 或 `Upload files`。
 
-- `contactEmail`：全站联系邮箱，目前是 `xiaohei@xiaohei.co`。
-- `pages.home`：首页文字。
-- `pages.about`：关于页文字。
-- `pages.hello`：原有介绍文章文字。
-- `posts`：新增文章列表。
-- `version`：内容格式版本，保持为 `1`。
+## 最简单的文章
 
-## 新增文章
+文件名建议带日期，如 `posts/2026-10-20-my-note.md`：
 
-将下面的对象加入 `posts` 数组。已有多个对象时用逗号分隔。`id` 必须唯一，只使用小写英文字母、数字和连字符。
+```markdown
+# 我的安全研究笔记
 
-```json
-{
-  "id": "my-first-note",
-  "date": "2026-10-19",
-  "category": {"en": "Research", "zh": "研究笔记"},
-  "title": {"en": "My first note", "zh": "我的第一篇笔记"},
-  "summary": {"en": "A short introduction.", "zh": "简短摘要。"},
-  "body": [
-    {"en": "First paragraph.", "zh": "第一段正文。"},
-    {"en": "Second paragraph.", "zh": "第二段正文。"}
-  ]
-}
+这里写正文。
+
+## 背景
+
+继续写内容。
+
+- 第一点
+- 第二点
 ```
 
-提交后，文章会自动显示在首页的新增文章列表，链接为 `/post.html?id=my-first-note`。新增文章按日期倒序排列；原有介绍文章保留在前面。`body` 中每个对象是一段纯文本，不解释 HTML 或 Markdown。
+标题取第一个一级标题，日期取文件名中的日期；没有日期前缀时，使用这篇文件首次提交的日期。中文文件名也支持，会生成稳定的文章 ID。
 
-## 更新范围与故障处理
+## 可选的文章信息
 
-- 这是浏览器访问时从 GitHub 读取内容，不是 GitHub Actions 自动部署；无需 Token，也不需要电脑保持运行。
-- 更新 CSS、页面布局、证书列表结构或新增功能仍需要修改 Sites 源码并发布。此仓库不是完整网站源码仓库。
-- GitHub API 读取失败、被限流、超时或 JSON 格式不符合要求时，网站显示随版本发布的备用内容。备用内容不会跟随 GitHub 自动刷新；故障期间新文章可能暂时无法读取。
-- 仓库必须保持公开。不要把密码、Token 或未公开资料写进内容文件。
-- 修改前可以在本地执行 `python3 -m json.tool content/site.json` 检查 JSON 语法。
-- 搜索引擎或不执行 JavaScript 的客户端可能只读取到随版本发布的静态文字。
+可复制 `examples/article.md` 到 `posts/`，修改内容并将 `draft: true` 改为 `draft: false`。
 
-如需撤销内容修改，可在 GitHub 中恢复之前提交的 `content/site.json`。
+```markdown
+---
+title: 我的安全研究笔记
+date: 2026-10-20
+slug: my-security-note
+category: 安全研究
+summary: 这里是文章摘要。
+draft: false
+---
+
+# 我的安全研究笔记
+
+这里写正文。
+```
+
+文件头使用简单的 `key: value` 格式；`slug` 只允许小写英文、数字和连字符，且不可重复。省略 `draft` 默认发布。修改已发布文章后再次推送会更新正文；删除对应文件会从列表移除。文件头可省略。
+
+现有自我介绍已放到 `posts/hello-lisg.md`，可以直接编辑它。
+
+## 当前 Markdown 支持
+
+支持段落、标题、代码围栏、简单有序/无序列表和引用。文章按原文展示，中英文切换不会自动翻译文章。目前复杂表格、嵌套列表、图片、行内链接/粗体等不会解析成对应富文本，HTML 也不会执行。Word/PDF 不会自动转成文章。
+
+## 维护与排错
+
+- 看 [Actions](https://github.com/Fasthei/webxiaohei/actions) 确认工作流是绿色成功状态。
+- 工作流失败时保留之前的文章列表，可打开失败日志查看具体文件名或格式错误。
+- `content/site.json` 的 `posts` 由工作流生成，不要手工维护；其他字段仍控制现有首页和关于页文字及联系邮箱。
+- 网站访问时从 GitHub 公开 API 读取文章，不是把完整网站迁移到 GitHub Pages。原 Sites 托管和域名绑定保留。
+- GitHub 接口不可用或被限流时，网站会显示随 Sites 版本发布的备用内容；备用内容不会实时跟随以后每篇文章更新。
+- 仓库须保持公开；不要上传密码、Token 或未公开资料。
+- 搜索引擎或不执行 JavaScript 的客户端可能只看到静态备用内容。
+- 网站布局及样式修改仍需要 Sites 发布。
+
+本地检查：`python3 -m unittest discover -s tests -v`；生成内容：`python3 scripts/build_posts.py`。
