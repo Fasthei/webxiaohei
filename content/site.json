@@ -88,8 +88,8 @@
         "zh": "个人介绍"
       },
       "text_22": {
-        "en": "Hello, I’m LISG.",
-        "zh": "你好，我是 LISG。"
+        "en": "About these notes",
+        "zh": "关于这些笔记"
       },
       "text_23": {
         "en": "A short introduction to my background in red teaming, the systems I focus on, and what this notebook is for.",
@@ -324,16 +324,16 @@
         "zh": "个人介绍"
       },
       "text_09": {
-        "en": "Hello, I’m LISG.",
-        "zh": "你好，我是 LISG。"
+        "en": "About these notes",
+        "zh": "关于这些笔记"
       },
       "text_10": {
         "en": "A short introduction to my background in red teaming, the systems I focus on, and what this notebook is for.",
         "zh": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。"
       },
       "text_11": {
-        "en": "I’m LISG, a red team practitioner with 8 years of experience. My work focuses on enterprise identity, cloud and hybrid-cloud environments, and the security of AI systems.",
-        "zh": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。"
+        "en": "I’m a red team practitioner with 8 years of experience. My work focuses on enterprise identity, cloud and hybrid-cloud environments, and the security of AI systems.",
+        "zh": "我拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。"
       },
       "text_12": {
         "en": "The systems I work with",
@@ -5831,7 +5831,8 @@
           ]
         }
       ],
-      "sourcePath": "posts/azure-encrypted-reasoning.md"
+      "sourcePath": "posts/azure-encrypted-reasoning.md",
+      "topic": "ai"
     },
     {
       "id": "aws-identity-root-payer-trust",
@@ -6885,8 +6886,8 @@
       "id": "hello-lisg",
       "date": "2026-10-19",
       "title": {
-        "zh": "你好，我是 LISG。",
-        "en": "Hello, I'm LISG."
+        "zh": "关于这些笔记",
+        "en": "About these notes"
       },
       "summary": {
         "zh": "简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。",
@@ -6900,8 +6901,8 @@
         {
           "type": "paragraph",
           "text": {
-            "zh": "我是 LISG，拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。",
-            "en": "I'm LISG, a red team practitioner with eight years of experience focused on enterprise identity, cloud and hybrid environments, and AI system security."
+            "zh": "我拥有 8 年红队经验，专注于企业身份、云与混合云环境，以及 AI 系统安全。",
+            "en": "I'm a red team practitioner with eight years of experience focused on enterprise identity, cloud and hybrid environments, and AI system security."
           }
         },
         {
@@ -6963,7 +6964,71 @@
           }
         }
       ],
-      "sourcePath": "posts/hello-lisg.md"
+      "sourcePath": "posts/hello-lisg.md",
+      "topic": "notes"
+    }
+  ],
+  "siteName": "TR Notes",
+  "topics": [
+    {
+      "id": "ai",
+      "number": "01",
+      "title": {
+        "en": "AI & LLM Security",
+        "zh": "AI 与大模型"
+      },
+      "description": {
+        "en": "Models, reasoning states & infrastructure.",
+        "zh": "模型、推理状态与基础设施。"
+      }
+    },
+    {
+      "id": "agents",
+      "number": "02",
+      "title": {
+        "en": "Agents & RAG",
+        "zh": "Agent 与 RAG"
+      },
+      "description": {
+        "en": "Tools, retrieval & trust between agents.",
+        "zh": "工具调用、检索与智能体间的信任。"
+      }
+    },
+    {
+      "id": "cloud",
+      "number": "03",
+      "title": {
+        "en": "Cloud & Hybrid",
+        "zh": "云与混合云"
+      },
+      "description": {
+        "en": "AWS, Azure, GCP & connected environments.",
+        "zh": "AWS、Azure、GCP 与跨环境安全。"
+      }
+    },
+    {
+      "id": "identity",
+      "number": "04",
+      "title": {
+        "en": "Identity & Red Team",
+        "zh": "身份与红队"
+      },
+      "description": {
+        "en": "Active Directory, identity & lateral movement.",
+        "zh": "Active Directory、身份与横向移动。"
+      }
+    },
+    {
+      "id": "notes",
+      "number": "05",
+      "title": {
+        "en": "Study Notes",
+        "zh": "学习笔记"
+      },
+      "description": {
+        "en": "Methods, reflections & notes along the way.",
+        "zh": "方法、思考与学习过程中的记录。"
+      }
     }
   ]
 }

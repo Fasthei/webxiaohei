@@ -1,83 +1,98 @@
-# LISG 网站文章
+# TR Notes
+
+安全研究与学习笔记。
 
 网站：https://www.xiaohei.co
 
-## 写文章 → 推送 GitHub → 网站自动更新
+默认英文，可切换中文。首页提供全文搜索、分类筛选与时间排序；分类目录列出各方向的文章；正文根据二至四级标题自动生成章节导航。作者简介、专业认证和联系方式保留在“关于”页。
 
-1. 在 `posts/` 文件夹创建 Markdown 文件，例如 `posts/2026-10-20-my-note.md`。
-2. 写好文章，推送或在 GitHub 网页提交到 `main` 分支。
-3. GitHub Actions 中的 **Publish Markdown articles** 自动生成文章列表。
-4. 工作流成功后，刷新网站即可看到文章。GitHub 的队列和缓存可能带来几分钟延迟。
+## 发布文章
 
-**不用手工编辑 JSON，不用重新部署网站，不用提供 Token，不用电脑一直运行。**
+1. 在 `posts/` 新建或上传 Markdown 文件，可以放入子目录。
+2. 填写标题、日期、`slug` 和 `topic`，然后提交到 `main`。
+3. GitHub Actions 自动生成文章索引并部署 Azure 网站；Sites 镜像从 GitHub 读取最新文章索引。
+4. 等 **Publish Markdown articles** 和 **Azure Static Web Apps CI/CD** 成功后刷新网站。
 
-你可以在 GitHub 网页点击 `posts` → `Add file` → `Create new file` 或 `Upload files`。
+无需手动修改 JSON。部署存在队列和执行时间，提交成功不代表页面已经完成部署。
 
-## 最简单的文章
+## 文章模板
 
-文件名建议带日期，如 `posts/2026-10-20-my-note.md`：
-
-```markdown
-# 我的安全研究笔记
-
-这里写正文。
-
-## 背景
-
-继续写内容。
-
-- 第一点
-- 第二点
-```
-
-标题取第一个一级标题，日期取文件名中的日期；没有日期前缀时，使用这篇文件首次提交的日期。中文文件名也支持，会生成稳定的文章 ID。
-
-## 可选的文章信息
-
-可复制 `examples/article.md` 到 `posts/`，修改内容并将 `draft: true` 改为 `draft: false`。
+复制 `examples/article.md` 到 `posts/`，修改内容，并将 `draft: true` 改为 `draft: false`。
 
 ```markdown
 ---
-title: 我的安全研究笔记
-date: 2026-10-20
-slug: my-security-note
-category: 安全研究
-summary: 这里是文章摘要。
+title: 我的实验笔记
+date: 2026-10-26
+slug: my-experiment
+topic: ai
+category: AI 安全研究
+summary: 一两句话说明本文的问题、方法和收获。
 draft: false
 ---
 
-# 我的安全研究笔记
+# 我的实验笔记
+
+## 问题与背景
 
 这里写正文。
+
+## 实验过程
+
+记录关键步骤、代码与观察。
+
+## 结论与待验证项
+
+区分实验结果和进一步推测。
 ```
 
-文件头使用简单的 `key: value` 格式；`slug` 只允许小写英文、数字和连字符，且不可重复。省略 `draft` 默认发布。修改已发布文章后再次推送会更新正文；删除对应文件会从列表移除。文件头可省略。
+`slug` 使用小写英文、数字和连字符，是文章永久链接的一部分。发布后尽量不要修改。日期格式为 `YYYY-MM-DD`。
 
-现有自我介绍已放到 `posts/hello-lisg.md`，可以直接编辑它。
+## 分类目录
 
-## 当前 Markdown 支持
+| topic | 分类 | 适合内容 |
+|---|---|---|
+| ai | AI 与大模型 | 模型、推理状态、模型基础设施、围栏 |
+| agents | Agent 与 RAG | 智能体、工具、MCP、A2A、检索、知识库 |
+| cloud | 云与混合云 | AWS、Azure、GCP、混合环境 |
+| identity | 身份与红队 | AD、域控、身份、信任关系、红队实践 |
+| notes | 学习笔记 | 学习方法、复盘、个人记录 |
 
-支持段落、标题、代码围栏、简单有序/无序列表和引用。文章按原文展示，中英文切换不会自动翻译文章。目前复杂表格、嵌套列表、图片、行内链接/粗体等不会解析成对应富文本，HTML 也不会执行。Word/PDF 不会自动转成文章。
+`topic` 决定归档目录，`category` 是可自由填写的文章主题文字。未填 `topic` 的旧文章按 `category` 关键词归类，无法识别的进入“学习笔记”。推荐明确填写 `topic`，避免跨领域文章归类歧义。
 
-## 维护与排错
+## 中英文文章
 
-- 看 [Actions](https://github.com/Fasthei/webxiaohei/actions) 确认工作流是绿色成功状态。
-- 工作流失败时保留之前的文章列表，可打开失败日志查看具体文件名或格式错误。
-- `content/site.json` 的 `posts` 由工作流生成，不要手工维护；其他字段仍控制现有首页和关于页文字及联系邮箱。
-- 网站访问时从 GitHub 公开 API 读取文章，不是把完整网站迁移到 GitHub Pages。原 Sites 托管和域名绑定保留。
-- GitHub 接口不可用或被限流时，网站会显示随 Sites 版本发布的备用内容；备用内容不会实时跟随以后每篇文章更新。
-- 仓库须保持公开；不要上传密码、Token 或未公开资料。
-- 搜索引擎或不执行 JavaScript 的客户端可能只看到静态备用内容。
-- 网站布局及样式修改仍需要 Sites 发布。
+中文稿：`posts/my-experiment.md`。
+英文稿：`posts/my-experiment.en.md`。
 
-本地检查：`python3 -m unittest discover -s tests -v`；生成内容：`python3 scripts/build_posts.py`。
+两份使用相同的 `slug`、日期、`topic` 和段落结构。标题、摘要、分类文字和正文可以翻译；标题层级、列表项数量、表格行列数和代码块数量必须一致。构建会校验结构，将它们合并为同一篇文章。没有英文稿时，两种界面都显示原文，不会自动生成翻译。
 
-## Azure Static Web Apps
+## 支持的排版
 
-`site/` 保存网站页面与资源。Azure 工作流在每次推送到 main 时运行文章测试并从 `posts/` 生成内容，再将最新 `content/site.json` 复制到 `site/content/site.json` 并部署整个 `site/`。Azure 网站从同域读取文章，不依赖浏览器访问 GitHub API。
+- 标题、段落、列表、引用、分隔线。
+- 带语言标记的代码块、行内代码、加粗和斜体。
+- Markdown 表格与 HTTP/HTTPS 链接。
+- 根据正文标题自动生成目录；切换语言时章节链接保持稳定。
+- HTML 作为普通文本显示，不执行脚本。
 
-`app_location: site`、`skip_app_build: true`、`output_location: ""` 用于直接发布静态文件。部署凭据继续使用现有 GitHub Actions Secret。
+## 自动化与部署
 
-### English articles
+`scripts/build_posts.py` 生成 `content/site.json`，按日期由新到旧排列并跳过 `draft: true`。Azure 工作流会在部署前重新生成索引并复制到 `site/content/site.json`，将 `site/` 部署到网站。
 
-为 `posts/name.md` 添加 `posts/name.en.md` 可提供英文标题、摘要、分类及正文。两份文章应使用相同的段落、标题和列表结构；代码块保持一致。生成器会校验结构并合并为同一篇双语文章，不会把英文稿作为第二篇文章发布。没有英文稿时保留原文。
+只更新文章时，现有工作流即可处理。修改页面样式或交互后，Azure 自动部署；Sites 镜像的静态页面需要同步发布。GitHub 公开仓库中的内容会被 Sites 客户端读取，因此不要提交密钥或其他秘密。
+
+## 本地检查
+
+```bash
+python -m unittest discover -s tests -v
+python scripts/build_posts.py
+cp content/site.json site/content/site.json
+node --test tests/content.test.cjs
+```
+
+## SEO 与语言入口
+
+英文规范地址使用 `https://www.xiaohei.co/`，中文规范地址使用 `https://cn.xiaohei.co/zh/`。两个域名若指向同一份静态部署，中文使用独立 `/zh/` 路径，保证返回的 HTML 本身就是中文。访问 cn 根路径时，浏览器会进入对应中文路径；这不是服务器 301 跳转。
+
+文章永久地址为 `/articles/<slug>/`，中文对应 `/zh/articles/<slug>/`。旧 `post.html?id=...` 链接仍可阅读，但不作为收录入口。`scripts/build_posts.py` 自动调用 `scripts/build_seo.py` 生成全文页面、语言标记、结构化数据、robots.txt 和 sitemap.xml。
+
+上线后应分别在 Google Search Console 验证两个域名并提交 sitemap.xml。本仓库无法替代 DNS、TLS、CDN/WAF 配置或站长平台验证；需确认搜索引擎能实际访问两个域名。

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.xiaohei.co/sitemap.xml
+Sitemap: https://cn.xiaohei.co/sitemap.xml

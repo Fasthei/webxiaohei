@@ -2,6 +2,7 @@
 title: Can Encrypted Thinking Be Revived? An Azure Reasoning-State Replay Experiment
 date: 2026-10-26
 slug: azure-encrypted-reasoning
+topic: ai
 category: AI Security Research
 summary: Starting with a cache hypothesis, I tested cross-session replay, cross-model reuse, and usage differences in Azure encrypted reasoning—and reconsidered the boundaries between state, caching, and trust.
 ---

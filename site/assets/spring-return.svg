@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="850" height="900" viewBox="0 0 850 900" fill="none">
+<title>Botanical illustration</title><desc>An original botanical drawing: pale flowers opening on an enduring branch, against the circles of the seasons.</desc>
+<defs>
+ <linearGradient id="branch" x1="230" y1="880" x2="650" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#53644f"/><stop offset="1" stop-color="#b8cba0"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#acbdaa" stop-opacity=".12"/><stop offset="1" stop-color="#acbdaa" stop-opacity="0"/></radialGradient>
+ <linearGradient id="petal" x1="-45" y1="-55" x2="55" y2="50"><stop stop-color="#f2eddf"/><stop offset="1" stop-color="#b4b8a5"/></linearGradient>
+ <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+ <g id="flower">
+  <path d="M0-5C-48-14-48-60-17-61 7-63 18-34 0-5Z" fill="url(#petal)"/>
+  <path d="M3-3C-3-53 40-67 51-40 61-14 36 6 3-3Z" fill="#d5d4c3"/>
+  <path d="M5 2C46-28 78 3 56 27 38 47 11 29 5 2Z" fill="#e4dfcd"/>
+  <path d="M1 5C42 31 27 72-2 62-27 54-23 24 1 5Z" fill="#cacdb7"/>
+  <path d="M-4 1C-9 47-54 56-61 26-67 2-39-14-4 1Z" fill="#ebe4d4"/>
+  <path d="M0 0-13-38M0 0 33-31M0 0 41 14M0 0 0 42M0 0-39 19" stroke="#aeb49c" stroke-width=".7" opacity=".7"/>
+  <circle r="10" fill="#b78671"/><circle r="4" fill="#d8b59a"/>
+  <g stroke="#ead5b7" stroke-width="1"><path d="M0-9 1-20M6-6 15-14M10 1 22 3M4 8 12 18M-5 8-9 20M-9-2-21-5M-5-7-13-17"/></g>
+  <g fill="#e6d0af"><circle cx="1" cy="-20" r="2"/><circle cx="15" cy="-14" r="2"/><circle cx="22" cy="3" r="2"/><circle cx="12" cy="18" r="2"/><circle cx="-9" cy="20" r="2"/><circle cx="-21" cy="-5" r="2"/><circle cx="-13" cy="-17" r="2"/></g>
+ </g>
+ <g id="leaf"><path d="M0 0C20-38 56-47 73-42 59-12 29 0 0 0Z" fill="#83956f"/><path d="M2-1 62-37" stroke="#acb89a" stroke-width=".7"/></g>
+</defs>
+<ellipse cx="465" cy="370" rx="370" ry="400" fill="url(#halo)"/>
+<g stroke="#a6b197" stroke-opacity=".17" stroke-width=".7">
+ <circle cx="475" cy="400" r="285"/><circle cx="475" cy="400" r="298" stroke-dasharray="2 10"/>
+ <path d="M105 401h740M475 32v735" stroke-opacity=".08"/>
+ <path d="M475 104v15M475 681v15M177 400h15M759 400h15"/>
+</g>
+<g fill="#a3ad96" fill-opacity=".4" font-family="monospace" font-size="9" letter-spacing="3"></g>
+<!-- The main branch follows a single, unbroken line through the changing seasons. -->
+<path d="M223 929C299 827 309 736 345 647 390 539 415 439 467 348 513 265 590 209 632 124 644 101 656 81 662 60" stroke="url(#branch)" stroke-width="5"/>
+<path d="M306 753C354 693 429 643 490 566 536 509 555 435 571 383M375 576C360 504 343 460 314 411 290 371 273 324 271 283M449 381C510 375 574 330 610 276M526 252C548 193 532 146 536 107" stroke="url(#branch)" stroke-width="2.4"/>
+<path d="M345 647C402 628 456 602 489 567M467 348C440 315 411 292 385 278M571 383C604 362 624 335 638 308M632 124C680 122 715 101 733 72" stroke="#8e9b7a" stroke-width="1.5"/>
+<g opacity=".9"><use href="#leaf" transform="translate(401 539) rotate(-20) scale(.85)"/><use href="#leaf" transform="translate(351 633) rotate(-151) scale(.65)"/><use href="#leaf" transform="translate(471 343) rotate(-119) scale(.62)"/><use href="#leaf" transform="translate(558 431) rotate(-39) scale(.64)"/><use href="#leaf" transform="translate(597 192) rotate(-31) scale(.55)"/><use href="#leaf" transform="translate(307 396) rotate(-120) scale(.55)"/><use href="#leaf" transform="translate(527 199) rotate(-149) scale(.45)"/></g>
+<use href="#flower" transform="translate(610 275) rotate(15) scale(1.12)"/>
+<use href="#flower" transform="translate(533 108) rotate(-18) scale(.64)"/>
+<use href="#flower" transform="translate(271 283) rotate(-37) scale(.58)"/>
+<use href="#flower" transform="translate(571 383) rotate(55) scale(.47)"/>
+<path d="M659 64C645 45 655 28 667 24 679 42 672 56 659 64Z" fill="#bdc9aa"/>
+<path d="M734 74C727 59 737 47 747 46 755 61 746 70 734 74Z" fill="#c9b9a0"/>
+<path d="M386 279C368 272 363 254 371 244 388 250 395 268 386 279Z" fill="#9eac89"/>
+<!-- Fallen petals and new growth share the same space. -->
+<g fill="#c9bdab" opacity=".5"><path d="M645 477c13-15 28-8 23 5-7 10-15 8-23-5Z"/><path d="M427 705c5-15 18-18 22-7-1 11-10 14-22 7Z"/><path d="M717 609c9-7 18-3 16 6-8 6-13 3-16-6Z"/></g>
+<g stroke="#9fa88e" stroke-opacity=".18" stroke-width=".8"><path d="M80 862c146-54 224-4 363-31 114-21 183-4 319 9"/><path d="M121 882c128-33 230 8 354-10 99-15 180-7 264 9"/></g>
+<rect width="850" height="900" filter="url(#paper)" opacity=".035" style="mix-blend-mode:soft-light"/>
+</svg>
