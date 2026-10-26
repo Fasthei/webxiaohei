@@ -284,10 +284,6 @@
       "cert_fortinet": {
         "en": "Fortinet Network Security Expert 8 — Cybersecurity Expert",
         "zh": "Fortinet 网络安全专家 8 级 — 网络安全专家认证"
-      },
-      "cert_badge_note": {
-        "en": "Custom display badges. Links open official certification information, not personal verification records.",
-        "zh": "站内展示徽章。链接指向官方认证说明，非个人证书验证记录。"
       }
     },
     "hello": {
@@ -3017,8 +3013,8 @@
         "en": "*Collapsing barriers, dual loss of control, and the return of discipline*"
       },
       "category": {
-        "en": "Identity & Red Team",
-        "zh": "身份与红队"
+        "zh": "身份与红队",
+        "en": "Identity & Red Team"
       },
       "body": [
         {

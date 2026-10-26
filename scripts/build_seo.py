@@ -94,6 +94,8 @@ def write_page(site,s,path,title,desc,lang,pages,post=None):
  s=re.sub(r'<meta name="description"[^>]*>','<meta name="description" content="'+html.escape(desc,quote=True)+'">',s)
  s=re.sub(r' data-(?:page-language|en-url|zh-url|seo-title)="[^"]*"','',s)
  s=s.replace('<body ','<body data-seo-title="'+html.escape(title,quote=True)+'" data-page-language="'+lang+'" data-en-url="'+path+'" data-zh-url="/zh'+path+'" ',1)
+ s=re.sub(r'<aside class="ai-writing-note".*?</aside>','',s,flags=re.S)
+ s=s.replace('<footer class="site-footer">',"<aside class=\"ai-writing-note\" aria-label=\"A note on the writing\" data-aria-en=\"A note on the writing\" data-aria-zh=\"内容说明\" style=\"margin-top:28px;padding:20px 0;border-top:1px solid #c9d3b72c;color:#b8c1ac;font-size:12px;line-height:1.9\"><p data-en=\"Written by AI and reviewed by the author before publication. Some AI flavor remains—the author is lazy and doesn't feel like polishing it away.\" data-zh=\"本站内容由 AI 代笔，发布前由作者审核。AI 味可能还在——作者比较懒，暂时不想调。\">Written by AI and reviewed by the author before publication. Some AI flavor remains—the author is lazy and doesn't feel like polishing it away.</p></aside>"+'<footer class="site-footer">')
  parser=Localize(lang);parser.feed(s);s=''.join(parser.out)
  canonical=url(path,lang)
  structured={'@context':'https://schema.org','@type':'BlogPosting' if post else 'WebPage','name':title,'url':canonical,'inLanguage':'zh-CN' if lang=='zh' else 'en','description':desc,'isPartOf':{'@type':'WebSite','name':'TR Notes','url':HOST['en']}}
