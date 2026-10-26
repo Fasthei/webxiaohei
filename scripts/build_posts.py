@@ -15,6 +15,8 @@ def bilingual(text):
 def blocks(markdown):
     result, paragraph, index = [], [], 0
     lines = markdown.splitlines()
+    def cells(line):
+        return [cell.strip().replace(r'\|', '|') for cell in re.split(r'(?<!\\)\|', line.strip().strip('|'))]
     def flush():
         if paragraph:
             result.append({'type': 'paragraph', 'text': bilingual(' '.join(paragraph))})
@@ -39,6 +41,21 @@ def blocks(markdown):
                 if not re.fullmatch(r'[A-Za-z0-9_+.\-]{1,40}', language): raise ValueError('代码语言标记格式错误')
                 block['language'] = language
             result.append(block)
+        elif line.strip().startswith('|') and index + 1 < len(lines) and all(re.fullmatch(r':?-{3,}:?', cell) for cell in cells(lines[index + 1])):
+            flush()
+            headers = cells(line)
+            rows = []
+            index += 2
+            while index < len(lines) and lines[index].strip().startswith('|'):
+                row = cells(lines[index])
+                if len(row) != len(headers): raise ValueError('表格列数不一致')
+                rows.append([bilingual(cell) for cell in row])
+                index += 1
+            result.append({'type': 'table', 'headers': [bilingual(cell) for cell in headers], 'rows': rows})
+            index -= 1
+        elif re.fullmatch(r'\s*(?:-{3,}|\*{3,}|_{3,})\s*', line):
+            flush()
+            result.append({'type': 'divider'})
         elif heading:
             flush()
             result.append({'type': 'heading', 'level': min(4, max(2, len(heading[1]))), 'text': bilingual(heading[2])})

@@ -36,4 +36,10 @@ class Tests(unittest.TestCase):
   self.write('2026-10-19-note.md','# 中文\n\n正文')
   self.write('2026-10-19-note.en.md','# English\n\n## Heading\n\nBody')
   with self.assertRaises(ValueError):m.build(self.root)
+ def test_tables_and_divider(self):
+  blocks=m.blocks('| Input | Result |\n|---|---|\n| `blob` | **200** |\n\n---')
+  self.assertEqual([b['type'] for b in blocks],['table','divider'])
+  self.assertEqual(blocks[0]['rows'][0][1]['zh'],'**200**')
+ def test_invalid_table_columns(self):
+  with self.assertRaises(ValueError):m.blocks('| A | B |\n|---|---|\n| C |')
 if __name__=='__main__':unittest.main()

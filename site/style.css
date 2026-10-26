@@ -14,3 +14,17 @@
 .cert-code{display:block;font-size:9px;color:#8b9185;margin-top:8px}.cert-code>span{margin-left:8px}
 #credentials .cert-badge-note{font-size:10px;color:#899180;line-height:1.8;margin:0;max-width:650px}
 @media(max-width:600px){.certifications.certification-badges{grid-template-columns:1fr;gap:0}.certification-link{gap:19px;padding:17px 0}.cert-badge{flex-basis:78px;width:78px;height:86px}.cert-name{font-size:13px}.cert-issuer,.cert-code{font-size:10px}}
+
+/* Technical article typography */
+.article-body{min-width:0;overflow-wrap:anywhere}
+.article-body pre{max-width:100%;overflow-x:auto;padding:20px;background:#efeee8;border:1px solid var(--line);border-radius:4px;font-size:12px;line-height:1.75;white-space:pre;overflow-wrap:normal}
+.article-body code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.article-body :not(pre)>code{font-size:.85em;background:#efeee8;padding:2px 5px;border-radius:3px}
+.article-body a{text-decoration:underline;text-underline-offset:3px;color:var(--accent)}
+.article-body hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+.article-table{width:100%;overflow-x:auto;margin:24px 0;border:1px solid var(--line);border-radius:4px}
+.article-table:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.article-table table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.7;min-width:520px}
+.article-table th,.article-table td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.article-table th{background:#efeee8;font-weight:600}.article-table tr:last-child td{border-bottom:0}
+@media(max-width:600px){.article-body pre{padding:14px;font-size:11px}.article-table table{font-size:12px}.article-table th,.article-table td{padding:10px}}

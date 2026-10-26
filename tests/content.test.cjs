@@ -10,7 +10,7 @@ async function run(remote, {page='home', fail=false}={}) {
  const text=node();text.dataset={contentKey:'text_01',en:'old',zh:'旧'};
  const mail=node(); const list=node(); const article=node();const count=node();const upcoming=node();const staticPost=node();staticPost.className='post-preview';
  const button=node(); button.dataset.language='zh';
- const document={documentElement:{dataset:{}},body:{dataset:{contentPage:page}},createElement:node,querySelectorAll(q){return q==='.post-preview'?nodes.filter(n=>n.className==='post-preview'):q==='[data-language]'?[button]:q==='[data-en]'?nodes.filter(n=>'en'in n.dataset):q==='[data-content-key]'?[text]:q.startsWith('a[')?[mail]:[]},querySelector(q){return q.startsWith('#writing')?count:upcoming},getElementById(id){return id==='github-posts'&&page==='home'?list:id==='github-article'&&page==='post'?article:null}};
+ const document={documentElement:{dataset:{}},body:{dataset:{contentPage:page}},createElement:node,createTextNode(text){const n=node("#text");n.textContent=text;return n;},querySelectorAll(q){return q==='.post-preview'?nodes.filter(n=>n.className==='post-preview'):q==='[data-language]'?[button]:q==='[data-en]'?nodes.filter(n=>'en'in n.dataset):q==='[data-content-key]'?[text]:q.startsWith('a[')?[mail]:[]},querySelector(q){return q.startsWith('#writing')?count:upcoming},getElementById(id){return id==='github-posts'&&page==='home'?list:id==='github-article'&&page==='post'?article:null}};
  let calls=0;
  const fetch=async url=>{calls++;if(fail&&calls===1)throw Error('offline');return {ok:true,text:async()=>JSON.stringify(calls===1?remote:baseline)}};
  await vm.runInNewContext(source,{document,fetch,localStorage:{getItem(){},setItem(){}},AbortSignal,URLSearchParams,location:{search:'?id=test-note'}});
@@ -89,4 +89,29 @@ test('static introduction remains visible and counted when not supplied by GitHu
  const r=await run(data);
  assert.equal(r.staticPost.hidden,false);
  assert.equal(r.count.textContent,'2 entries');
+});
+
+test('technical article tables and inline formatting render safely and switch languages',async()=>{
+ const data=structuredClone(baseline);
+ data.posts=[{...post,body:[
+  {type:'paragraph',text:{en:'**Finding** with `cached_tokens` and [source](https://example.com). <img src=x onerror=bad()>',zh:'**结论** 与 `cached_tokens` 和 [来源](https://example.com)。'}},
+  {type:'table',headers:[bilingual('Input'),bilingual('Result')],rows:[[bilingual('Unchanged'),bilingual('**HTTP 200**')]]},
+  {type:'divider'},
+  {type:'code',text:bilingual('**literal** <script>alert(1)</script>')}
+ ]}];
+ const r=await run(data,{page:'post'});
+ assert.equal(r.document.documentElement.dataset.contentSource,'site');
+ const b=r.article.children[1].children;
+ assert.equal(b[0].children[0].tagName,'strong');assert.equal(b[0].children[0].textContent,'Finding');
+ assert.equal(b[0].children.find(n=>n.tagName==='a').href,'https://example.com');
+ assert.equal(r.nodes.some(n=>n.tagName==='img'||n.tagName==='script'),false);
+ assert.equal(b[1].children[0].tagName,'table');
+ assert.equal(b[1].children[0].children[0].children[0].children[0].attrs.scope,'col');
+ assert.equal(b[2].tagName,'hr');
+ assert.equal(b[3].children[0].textContent,'**literal** <script>alert(1)</script>');
+ r.button.click();assert.equal(b[0].children[0].textContent,'结论');
+});
+test('malformed table rows are rejected before content is applied',async()=>{
+ const data=structuredClone(baseline);data.posts=[{...post,body:[{type:'table',headers:[bilingual('A')],rows:[[bilingual('B'),bilingual('C')]]}]}];
+ const r=await run(data);assert.equal(r.document.documentElement.dataset.contentSource,'fallback');
 });

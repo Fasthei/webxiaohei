@@ -7,7 +7,10 @@
   function render() {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
     if (articleTitle) document.title = articleTitle[language] + ' — LISG';
-    document.querySelectorAll('[data-en]').forEach(element => { element.textContent = element.dataset[language]; });
+    document.querySelectorAll('[data-en]').forEach(element => {
+      if (element.dataset.markdown === 'true') renderInline(element, element.dataset[language]);
+      else element.textContent = element.dataset[language];
+    });
     buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.language === language)));
   }
   buttons.forEach(button => button.addEventListener('click', () => {
@@ -20,6 +23,8 @@
   function validBlock(block) {
     if (!record(block)) return false;
     if (!Object.prototype.hasOwnProperty.call(block, 'type')) return bilingual(block);
+    if (block.type === 'divider') return true;
+    if (block.type === 'table') return Array.isArray(block.headers) && block.headers.length > 0 && block.headers.every(bilingual) && Array.isArray(block.rows) && block.rows.every(row => Array.isArray(row) && row.length === block.headers.length && row.every(bilingual));
     if (block.type === 'list') return typeof block.ordered === 'boolean' && Array.isArray(block.items) && block.items.every(bilingual);
     if (!bilingual(block.text)) return false;
     if (block.type === 'heading') return [2, 3, 4].includes(block.level);
@@ -45,12 +50,67 @@
     else if (text) { node.dataset.en = text.en; node.dataset.zh = text.zh; }
     return node;
   }
+  function renderInline(node, text) {
+    // Only create known elements; article HTML is always rendered as text.
+    const pattern = /(`[^`\n]+`|\*\*[^*\n]+\*\*|\*[^*\n]+\*|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<>\u3000-\u303f]+)/g;
+    const matches = [...text.matchAll(pattern)];
+    if (!matches.length) { node.textContent = text; return; }
+    node.replaceChildren();
+    let cursor = 0;
+    for (const match of matches) {
+      if (match.index > cursor) node.append(document.createTextNode(text.slice(cursor, match.index)));
+      const token = match[0];
+      let child;
+      if (token.startsWith('`')) child = element('code', '', token.slice(1, -1));
+      else if (token.startsWith('**')) child = element('strong', '', token.slice(2, -2));
+      else if (token.startsWith('*')) child = element('em', '', token.slice(1, -1));
+      else {
+        const link = token.match(/^\[([^\]]+)\]\((.+)\)$/);
+        child = element('a', '', link ? link[1] : token);
+        child.href = link ? link[2] : token;
+        child.rel = 'noopener noreferrer';
+      }
+      node.append(child);
+      cursor = match.index + token.length;
+    }
+    if (cursor < text.length) node.append(document.createTextNode(text.slice(cursor)));
+  }
+  function markdownElement(tag, text) {
+    const node = element(tag, '', text);
+    node.dataset.markdown = 'true';
+    return node;
+  }
   function renderBlock(block) {
     if (!Object.prototype.hasOwnProperty.call(block, 'type')) return element('p', '', block);
     if (block.type === 'list') {
       const list = element(block.ordered ? 'ol' : 'ul');
-      block.items.forEach(item => list.append(element('li', '', item)));
+      block.items.forEach(item => list.append(markdownElement('li', item)));
       return list;
+    }
+    if (block.type === 'divider') return element('hr');
+    if (block.type === 'table') {
+      const wrapper = element('div', 'article-table');
+      wrapper.setAttribute('tabindex', '0');
+      wrapper.setAttribute('role', 'region');
+      wrapper.setAttribute('aria-label', 'Data table / 数据表格');
+      const table = element('table');
+      const head = element('thead');
+      const headings = element('tr');
+      block.headers.forEach(value => {
+        const cell = markdownElement('th', value);
+        cell.setAttribute('scope', 'col');
+        headings.append(cell);
+      });
+      head.append(headings);
+      const body = element('tbody');
+      block.rows.forEach(row => {
+        const tr = element('tr');
+        row.forEach(value => tr.append(markdownElement('td', value)));
+        body.append(tr);
+      });
+      table.append(head, body);
+      wrapper.append(table);
+      return wrapper;
     }
     if (block.type === 'code') {
       const pre = element('pre');
@@ -60,7 +120,7 @@
       return pre;
     }
     const tag = block.type === 'heading' ? 'h' + block.level : block.type === 'quote' ? 'blockquote' : 'p';
-    return element(tag, '', block.text);
+    return markdownElement(tag, block.text);
   }
   function apply(data) {
     const page = data.pages[document.body.dataset.contentPage] || {};
