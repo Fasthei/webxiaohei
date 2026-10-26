@@ -53,12 +53,12 @@ test('structured Markdown blocks render semantic elements as inert text and swit
  assert.equal(blocks[4].children[0].textContent,'const x = "<script>";\nalert(x);');
  assert.equal(blocks[4].children[0].dataset.language,'javascript');
  assert.deepEqual(blocks[5].children.map(n=>[n.tagName,n.textContent]),[['li','One'],['li','Two']]);
- assert.equal(r.document.title,'Test — 天秀之人 · TR');
+ assert.equal(r.document.title,'Test — TR Notes');
  r.button.click();
  assert.equal(blocks[0].textContent,'中文 Section');
  assert.equal(blocks[5].children[0].textContent,'中文 One');
  assert.equal(blocks[8].textContent,'旧段落');
- assert.equal(r.document.title,'测试 — 天秀之人 · TR');
+ assert.equal(r.document.title,'测试 — TR Notes');
 });
 test('invalid structured blocks reject the entire remote payload before application',async()=>{
  const invalid=[null,[],{type:'html',text:bilingual('<b>bad</b>')},

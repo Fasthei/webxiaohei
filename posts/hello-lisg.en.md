@@ -1,5 +1,5 @@
 ---
-title: Hello, I'm LISG.
+title: About these notes
 date: 2026-10-19
 slug: hello-lisg
 topic: notes
@@ -7,9 +7,9 @@ category: About me
 summary: An introduction to my red team background, the security areas I focus on, and what I plan to share in this notebook.
 ---
 
-# Hello, I'm LISG.
+# About these notes
 
-I'm LISG, a red team practitioner with eight years of experience focused on enterprise identity, cloud and hybrid environments, and AI system security.
+I'm a red team practitioner with eight years of experience focused on enterprise identity, cloud and hybrid environments, and AI system security.
 
 ## The systems I focus on
 

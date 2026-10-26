@@ -6,7 +6,7 @@
   const buttons = [...document.querySelectorAll('[data-language]')];
   function render() {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
-    if (articleTitle) document.title = articleTitle[language] + ' — 天秀之人 · TR';
+    if (articleTitle) document.title = articleTitle[language] + ' — TR Notes';
     else if (document.body.dataset.titleEn) document.title = document.body.dataset[language === 'en' ? 'titleEn' : 'titleZh'];
     document.querySelectorAll('[data-en]').forEach(element => {
       if (element.dataset.markdown === 'true') renderInline(element, element.dataset[language]);
@@ -244,7 +244,7 @@
       const post = data.posts.find(post => post.id === new URLSearchParams(location.search).get('id'));
       const header = element('header', 'article-header');
       if (post) {
-        const meta=element('div','post-meta');meta.append(element('time','',post.date),element('span','',readingTime(post)),element('span','',{en:'By LISG',zh:'作者 LISG'}));
+        const meta=element('div','post-meta');meta.append(element('time','',post.date),element('span','',readingTime(post)));
         header.append(meta, element('h1', '', post.title), element('p', 'article-deck', post.summary));
         setText(document.getElementById('article-topic'),topicFor(post).title);
         const body = element('div', 'article-body');

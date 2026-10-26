@@ -1,6 +1,6 @@
-# 天秀之人 · TR
+# TR Notes
 
-TR 是「天秀之人」。本站收录 LISG 的安全研究与学习笔记。
+安全研究与学习笔记。
 
 网站：https://www.xiaohei.co
 
