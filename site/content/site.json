@@ -1166,7 +1166,8 @@
           ]
         }
       ],
-      "sourcePath": "posts/azure-encrypted-reasoning.md"
+      "sourcePath": "posts/azure-encrypted-reasoning.md",
+      "topic": "ai"
     },
     {
       "id": "hello-lisg",
@@ -1250,7 +1251,71 @@
           }
         }
       ],
-      "sourcePath": "posts/hello-lisg.md"
+      "sourcePath": "posts/hello-lisg.md",
+      "topic": "notes"
+    }
+  ],
+  "siteName": "TR",
+  "topics": [
+    {
+      "id": "ai",
+      "number": "01",
+      "title": {
+        "en": "AI & LLM Security",
+        "zh": "AI 与大模型"
+      },
+      "description": {
+        "en": "Models, reasoning states & infrastructure.",
+        "zh": "模型、推理状态与基础设施。"
+      }
+    },
+    {
+      "id": "agents",
+      "number": "02",
+      "title": {
+        "en": "Agents & RAG",
+        "zh": "Agent 与 RAG"
+      },
+      "description": {
+        "en": "Tools, retrieval & trust between agents.",
+        "zh": "工具调用、检索与智能体间的信任。"
+      }
+    },
+    {
+      "id": "cloud",
+      "number": "03",
+      "title": {
+        "en": "Cloud & Hybrid",
+        "zh": "云与混合云"
+      },
+      "description": {
+        "en": "AWS, Azure, GCP & connected environments.",
+        "zh": "AWS、Azure、GCP 与跨环境安全。"
+      }
+    },
+    {
+      "id": "identity",
+      "number": "04",
+      "title": {
+        "en": "Identity & Red Team",
+        "zh": "身份与红队"
+      },
+      "description": {
+        "en": "Active Directory, identity & lateral movement.",
+        "zh": "Active Directory、身份与横向移动。"
+      }
+    },
+    {
+      "id": "notes",
+      "number": "05",
+      "title": {
+        "en": "Study Notes",
+        "zh": "学习笔记"
+      },
+      "description": {
+        "en": "Methods, reflections & notes along the way.",
+        "zh": "方法、思考与学习过程中的记录。"
+      }
     }
   ]
 }

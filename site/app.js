@@ -6,11 +6,13 @@
   const buttons = [...document.querySelectorAll('[data-language]')];
   function render() {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
-    if (articleTitle) document.title = articleTitle[language] + ' — LISG';
+    if (articleTitle) document.title = articleTitle[language] + ' — TR';
+    else if (document.body.dataset.titleEn) document.title = document.body.dataset[language === 'en' ? 'titleEn' : 'titleZh'];
     document.querySelectorAll('[data-en]').forEach(element => {
       if (element.dataset.markdown === 'true') renderInline(element, element.dataset[language]);
       else element.textContent = element.dataset[language];
     });
+    document.querySelectorAll('[data-placeholder-en]').forEach(node => {node.placeholder = node.dataset[language === 'en' ? 'placeholderEn' : 'placeholderZh'];});
     buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.language === language)));
   }
   buttons.forEach(button => button.addEventListener('click', () => {
@@ -122,6 +124,109 @@
     const tag = block.type === 'heading' ? 'h' + block.level : block.type === 'quote' ? 'blockquote' : 'p';
     return markdownElement(tag, block.text);
   }
+  const topics = [
+    {id:'ai', title:{en:'AI & LLM Security',zh:'AI 与大模型'}, description:{en:'Models, reasoning states & infrastructure.',zh:'模型、推理状态与基础设施。'}},
+    {id:'agents', title:{en:'Agents & RAG',zh:'Agent 与 RAG'}, description:{en:'Tools, retrieval & trust between agents.',zh:'工具调用、检索与智能体间的信任。'}},
+    {id:'cloud', title:{en:'Cloud & Hybrid',zh:'云与混合云'}, description:{en:'AWS, Azure, GCP & connected environments.',zh:'AWS、Azure、GCP 与跨环境安全。'}},
+    {id:'identity', title:{en:'Identity & Red Team',zh:'身份与红队'}, description:{en:'Active Directory, identity & lateral movement.',zh:'Active Directory、身份与横向移动。'}},
+    {id:'notes', title:{en:'Study Notes',zh:'学习笔记'}, description:{en:'Methods, reflections & notes along the way.',zh:'方法、思考与学习过程中的记录。'}}
+  ];
+  let libraryData = null;
+  const initialParams = new URLSearchParams(location.search);
+  let selectedTopic = initialParams.get('topic') || 'all';
+  let searchQuery = initialParams.get('q') || '';
+  let sortOrder = initialParams.get('sort') === 'oldest' ? 'oldest' : 'newest';
+  if (!topics.some(t => t.id === selectedTopic)) selectedTopic = 'all';
+  const topicFor = post => {
+    if (topics.some(t => t.id === post.topic)) return topics.find(t => t.id === post.topic);
+    const label = post.category.en + ' ' + post.category.zh;
+    const id = /agent|rag|智能体|检索/i.test(label) ? 'agents' : /cloud|aws|azure|gcp|云/i.test(label) ? 'cloud' : /identity|active directory|red team|身份|红队|域控/i.test(label) ? 'identity' : /\bai\b|llm|模型/i.test(label) ? 'ai' : 'notes';
+    return topics.find(t => t.id === id);
+  };
+  function readingTime(post) {
+    const values = {en:[],zh:[]};
+    function collect(item) {
+      if (bilingual(item)) {values.en.push(item.en); values.zh.push(item.zh);}
+      else if (Array.isArray(item)) item.forEach(collect);
+      else if (record(item)) Object.values(item).forEach(collect);
+    }
+    collect(post.body);
+    const count = lang => Math.max(1, Math.ceil((values[lang].join(' ').match(/[\u3400-\u9fff]|[A-Za-z0-9_]+/g) || []).length / (lang === 'zh' ? 350 : 220)));
+    return {en:count('en')+' min read',zh:'约 '+count('zh')+' 分钟'};
+  }
+  function setText(node, value) {
+    if (!node) return;
+    node.dataset.en=value.en; node.dataset.zh=value.zh;
+  }
+  function setFilterURL() {
+    if (typeof history === 'undefined' || !history.replaceState) return;
+    const p=new URLSearchParams();
+    if(selectedTopic!=='all')p.set('topic',selectedTopic);
+    if(searchQuery)p.set('q',searchQuery);
+    if(sortOrder==='oldest')p.set('sort','oldest');
+    history.replaceState(null,'',location.pathname+(p.toString()?'?'+p.toString():''));
+  }
+  function updateCatalog() {
+    if(!libraryData)return;
+    const list=document.getElementById('github-posts');
+    if(!list)return;
+    const query=searchQuery.trim().toLocaleLowerCase();
+    function searchable(post){
+      const values=[];
+      function visit(x){if(bilingual(x)){values.push(x.en,x.zh);}else if(Array.isArray(x))x.forEach(visit);else if(record(x))Object.values(x).forEach(visit);}
+      visit([post.title,post.summary,post.category,post.body,topicFor(post).title]);return values.join(' ').toLocaleLowerCase();
+    }
+    const posts=libraryData.posts.filter(post => (selectedTopic==='all'||topicFor(post).id===selectedTopic) && (!query||searchable(post).includes(query))).sort((a,b)=>(sortOrder==='oldest'?1:-1)*(a.date.localeCompare(b.date)||a.id.localeCompare(b.id)));
+    list.replaceChildren();
+    for(const post of posts){
+      const card=element('article','post-preview');
+      const meta=element('div','post-meta');
+      const topic=element('a','topic-pill',topicFor(post).title);topic.href='/?topic='+topicFor(post).id;
+      const date=element('time','',post.date);date.dateTime=post.date;
+      meta.append(topic,date,element('span','',readingTime(post)));
+      const title=element('h2');const titleLink=element('a','',post.title);titleLink.href='/post.html?id='+post.id;title.append(titleLink);
+      const link=element('a','read-link',{en:'Read note →',zh:'阅读全文 →'});link.href='/post.html?id='+post.id;
+      card.append(meta,title,element('p','',post.summary),link);list.append(card);
+    }
+    const active=topics.find(t=>t.id===selectedTopic);
+    setText(document.getElementById('writing-heading'),active?active.title:{en:'All notes',zh:'全部文章'});
+    setText(document.getElementById('catalog-description'),active?active.description:{en:'Research and learning, one note at a time.',zh:'从一篇笔记开始，积累研究与学习。'});
+    setText(document.getElementById('article-count'),{en:posts.length+' '+(posts.length===1?'note':'notes'),zh:posts.length+' 篇'});
+    const empty=document.getElementById('empty-results');if(empty)empty.hidden=posts.length>0;
+    const clear=document.getElementById('clear-search');if(clear)clear.hidden=!searchQuery;
+    document.querySelectorAll('[data-topic]').forEach(a=>{
+      if(a.dataset.topic===selectedTopic)a.setAttribute('aria-current','page');
+      else a.removeAttribute('aria-current');
+    });
+    render();
+  }
+  function setupLibrary(data) {
+    libraryData=data;
+    const total=document.getElementById('total-notes');setText(total,{en:data.posts.length+' published notes',zh:data.posts.length+' 篇已发布文章'});
+    document.querySelectorAll('[data-topic]').forEach(a=>{
+      const count=a.dataset.topic==='all'?data.posts.length:data.posts.filter(p=>topicFor(p).id===a.dataset.topic).length;
+      a.append(element('span','topic-count',String(count)));
+      a.addEventListener('click',event=>{
+        if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button>0)return;
+        event.preventDefault();selectedTopic=a.dataset.topic;setFilterURL();updateCatalog();
+      });
+    });
+    const input=document.getElementById('article-search');if(input){input.value=searchQuery;input.addEventListener('input',()=>{searchQuery=input.value;setFilterURL();updateCatalog();});}
+    const sort=document.getElementById('article-sort');if(sort){sort.value=sortOrder;sort.addEventListener('change',()=>{sortOrder=sort.value;setFilterURL();updateCatalog();});}
+    const clear=document.getElementById('clear-search');if(clear)clear.addEventListener('click',()=>{searchQuery='';if(input){input.value='';input.focus();}setFilterURL();updateCatalog();});
+    const reset=document.getElementById('reset-filters');if(reset)reset.addEventListener('click',()=>{searchQuery='';selectedTopic='all';if(input)input.value='';setFilterURL();updateCatalog();});
+    const directory=document.getElementById('topic-directory');
+    if(directory){directory.replaceChildren();topics.forEach((t,index)=>{
+      const posts=data.posts.filter(p=>topicFor(p).id===t.id).sort((a,b)=>b.date.localeCompare(a.date));
+      const card=element('section','directory-card');card.id=t.id;
+      const meta=element('div','directory-meta');meta.append(element('span','',String(index+1).padStart(2,'0')),element('span','',{en:posts.length+' '+(posts.length===1?'note':'notes'),zh:posts.length+' 篇'}));
+      card.append(meta,element('h2','',t.title),element('p','',t.description));
+      if(posts.length){const list=element('ul','directory-links');posts.forEach(p=>{const li=element('li');const a=element('a','',p.title);a.href='/post.html?id='+p.id;li.append(a);list.append(li);});card.append(list);}
+      else card.append(element('p','directory-empty',{en:'No notes published in this area yet.',zh:'此分类暂未发布文章。'}));
+      const link=element('a','directory-link',{en:'Explore this topic →',zh:'浏览此分类 →'});link.href='/?topic='+t.id;card.append(link);directory.append(card);
+    });}
+    updateCatalog();
+  }
   function apply(data) {
     const page = data.pages[document.body.dataset.contentPage] || {};
     document.querySelectorAll('[data-content-key]').forEach(node => {
@@ -132,42 +237,32 @@
       node.href = 'mailto:' + data.contactEmail;
       if (!node.hasAttribute('data-en')) node.textContent = data.contactEmail + ' ↗';
     });
-    const list = document.getElementById('github-posts');
-    if (list) {
-      list.replaceChildren();
-      for (const post of [...data.posts].sort((a, b) => b.date.localeCompare(a.date))) {
-        const card = element('article', 'post-preview');
-        const meta = element('div', 'post-meta');
-        const date = element('time', '', post.date); date.dateTime = post.date;
-        meta.append(date, element('span', '', '·'), element('span', '', post.category));
-        const link = element('a', 'read-link', {en:'Read the article →', zh:'阅读全文 →'});
-        link.href = '/post.html?id=' + encodeURIComponent(post.id);
-        card.append(meta, element('h2', '', post.title), element('p', '', post.summary), link);
-        list.append(card);
-      }
-      const hasIntroduction = data.posts.some(post => post.id === 'hello-lisg');
-      document.querySelectorAll('.post-preview').forEach(card => {
-        if (!list.contains(card)) card.hidden = hasIntroduction;
-      });
-      const entryCount = data.posts.length + (hasIntroduction ? 0 : 1);
-      const count = document.querySelector('#writing-heading + span');
-      if (count) { count.dataset.en = `${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}`; count.dataset.zh = `${entryCount} 篇`; }
-      const upcoming = document.querySelector('.upcoming');
-      if (upcoming) upcoming.hidden = data.posts.length > 0;
-    }
+    setupLibrary(data);
     const article = document.getElementById('github-article');
     if (article) {
       article.replaceChildren();
       const post = data.posts.find(post => post.id === new URLSearchParams(location.search).get('id'));
       const header = element('header', 'article-header');
       if (post) {
-        header.append(element('p', 'post-meta', post.date), element('h1', '', post.title), element('p', 'article-deck', post.summary));
+        const meta=element('div','post-meta');meta.append(element('time','',post.date),element('span','',readingTime(post)),element('span','',{en:'By LISG',zh:'作者 LISG'}));
+        header.append(meta, element('h1', '', post.title), element('p', 'article-deck', post.summary));
+        setText(document.getElementById('article-topic'),topicFor(post).title);
         const body = element('div', 'article-body');
-        post.body.forEach(block => body.append(renderBlock(block)));
+        const toc=document.getElementById('article-toc');if(toc)toc.replaceChildren();
+        let headingIndex=0;
+        post.body.forEach(block => {
+          const node=renderBlock(block);
+          if(block.type==='heading'){
+            node.id='section-'+(++headingIndex);
+            if(toc){const a=element('a',block.level>2?'toc-sub':'',block.text);a.href='#'+node.id;toc.append(a);}
+          }
+          body.append(node);
+        });
+        if(toc&&!headingIndex)toc.append(element('p','',{en:'This note has no sections.',zh:'这篇笔记暂无章节。'}));
         article.append(header, body);
         articleTitle = post.title;
       } else {
-        header.append(element('h1', '', {en:'Article unavailable', zh:'暂时无法读取这篇文章'}), element('p', '', {en:'Return to the notebook or try refreshing later.', zh:'请返回笔记首页，或稍后刷新重试。'}));
+        header.append(element('h1', '', {en:'Article unavailable', zh:'暂时无法读取这篇文章'}), element('p', '', {en:'Return to the library or try refreshing later.', zh:'请返回知识库，或稍后刷新重试。'}));
         article.append(header);
       }
     }
@@ -180,6 +275,7 @@
     if (text.length > 1000000) throw new Error('Content too large');
     return validate(JSON.parse(text));
   }
+  document.querySelectorAll('[data-nav]').forEach(a=>{if(a.dataset.nav===document.body.dataset.contentPage)a.setAttribute('aria-current','page');});
   render();
   (async () => {
     try {
@@ -192,6 +288,8 @@
         document.documentElement.dataset.contentSource = 'fallback';
       } catch {
         const article = document.getElementById('github-article');
+        const list=document.getElementById('github-posts')||document.getElementById('topic-directory');
+        if(list)list.replaceChildren(element('p','empty-state',{en:'Notes could not be loaded. Please refresh to try again.',zh:'文章暂时无法加载，请刷新后重试。'}));
         if (article) { article.replaceChildren(element('p', '', {en:'Content unavailable. Please try again later.', zh:'暂时无法读取内容，请稍后重试。'})); render(); }
       }
     }

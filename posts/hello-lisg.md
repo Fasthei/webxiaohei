@@ -2,6 +2,7 @@
 title: 你好，我是 LISG。
 date: 2026-10-19
 slug: hello-lisg
+topic: notes
 category: 个人介绍
 summary: 简单介绍我的红队背景、关注的安全领域，以及这个笔记站想记录的内容。
 ---
@@ -25,3 +26,4 @@ summary: 简单介绍我的红队背景、关注的安全领域，以及这个�
 目前，我正在寻找红队、云安全、AI 或 Agent 安全方向的新机会。如果与你正在做的事情相关，欢迎联系。
 
 联系邮箱：xiaohei@xiaohei.co
+

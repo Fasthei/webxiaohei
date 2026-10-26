@@ -113,7 +113,12 @@ def parse(path, root=ROOT):
     datetime.date.fromisoformat(date)
     body = blocks(text)
     summary = meta.get('summary') or next((item['text']['zh'][:160] for item in body if item['type'] == 'paragraph'), title)
-    return {'id': post_id, 'date': date, 'title': bilingual(title), 'summary': bilingual(summary), 'category': bilingual(meta.get('category', '研究笔记')), 'body': body, 'sourcePath': 'posts/' + relative}
+    topic = meta.get('topic')
+    if topic and topic not in {'ai', 'agents', 'cloud', 'identity', 'notes'}:
+        raise ValueError(f'{path.name}: topic 必须是 ai / agents / cloud / identity / notes')
+    post = {'id': post_id, 'date': date, 'title': bilingual(title), 'summary': bilingual(summary), 'category': bilingual(meta.get('category', '研究笔记')), 'body': body, 'sourcePath': 'posts/' + relative}
+    if topic: post['topic'] = topic
+    return post
 
 def merge_translation(original, translated, path='article'):
     """Merge aligned English Markdown without changing the Chinese article."""

@@ -2,6 +2,7 @@
 title: 加密的思考能被“复活”吗？一次 Azure 推理状态重放实验
 date: 2026-10-26
 slug: azure-encrypted-reasoning
+topic: ai
 category: AI 安全研究
 summary: 从一个关于缓存的猜想出发，我测试了 Azure 加密推理块的跨会话重放、跨模型复用与用量变化，重新梳理推理状态、缓存和信任边界之间的关系。
 ---

@@ -1,25 +1,23 @@
 ---
-title: 我的安全研究笔记
-date: 2026-10-19
-slug: my-security-note
-category: 安全研究
-summary: 在这里填写文章摘要。
+title: 我的实验笔记
+date: 2026-10-26
+slug: my-experiment
+topic: ai
+category: AI 安全研究
+summary: 一两句话说明本文的问题、方法和收获。
 draft: true
 ---
 
-# 我的安全研究笔记
+# 我的实验笔记
 
-这里写正文。复制到 posts/ 后将 draft 改为 false 即可发布。
+## 问题与背景
 
-## 研究背景
+说明你希望理解或验证的问题。
 
-这一段介绍问题的背景。
+## 实验过程
 
-- 第一点
-- 第二点
+记录方法、关键代码与输入输出。
 
-> 一段引用或提醒。
+## 结论与待验证项
 
-```python
-print('hello')
-```
+区分已经观察到的结果与后续需要验证的推测。

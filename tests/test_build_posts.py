@@ -42,4 +42,9 @@ class Tests(unittest.TestCase):
   self.assertEqual(blocks[0]['rows'][0][1]['zh'],'**200**')
  def test_invalid_table_columns(self):
   with self.assertRaises(ValueError):m.blocks('| A | B |\n|---|---|\n| C |')
+ def test_explicit_topic_is_preserved(self):
+  post=m.parse(self.write('2026-10-26-note.md','---\ntopic: cloud\n---\n# Cloud note'),self.root)
+  self.assertEqual(post['topic'],'cloud')
+ def test_invalid_topic_is_rejected(self):
+  with self.assertRaises(ValueError):m.parse(self.write('2026-10-26-note.md','---\ntopic: missing\n---\n# Note'),self.root)
 if __name__=='__main__':unittest.main()

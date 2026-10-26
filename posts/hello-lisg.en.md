@@ -2,6 +2,7 @@
 title: Hello, I'm LISG.
 date: 2026-10-19
 slug: hello-lisg
+topic: notes
 category: About me
 summary: An introduction to my red team background, the security areas I focus on, and what I plan to share in this notebook.
 ---
@@ -25,3 +26,4 @@ This notebook is where I record my thinking on these topics. Technical articles 
 I'm currently looking for new opportunities in red teaming, cloud security, AI security, or agent security. If that connects with your work, I'd be glad to hear from you.
 
 Contact: xiaohei@xiaohei.co
+
