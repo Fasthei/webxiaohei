@@ -1,3 +1,8 @@
+---
+topic: identity
+category: Identity & Red Team
+---
+
 # Everyone Is a Red Teamer: Four Years of AI Red Teaming
 
 *Collapsing barriers, dual loss of control, and the return of discipline*

@@ -3017,8 +3017,8 @@
         "en": "*Collapsing barriers, dual loss of control, and the return of discipline*"
       },
       "category": {
-        "zh": "研究笔记",
-        "en": "研究笔记"
+        "en": "Identity & Red Team",
+        "zh": "身份与红队"
       },
       "body": [
         {
@@ -3249,7 +3249,8 @@
           }
         }
       ],
-      "sourcePath": "posts/2026-10-27-ai-red-team-four-years.md"
+      "sourcePath": "posts/2026-10-27-ai-red-team-four-years.md",
+      "topic": "identity"
     },
     {
       "id": "microsoft-identity-part2-m365-copilot",
