@@ -88,3 +88,11 @@ python scripts/build_posts.py
 cp content/site.json site/content/site.json
 node --test tests/content.test.cjs
 ```
+
+## SEO 与语言入口
+
+英文规范地址使用 `https://www.xiaohei.co/`，中文规范地址使用 `https://cn.xiaohei.co/zh/`。两个域名若指向同一份静态部署，中文使用独立 `/zh/` 路径，保证返回的 HTML 本身就是中文。访问 cn 根路径时，浏览器会进入对应中文路径；这不是服务器 301 跳转。
+
+文章永久地址为 `/articles/<slug>/`，中文对应 `/zh/articles/<slug>/`。旧 `post.html?id=...` 链接仍可阅读，但不作为收录入口。`scripts/build_posts.py` 自动调用 `scripts/build_seo.py` 生成全文页面、语言标记、结构化数据、robots.txt 和 sitemap.xml。
+
+上线后应分别在 Google Search Console 验证两个域名并提交 sitemap.xml。本仓库无法替代 DNS、TLS、CDN/WAF 配置或站长平台验证；需确认搜索引擎能实际访问两个域名。

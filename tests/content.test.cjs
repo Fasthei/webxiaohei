@@ -25,7 +25,7 @@ test('fresh deployed content updates text and email and preserves language switc
 test('network failure falls back to published content',async()=>{const r=await run(null,{fail:true});assert.equal(r.document.documentElement.dataset.contentSource,'fallback');assert.equal(r.calls,2)});
 test('invalid remote data falls back without partial updates',async()=>{const r=await run({version:2});assert.equal(r.document.documentElement.dataset.contentSource,'fallback');assert.equal(r.mail.href,'mailto:xiaohei@xiaohei.co')});
 const post={id:'test-note',date:'2026-10-19',title:{en:'Test',zh:'测试'},summary:{en:'Summary',zh:'摘要'},category:{en:'Research',zh:'研究'},body:[{en:'<script>unsafe()</script>',zh:'中文正文'}]};
-test('new posts generate links and article paragraphs as text',async()=>{const data=structuredClone(baseline);data.posts=[post];const home=await run(data);assert.equal(home.list.children.length,1);assert.equal(home.list.children[0].children[3].href,'/post.html?id=test-note');const page=await run(data,{page:'post'});assert.equal(page.article.children[1].children[0].textContent,'<script>unsafe()</script>');assert.equal(page.article.children[1].children[0].children.length,0)});
+test('new posts generate links and article paragraphs as text',async()=>{const data=structuredClone(baseline);data.posts=[post];const home=await run(data);assert.equal(home.list.children.length,1);assert.equal(home.list.children[0].children[3].href,'/articles/test-note/');const page=await run(data,{page:'post'});assert.equal(page.article.children[1].children[0].textContent,'<script>unsafe()</script>');assert.equal(page.article.children[1].children[0].children.length,0)});
 test('unknown article displays a recovery message',async()=>{const r=await run(baseline,{page:'post'});assert.equal(r.article.children[0].children[0].textContent,'Article unavailable')});
 test('duplicate IDs reject the remote content',async()=>{const data=structuredClone(baseline);data.posts=[post,post];const r=await run(data);assert.equal(r.document.documentElement.dataset.contentSource,'fallback')});
 
@@ -107,7 +107,7 @@ test('malformed table rows are rejected before content is applied',async()=>{
 test('topic deep links filter articles, and empty topics show a recovery action',async()=>{
  const data=structuredClone(baseline);data.posts=[{...post,topic:'ai'},{...post,id:'cloud-note',topic:'cloud'}];
  const r=await run(data,{search:'?topic=ai'});
- assert.equal(r.list.children.length,1);assert.equal(r.list.children[0].children[3].href,'/post.html?id=test-note');
+ assert.equal(r.list.children.length,1);assert.equal(r.list.children[0].children[3].href,'/articles/test-note/');
  assert.equal(r.ids['article-count'].textContent,'1 note');
  r.filters.find(n=>n.dataset.topic==='agents').click({preventDefault(){}});
  assert.equal(r.list.children.length,0);assert.equal(r.ids['empty-results'].hidden,false);
@@ -116,10 +116,10 @@ test('topic deep links filter articles, and empty topics show a recovery action'
 test('bilingual full-text search, clearing and date sorting work together',async()=>{
  const data=structuredClone(baseline);data.posts=[{...post,topic:'ai',date:'2026-10-26'},{...post,id:'older',date:'2026-10-19',topic:'cloud',body:[{type:'paragraph',text:{en:'unique phrase',zh:'检索实验'}}]}];
  const r=await run(data);r.ids['article-search'].value='检索实验';r.ids['article-search'].input();
- assert.equal(r.list.children.length,1);assert.equal(r.list.children[0].children[3].href,'/post.html?id=older');
+ assert.equal(r.list.children.length,1);assert.equal(r.list.children[0].children[3].href,'/articles/older/');
  r.button.click();assert.equal(r.ids['article-count'].textContent,'1 篇');
  r.ids['clear-search'].click();assert.equal(r.list.children.length,2);
- r.ids['article-sort'].value='oldest';r.ids['article-sort'].change();assert.equal(r.list.children[0].children[3].href,'/post.html?id=older');
+ r.ids['article-sort'].value='oldest';r.ids['article-sort'].change();assert.equal(r.list.children[0].children[3].href,'/zh/articles/older/');
 });
 test('topic directory shows real counts and explicitly empty categories',async()=>{
  const data=structuredClone(baseline);data.posts=[{...post,topic:'ai'}];const r=await run(data,{page:'topics'});

@@ -159,5 +159,8 @@ def build(root=ROOT):
     if len(output.encode()) > 950000: raise ValueError('内容超过 950 KB，请拆分或归档文章')
     content_path.write_text(output)
     print(f'Generated {len(posts)} published articles')
+    if (root / 'site/index.html').exists():
+        from build_seo import build as build_seo
+        build_seo(root)
 
 if __name__ == '__main__': build()

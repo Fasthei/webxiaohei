@@ -1,12 +1,14 @@
 (() => {
+  if(location.hostname==='cn.xiaohei.co'&&!location.pathname.startsWith('/zh/')){location.replace('/zh'+location.pathname+location.search+location.hash);return;}
   const source = '/content/site.json';
-  let language = 'en';
+  let language = document.body.dataset.pageLanguage || 'en';
   let articleTitle = null;
-  try { if (localStorage.getItem('lisg-language-choice') === 'zh') language = 'zh'; } catch {}
+  try { if (!document.body.dataset.pageLanguage && localStorage.getItem('lisg-language-choice') === 'zh') language = 'zh'; } catch {}
   const buttons = [...document.querySelectorAll('[data-language]')];
   function render() {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
     if (articleTitle) document.title = articleTitle[language] + ' — TR Notes';
+    else if(document.body.dataset.seoTitle) document.title=document.body.dataset.seoTitle;
     else if (document.body.dataset.titleEn) document.title = document.body.dataset[language === 'en' ? 'titleEn' : 'titleZh'];
     document.querySelectorAll('[data-en]').forEach(element => {
       if (element.dataset.markdown === 'true') renderInline(element, element.dataset[language]);
@@ -17,6 +19,7 @@
     buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.language === language)));
   }
   buttons.forEach(button => button.addEventListener('click', () => {
+    if(document.body.dataset.enUrl){location.href=button.dataset.language==='zh'?document.body.dataset.zhUrl:document.body.dataset.enUrl;return;}
     language = button.dataset.language;
     try { localStorage.setItem('lisg-language-choice', language); } catch {}
     render();
@@ -184,11 +187,11 @@
     for(const post of posts){
       const card=element('article','post-preview');
       const meta=element('div','post-meta');
-      const topic=element('a','topic-pill',topicFor(post).title);topic.href='/?topic='+topicFor(post).id+'#notes';
+      const topic=element('a','topic-pill',topicFor(post).title);topic.href=(language==='zh'?'/zh':'')+'/?topic='+topicFor(post).id+'#notes';
       const date=element('time','',post.date);date.dateTime=post.date;
       meta.append(topic,date,element('span','',readingTime(post)));
-      const title=element('h2');const titleLink=element('a','',post.title);titleLink.href='/post.html?id='+post.id;title.append(titleLink);
-      const link=element('a','read-link',{en:'Continue reading →',zh:'继续阅读 →'});link.href='/post.html?id='+post.id;
+      const title=element('h2');const titleLink=element('a','',post.title);titleLink.href=(language==='zh'?'/zh':'')+'/articles/'+post.id+'/';title.append(titleLink);
+      const link=element('a','read-link',{en:'Continue reading →',zh:'继续阅读 →'});link.href=(language==='zh'?'/zh':'')+'/articles/'+post.id+'/';
       card.append(meta,title,element('p','',post.summary),link);list.append(card);
     }
     const active=topics.find(t=>t.id===selectedTopic);
@@ -224,9 +227,9 @@
       const card=element('section','directory-card');card.id=t.id;
       const meta=element('div','directory-meta');meta.append(element('span','',String(index+1).padStart(2,'0')),element('span','',{en:posts.length+' '+(posts.length===1?'note':'notes'),zh:posts.length+' 篇'}));
       card.append(meta,element('h2','',t.title),element('p','',t.description));
-      if(posts.length){const list=element('ul','directory-links');posts.forEach(p=>{const li=element('li');const a=element('a','',p.title);a.href='/post.html?id='+p.id;li.append(a);list.append(li);});card.append(list);}
+      if(posts.length){const list=element('ul','directory-links');posts.forEach(p=>{const li=element('li');const a=element('a','',p.title);a.href=(language==='zh'?'/zh':'')+'/articles/'+p.id+'/';li.append(a);list.append(li);});card.append(list);}
       else card.append(element('p','directory-empty',{en:'No entries yet.',zh:'暂无文章。'}));
-      const link=element('a','directory-link',{en:'View notes →',zh:'查看文章 →'});link.href='/?topic='+t.id+'#notes';card.append(link);directory.append(card);
+      const link=element('a','directory-link',{en:'View notes →',zh:'查看文章 →'});link.href=(language==='zh'?'/zh':'')+'/?topic='+t.id+'#notes';card.append(link);directory.append(card);
     });}
     updateCatalog();
   }
@@ -244,7 +247,7 @@
     const article = document.getElementById('github-article');
     if (article) {
       article.replaceChildren();
-      const post = data.posts.find(post => post.id === new URLSearchParams(location.search).get('id'));
+      const post = data.posts.find(post => post.id === (document.body.dataset.postId || new URLSearchParams(location.search).get('id')));
       const header = element('header', 'article-header');
       if (post) {
         const meta=element('div','post-meta');meta.append(element('time','',post.date),element('span','',readingTime(post)));
@@ -292,8 +295,8 @@
       } catch {
         const article = document.getElementById('github-article');
         const list=document.getElementById('github-posts')||document.getElementById('topic-directory');
-        if(list)list.replaceChildren(element('p','empty-state',{en:'Notes could not be loaded. Please refresh to try again.',zh:'文章暂时无法加载，请刷新后重试。'}));
-        if (article) { article.replaceChildren(element('p', '', {en:'Content unavailable. Please try again later.', zh:'暂时无法读取内容，请稍后重试。'})); render(); }
+        if(list&&!document.body.dataset.pageLanguage)list.replaceChildren(element('p','empty-state',{en:'Notes could not be loaded. Please refresh to try again.',zh:'文章暂时无法加载，请刷新后重试。'}));
+        if (article&&!document.body.dataset.pageLanguage) { article.replaceChildren(element('p', '', {en:'Content unavailable. Please try again later.', zh:'暂时无法读取内容，请稍后重试。'})); render(); }
       }
     }
   })();
