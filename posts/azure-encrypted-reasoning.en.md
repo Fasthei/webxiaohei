@@ -1,52 +1,52 @@
 ---
-title: Can Encrypted Thinking Be Revived? Testing My Azure Cache Hypothesis
+title: Can Encrypted Thinking Be Revived? An Azure Reasoning-State Replay Experiment
 date: 2026-10-26
 slug: azure-encrypted-reasoning
 category: AI Security Research
-summary: Encrypted reasoning replay, cross-model consumption, and cache usage differences: my Azure experiments and conditional threat model for cross-subscription caching.
+summary: Starting with a cache hypothesis, I tested cross-session replay, cross-model reuse, and usage differences in Azure encrypted reasoning—and reconsidered the boundaries between state, caching, and trust.
 ---
 
-# Can Encrypted Thinking Be Revived? Testing My Azure Cache Hypothesis
+# Can Encrypted Thinking Be Revived? An Azure Reasoning-State Replay Experiment
 
-> **TL;DR** I had a hypothesis: put a model's encrypted chain of thought (CoT) into Azure's cache, then retrieve the previous request's hidden reasoning in a subsequent request. I tested it on my own Azure OpenAI resources using GPT-6-generation reasoning models. **The core intuition held up**: encrypted reasoning blocks can be obtained without special privileges, replayed unchanged across sessions so a model can continue without new reasoning, and even injected into and consumed by another model. The server checks integrity, but not origin. One part needed correcting: the channel is the replayed ciphertext itself, not the cache. The cache acts as a **counter**, reporting whether and how much was reused. If Microsoft opens **cross-resource and cross-subscription cache sharing** as planned, I believe that counter could become a cross-tenant probing channel, with consequences more serious than blob replay. Here are my hypothesis, sources, experiments, code, and conclusions.
+> **Abstract** An encrypted reasoning block can travel to another request. Does the earlier thinking travel with it? I tested cross-session replay, ciphertext modification, cache hits, and cross-model reuse on my own Azure OpenAI resources. Within the tested scope, unchanged blocks were accepted, with changes in input usage and response behavior; modified ciphertext was rejected. These observations revised my original cache hypothesis: I observed replayable reasoning state and signals in usage and cache counters, but did not read hidden reasoning plaintext from the cache.
 
 ---
 
-## 1. My hypothesis
+## 1. Starting with a cache hypothesis
 
-This was the idea I started with:
+The initial question was straightforward:
 
-> "Use Azure's caching mechanism to put encrypted CoT into a cache, then have the next request read the previous cached content."
+> If encrypted chain of thought enters Azure's cache, can the next request read back the previous request's thinking?
 
-A reasoning model returns its hidden chain of thought to the client as an opaque encrypted block. My intuition was: **if the block can be passed between requests, then one request's thinking can travel with the next request**. Since caching preserves earlier computation, could it provide a channel for reading the previous request's content? If so, hidden reasoning could flow between sessions, and potentially between identities.
+A reasoning model can package state into an opaque encrypted block for the client to retain and return later. That portability raises a question about scope: will the block still be accepted with different messages, a different persona, or even a different model? And what role does caching play?
 
-I split this into three testable propositions:
+To keep those questions separate, I defined three propositions:
 
-- **P1 — Acquisition and portability:** encrypted reasoning blocks can be obtained without special privileges and carried across requests.
-- **P2 — Revival:** replaying a block lets the next request resume the previous reasoning state without thinking again. Hidden reasoning state revives across requests.
-- **P3 — Cache channel:** the cache acts as a content carrier; a later request can read what an earlier request stored there.
+- **P1: Acquisition and portability.** Can an ordinary API call obtain an encrypted reasoning block and carry it into a subsequent request?
+- **P2: Reuse across contexts.** After the conversation changes, is the original block still accepted, and does it affect subsequent processing?
+- **P3: Reading through the cache.** Does caching provide a way to read the previous request's hidden reasoning content?
 
-## 2. The research behind the hypothesis
+## 2. Research leads: what ciphertext protects, and what it leaves open
 
-Before testing, I reviewed public work that could inform the hypothesis:
+Before testing, I collected several research leads. They helped define the experiments, but cannot replace testing Azure's specific behavior:
 
-1. **Stolen Thoughts** (Panfilov et al., arXiv:2608.09867, August 2026): encrypted reasoning blocks from mainstream APIs are too broadly interchangeable across sessions, users, and models. The authors recovered 367 pieces of PII and 182 credentials from blocks in 315,000 public logs. They also describe a decoding jailbreak: inject a stronger model's block into a weaker model from the same provider and ask it to transcribe the reasoning it consumes. The central distinction inspired me: **encryption answers whether the content was altered, but not who may use it and where. The protocol lacks explicit usage boundaries.**
-2. **Matthew Green, *Fooling around with encrypted reasoning blobs*** (May 29, 2026): his tests found that blocks could be replayed across sessions, accounts, and models, remained semantically active, and exposed side channels through blob length and token usage.
-3. **Azure's official prompt caching documentation:** `cached_tokens` and `cache_write_tokens`, matching prefixes of at least 1,024 tokens, `prompt_cache_key` and explicit breakpoints for GPT-5.6+, and the key restriction: **"Caches aren't shared between Azure subscriptions."** I return to that restriction in Section 6.
-4. **Gu et al. (ICML 2025):** eight of 17 inference providers offered prompt caching, and **seven shared cache entries across users**. Hit latency could indicate that someone else had recently asked the same question. Cross-user sharing is an observed industry practice, not just a theoretical concern.
-5. Related work includes *How to Steal Reasoning Without Reasoning Traces* (arXiv:2603.07267) and *Monitoring Reasoning Models for Misbehavior* (arXiv:2503.11926).
+1. **Stolen Thoughts** examines the portability, replay, and potential recovery of encrypted reasoning. The question it prompted for me was: **does an unmodified block necessarily belong in the current context?**
+2. **Matthew Green's experiments with encrypted reasoning blobs** explore boundaries through cross-session, cross-account, and cross-model reuse, along with length and usage signals.
+3. **Azure's prompt caching documentation** provides background on prefix matching, cache usage, and subscription isolation. Actual behavior still needs to be assessed against deployment settings and observations.
+4. **Gu et al.'s research on cache sharing** suggests that cache hits and latency can become side channels for observing other requests.
+5. **Research on reasoning-trace extraction and monitoring** highlights a separate distinction: a model consuming state is not the same as a client reading its plaintext.
 
-These sources made the experiments worth doing: they covered blob portability, real-world cache sharing, and caching as a side channel. My question was narrower: **what is the status of P1, P2, and P3 in Microsoft's Azure implementation, with GPT-6-generation deployments in October 2026?**
+That distinction is the focus here: **can I move state into a new context, and how much can I observe through the response?**
 
-## 3. How I tested
+## 3. Test environment and method
 
-- **Environment:** my own Azure OpenAI resources, using GlobalStandard deployments, GPT-6-generation reasoning models, the Responses API, and client-managed history with `store:false`. I later repeated the key tests on a separately configured resource. All sessions and ciphertext blocks were generated by me; no third-party data was involved.
-- **Method:** **acquire → replay → compare usage → tamper → inject across models → probe for transcription**. I saved the full requests and responses at every step.
-- One pitfall: simple questions defaulted to zero reasoning (`reasoning_tokens=0`, with no reasoning item). A multi-step problem with `reasoning.effort ≥ medium` was needed to trigger it reliably. My first round produced no useful reasoning blocks because of this.
+- **Environment:** my own Azure OpenAI resources, GlobalStandard deployments, GPT-6-generation reasoning models, and the Responses API with client-managed history through `store:false`. I repeated key steps on a separately configured resource. All sessions and blocks were generated by me.
+- **Sequence:** acquire a block → replay it unchanged → compare usage → modify the ciphertext → submit it to another model → attempt transcription. I retained the requests and responses for comparison.
+- **A practical prerequisite:** simple questions sometimes returned `reasoning_tokens=0` with no reasoning item. Multi-step problems and higher `reasoning.effort` settings produced blocks consistently enough to test.
 
-## 4. Experiments and results, with code
+## 4. Experiments: from state acquisition to cross-model reuse
 
-### 4.1 Obtain an encrypted reasoning block — the first half of P1
+### 4.1 Obtaining an encrypted reasoning block
 
 ```bash
 curl -sS "$ENDPOINT/openai/v1/responses" \
@@ -63,7 +63,7 @@ curl -sS "$ENDPOINT/openai/v1/responses" \
   }'
 ```
 
-The key is `reasoning.encrypted_content` in `include`, together with `store:false`: ask the service to return an encrypted reasoning state instead of storing the response. The relevant response structure looked like this:
+The key parameters are `reasoning.encrypted_content` in `include` and `store:false`. The former requests encrypted reasoning content; the latter makes this experiment use client-carried history. This abbreviated response shows just one of the reasoning items:
 
 ```json
 {
@@ -82,11 +82,11 @@ The key is `reasoning.encrypted_content` in `include`, together with `store:fals
 }
 ```
 
-**What I observed:** a single response returned **two** encrypted reasoning blocks, corresponding to two reasoning stages. An ordinary API key was sufficient. I also noted that `usage` directly exposed the hidden reasoning length, 833 tokens, as a billing field. **The length associated with the ciphertext was observable from the start.**
+The complete response in this run contained two encrypted reasoning blocks and reported 833 `reasoning_tokens`. Two measurements need to remain distinct: **ciphertext length is the byte size visible to the client; reasoning_tokens is the reasoning usage reported by the service.** Both provide observations, but they are not interchangeable.
 
-### 4.2 Revive state across sessions — the key evidence for P2
+### 4.2 Replaying the block in a different context
 
-I put the block from Section 4.1 into a **completely new session**, with a different persona, prefix, and language instruction, unrelated to the original session:
+I put the previous block into a new set of messages, changing the question, persona, and language instructions without supplying the original session ID.
 
 ```json
 {
@@ -108,16 +108,16 @@ I put the block from Section 4.1 into a **completely new session**, with a diffe
 }
 ```
 
-There is no original session ID, no session token, and no proof that this is a valid continuation. The ciphertext is the entire credential. I watched two signals to determine whether the old reasoning had been revived:
+I recorded two observations:
 
-1. **The `input_tokens` difference:** the plain text was roughly 44 tokens, while the request carrying the block had `input_tokens=367`. The extra ≈325 tokens corresponded to decrypted hidden reasoning entering the context. I treated this usage difference as direct evidence that the ciphertext was accepted and decrypted.
-2. **Behavior:** the model answered directly in French, with no new deliberation. A mathematical reasoning state had been carried into a translation session.
+1. **The request succeeded, and usage changed.** The plain text was approximately 44 tokens; the request carrying the block reported `input_tokens=367`. This difference shows that carrying the block affects server-side input accounting, but does not reveal its text.
+2. **The model answered in French as the new messages requested.** This shows that the new messages and the block could be processed in one request. The response language alone does not establish reuse of the original mathematical reasoning process.
 
-**Result:** **HTTP 200, with no source-validation error**, consistently on both resources. I considered P2 established: hidden reasoning state revived across sessions. The server checked ciphertext integrity, **not where the block came from**.
+Both resources returned **HTTP 200**. The direct finding is that **changing the conversation messages did not prevent acceptance of the unchanged block in these tests**. That is different from reading hidden chain of thought, and does not by itself establish cross-account or cross-tenant portability.
 
-### 4.3 Separate integrity from source validation — unchanged versus modified ciphertext
+### 4.3 What happens if one character changes?
 
-Could Section 4.2 simply reflect weak validation? I ran a paired control, changing **just one character in the ciphertext**:
+To distinguish acceptance of unchanged replay from acceptance of arbitrary ciphertext, I changed one character near the middle of the block and submitted it again:
 
 ```python
 blob = json.load(open("blob.json"))
@@ -130,28 +130,30 @@ blob["encrypted_content"] = enc[:mid] + ("A" if enc[mid] != "A" else "B") + enc[
 #  Reason: Encrypted content could not be decrypted or parsed."
 ```
 
-I flipped a Base64 character near the middle, changing the underlying bytes and causing the AEAD tag to mismatch. The result was clear:
+The results were:
 
-| Input I replayed | Server behavior |
+| Submitted content | Server response |
 |---|---|
-| Unchanged block from **another session** | **HTTP 200: accepted and decrypted** |
+| Unchanged block from a different set of conversation messages | **HTTP 200** |
 | Block with one character changed | **HTTP 400: invalid_encrypted_content** |
 
-This separated two protocol checks: **integrity checking was present and strict, while source checking was absent; changing the session, persona, or language made no difference**. To me, this was an Azure reproduction of the distinction in Stolen Thoughts: ciphertext can prove it was not modified without proving it belongs in the current context. **An attacker does not need to modify it.**
+This control shows that the service rejected the modified block. The error mentions decryption or parsing failure, so that response alone cannot identify the internal algorithm or the exact failing stage.
 
-### 4.4 The cache is a counter, not a content store — testing P3
+The useful distinction is that both behaviors coexist: **the modification was rejected, while unchanged replay across contexts succeeded**. Integrity and usage boundaries need separate checks; evidence for the former cannot establish the adequacy of the latter.
 
-Next, I tested the caching part of the hypothesis by comparing requests with the same prefix:
+### 4.4 What does the cache actually reveal?
 
-| Experiment | Input | `cached_tokens` | My interpretation |
+I then compared cache hits using the same reference prefix:
+
+| Experiment | Input | `cached_tokens` | Observation |
 |---|---|---|---|
-| Cold request | [2,600-token reference prefix, problem] | 0; 2,671 written | First request writes computation into the cache |
-| Replay the same request | Same as above | **2671** | Prefix hit reuses earlier computation |
-| Replay the encrypted block | [prefix, problem, blob, new message] | 0; 3,016 written | Decrypted reasoning enters the cache for the first time |
-| Exact replay | Same as above | **3016** | Full hit |
-| **Change one word** | One word changed in the final message | **0** | **All-or-nothing behavior at breakpoint granularity** |
+| Cold request | [approximately 2,600-token prefix, problem] | 0; 2,671 written | Initial request missed |
+| Replay the original request | Same as above | **2671** | Identical input hit the cache |
+| Add the reasoning block | [prefix, problem, blob, new message] | 0; 3,016 written | Expanded input initially missed |
+| Exact replay | Same as above | **3016** | Expanded input hit the cache |
+| Change one word | Change one word in the final message | **0** | Hits dropped to zero in this comparison |
 
-I also **measured** the length of the decrypted reasoning using request-level usage differences:
+I also compared total input usage before and after adding the block:
 
 ```python
 r1 = post(base_request)                       # in=2674 (no encrypted block)
@@ -159,17 +161,19 @@ r3 = post(base_request + [blob, next_msg])    # in=3019
 leak_len = r3.usage.input_tokens - r1.usage.input_tokens   # ≈ 345 tokens
 ```
 
-I drew three findings from this:
+The difference in this example is 345 tokens. However, the second request adds both `blob` and `next_msg`. **345 is the difference for the entire input change, not a measurement attributable solely to hidden reasoning.** Isolating the block's contribution requires another control: add the same new message without the block.
 
-- The `input_tokens` difference measured about 345 hidden reasoning tokens. I cross-checked this with the blob size, estimated from Base64 length × 3/4, and repeatedly observed stable results. **Usage counters provided a precise, low-noise probe for whether the ciphertext was accepted.**
-- I found **no readable content in the cache**: there was no API to read cached content. The cache reused KV computation, while decryption happened only within the server-side context.
-- The GPT-6-generation cache behaved **all-or-nothing at breakpoint granularity**: any change caused an overall miss, rather than the older sliding-prefix matching in 128-token increments.
+The existing records support three observations:
 
-**My verdict on P3: revise it rather than discard it.** Caching played a role, but as a **counter and metering channel** for hits, reads, and writes, not as a content carrier. This distinction matters in Section 6: a cross-tenant counter that reports only numbers can still be a difficult channel to defend.
+- **Input accounting and cache hits are different signals.** `input_tokens` measures changes in input accounting; `cached_tokens` reports the cached portion. The two should not be conflated.
+- **I did not read hidden reasoning plaintext from the cache.** These experiments show usage and hit differences, not an interface that directly retrieves cached content.
+- **A one-word change causing zero hits is a result for this request set.** It warrants further testing, but cannot establish the cache semantics of every model, breakpoint configuration, or deployment.
 
-### 4.5 Cross-model injection — how portable are the blocks?
+The original P3 hypothesis therefore remains unsupported. I found observable signals of state processing and computation reuse. Whether they enable reliable content inference is a separate experimental question.
 
-I stripped the block's `id` and injected it into **different models in the same family**, gpt-6-astra and gpt-6-luna, alongside a direct disclosure prompt:
+### 4.5 Reuse across models within the same family
+
+Finally, I removed the block's `id`, passed it to gpt-6-astra and gpt-6-luna from the same family, and asked about a secret code in the earlier reasoning:
 
 ```python
 clean = {"type": "reasoning",
@@ -183,54 +187,58 @@ post({"model": "gpt-6-astra",                              # inject into a diffe
       "include": ["reasoning.encrypted_content"], "store": false})
 ```
 
-**Result:** both astra and luna returned **HTTP 200 and accepted and decrypted** the block from sol. Their `input_tokens` increased by approximately 87 tokens, and the models **continued from the injected reasoning state**, restating the conclusion from the earlier session. Within the GPT-6 family, I observed no model boundary preventing this consumption.
+Both returned **HTTP 200**. The records showed an input-accounting increase of approximately 87 tokens, and some responses restated the earlier conclusion. Together, these observations support the finding that **the tested models accepted a block from another model in the same family and showed signs of state reuse**. This was a same-provider, same-family test, not evidence of portability across vendors.
 
-A brief note on the final step: direct requests to transcribe the reasoning or disclose the hidden secret code were all refused. The model **inherited the original reasoning's confidentiality constraints** along with the reasoning state. It continued both the thinking and the secrecy. That final protection held, without changing my main conclusion: state revival and movement across trust boundaries had already occurred.
+Direct requests to transcribe the reasoning or reveal the secret code received refusals. That result matters too: accepting state does not guarantee disclosure of its plaintext. The current controls cannot distinguish whether the refusals arose from the receiving model's policy, constraints in the prior state, or another mechanism.
 
-## 5. My verdict
+## 5. Returning to the three questions
 
-| Proposition | Verdict | Key evidence |
+| Proposition | Finding | Evidence and limits |
 |---|---|---|
-| P1: blocks can be obtained without special privileges and carried across requests | ✅ Established | An ordinary API key and one `include` parameter returned two blocks in one response |
-| P2: a later request revives old reasoning state | ✅ Established | Cross-session replay returned HTTP 200; ≈325/345/87-token differences recurred; models continued without new reasoning; both resources agreed |
-| P3: the cache is a content carrier | ⚠️ Established in revised form | No readable cache-content API; the actual role was a **metering side channel**, with usage differences serving as a length oracle and all-or-nothing breakpoint behavior |
+| P1: obtain and carry an encrypted reasoning block | **Supported** | Ordinary API calls returned blocks that could be carried into later requests |
+| P2: reuse after the context changes | **Acceptance confirmed; signs of reuse** | Cross-session and same-family cross-model requests succeeded, with usage and some response changes; arbitrary identity-to-identity portability was not established |
+| P3: read hidden reasoning through the cache | **Not supported** | Cache hits and usage changed, but hidden reasoning plaintext was not recovered |
 
-**My conclusion: the core intuition was right. Encrypted thinking can move between sessions and models without the server asking where it came from. I was wrong about the channel: the ciphertext replay carries the state, while the cache is a precise counter alongside it.** Under the cross-resource and cross-subscription cache-sharing changes I expect from Microsoft, I believe that counter could become a more serious problem than replay alone.
+The most useful outcome was separating three things I initially treated as one: **the block carries state, usage fields provide observations, and caching reflects computation reuse**. They are related, but none automatically proves the behavior of the others.
 
-## 6. What could happen if Azure opens cross-resource and cross-subscription caching?
+My question is now more specific: when a system accepts externally supplied reasoning state, does it know which session, model, and task that state belongs to?
 
-**Source of this observation:** Azure management-plane preview information I saw indicated that Microsoft would soon open **cross-resource and cross-subscription cache sharing**. At the time of writing, the public documentation still said caches were not shared across Azure subscriptions. Combining four observations—cross-session replay (4.2), integrity checks without source checks (4.3), precise cache counters (4.4), and cross-model consumption (4.5)—my concern is that this could move the attack surface from **requiring possession of a ciphertext block to requiring no victim key at all**.
+## 6. If cache sharing expands, what still needs testing?
 
-### 6.1 Six potential consequences
+I saw indications of cross-resource and cross-subscription cache sharing in Azure management-plane preview information. That is a lead for further research, not a confirmed product-release commitment. The following discussion assumes that **a future implementation actually allows requests in different subscriptions to share observable cache state**.
 
-**1. Cross-tenant context reconstruction with no victim-side logs or awareness.** If caches match across subscriptions, `cached_tokens` becomes a **cross-tenant prefix-membership oracle**. An attacker submits candidate prefixes; a positive counter could confirm that a target tenant's context contained that prefix. GPT-5.6+ lets the requester choose explicit breakpoint positions. Under the all-or-nothing behavior in Section 4.4, a probe initially needs to guess an entire breakpoint prefix. Attacker-selected breakpoints could turn this into incremental probing at attacker-selected boundaries. System prompts, private RAG documents, and conversation history could then be confirmed and reconstructed piece by piece. All probe requests occur in the attacker's own subscription, outside the victim's logs.
+### 6.1 Six questions to test separately
 
-**2. Membership inference against private corpora.** Enterprise caches can contain RAG excerpts, private documents, and compliance material. Cross-subscription caching could turn the question "Does the victim's context contain X?" into a repeatable decision interface. This would be a **membership oracle for private enterprise documents**, without requiring model weights or a training-data interface.
+**1. Prefix membership inference.** If different subscriptions can hit the same entry, a hit may help determine whether a candidate prefix appeared before. A single hit does not identify a particular tenant or automatically reconstruct its context. Controls need to account for the investigator's own warm-up requests, common prefixes, and other cache sources, then measure false positives and enumeration cost.
 
-**3. Cross-tenant prefix confirmation for hidden CoT.** My Section 4.4 tests indicated that decrypted reasoning entered the cache with the prefix, as reflected by cache writes. Cross-subscription matching could let an attacker **test guesses about another tenant's hidden reasoning**, such as whether it contains `password=`. Hidden-reasoning leakage would no longer require possession of the encrypted block.
+**2. The presence of private material.** A sufficiently specific candidate text, under matching conditions, might expose whether a passage was processed. That is far from reading an entire knowledge base. Chunking, ordering, preceding messages, and cache keys all affect the experiment.
 
-**4. Persistent injection through cache poisoning.** An attacker could try to seed a shared cache with a malicious prefix so a later victim request consumes polluted context. This would **change no request body, write no file, and leave no conventional log signature**, potentially bypassing WAF and content-filter visibility. With GPT-5.6+ extended retention of up to 24 hours, a poisoned entry could persist across a tenant's subsequent traffic.
+**3. Probing hidden reasoning.** A cache hit for a request carrying a reasoning block does not show that ordinary text can match the hidden reasoning inside it. Whether blocks and text occupy the same cache-matching space must be tested independently.
 
-**5. Economic attacks and asymmetric detection.** Cache hits can receive input-token discounts—over 90% for some standard deployments, or 100% for PTU deployments. A shared cache could enable billing arbitrage or shift cache-write costs. Meanwhile, the probes in the first scenario occur inside the attacker's subscription, leaving **no victim-side detection trace** and undermining incident-response assumptions about tenant isolation.
+**4. Cache poisoning.** Shared caching alone does not imply arbitrary content injection. Demonstrating poisoning requires a cache-key confusion, incorrect reuse, or another defect that causes a victim request to consume mismatched state. The replay and hit records here do not establish that step.
 
-**6. Compliance and tenant-isolation commitments.** Tenant isolation is central to DPAs and security questionnaires. Cross-subscription caching means one customer's prompts or computation residues can deterministically affect another customer's observable state. That is **cross-customer information flow**. Extended-retention caches residing in regional GPU memory could also raise data-residency questions. The answer to "Is my data isolated from other customers?" could acquire a cache-related exception.
+**5. Cost and detection asymmetry.** Caching can affect computation and probing costs, but billing attribution depends on the implementation. If probes occur in another subscription, local logs may not cover them. That does not mean the service or every detection system has no record.
 
-### 6.2 What still needs testing
+**6. Isolation boundaries.** Subscriptions, resources, and tenants are different boundaries. Determining whether cross-subscription sharing creates cross-tenant information flow requires identifying the participants, sharing settings, and isolation controls. Cross-subscription behavior alone cannot establish cross-customer leakage.
 
-The scenarios above are my conditional threat model. Three variables determine the actual severity: **matching granularity**, whether all-or-nothing breakpoints or sliding prefixes; **explicit opt-in**, including mutual agreement versus one-sided sharing; and **tighter blob binding** to sessions, models, or tenants. After the feature becomes available, my plan is T7: cross-subscription hit validation; T8: enumeration cost of binary prefix probes; T9: cache-poisoning feasibility; and T10: cross-subscription blob replay. I will run these between two subscriptions I own. This section records the questions in advance.
+### 6.2 Follow-up experiments
 
-### 6.3 Three recommendations for defenders
+I plan to test four questions between two subscriptions I own: **T7: can requests actually hit across subscriptions; T8: do hits reliably support prefix inference; T9: is incorrect reuse or cache poisoning possible; T10: can reasoning blocks be replayed across subscriptions?** Each test will record its prerequisites, failures, costs, and visible logs. Success in one will not be treated as proof of the next.
 
-1. **Treat encrypted blocks as potentially sensitive assets.** An unreadable `encrypted_content` field cannot be selectively redacted. Remove the entire block from logs, telemetry, and object storage before publication. For sessions that handled credentials, rotate those credentials after removing the logs.
-2. **Gate Agent state on its source.** When restoring checkpoints or accepting external trajectories, discard opaque blocks whose source, session, or model does not match. Do not simply let the model try consuming them.
-3. **Leave cross-subscription cache sharing off by default.** If sharing is necessary, restrict it to explicit peers and monitor unusual `cached_tokens` and `cache_write_tokens` patterns. Stable hits on unfamiliar prefixes or drifting write/read ratios may indicate probing at the cache boundary.
+### 6.3 Implications for system design
 
-## 7. References
+1. **Manage encrypted reasoning blocks as sensitive state.** Being unreadable does not make them suitable for public logs, telemetry, or support tickets. Remove entire blocks before sharing requests externally; if exposed state may contain credentials, assess whether those credentials need rotation.
+2. **Constrain state restoration by source.** When an Agent restores a checkpoint or accepts an external trajectory, check the source, session, model, and task before handing an opaque block to the model.
+3. **Design cache sharing as a separate boundary.** Define participants and scope, and retain visibility into hits, writes, billing, and unusual behavior. Anomalous counters can prompt investigation, but should not be treated as proof of an attack on their own.
 
-1. Panfilov et al., *Stealing Reasoning Traces from Proprietary LLM APIs* (Stolen Thoughts), arXiv:2608.09867, August 2026 — https://arxiv.org/abs/2608.09867
-2. Matthew Green, *Fooling around with encrypted reasoning blobs*, May 2026 — https://blog.cryptographyengineering.com/2026/05/29/fooling-around-with-encrypted-reasoning-blobs/
+## 7. Reference leads
+
+These entries come from the original research notes. The experimental judgments in this article are based on the request and response observations presented in Section 4.
+
+1. Panfilov et al., *Stealing Reasoning Traces from Proprietary LLM APIs* (Stolen Thoughts), arXiv:2608.09867 — https://arxiv.org/abs/2608.09867
+2. Matthew Green, *Fooling around with encrypted reasoning blobs* — https://blog.cryptographyengineering.com/2026/05/29/fooling-around-with-encrypted-reasoning-blobs/
 3. Microsoft, *Prompt caching with Azure OpenAI in Microsoft Foundry Models* — https://learn.microsoft.com/azure/ai-foundry/openai/how-to/prompt-caching
-4. Gu et al., audit of cross-user LLM API prompt cache sharing, ICML 2025
+4. Gu et al., research on cross-user LLM API prompt cache sharing, ICML 2025 (the original notes did not include the complete title or link)
 5. *How to Steal Reasoning Without Reasoning Traces*, arXiv:2603.07267
 6. *Monitoring Reasoning Models for Misbehavior*, arXiv:2503.11926
 7. Simon Willison, commentary on *Stealing Reasoning Traces from Proprietary LLM APIs* — https://simonwillison.net/2026/Aug/11/stealing-reasoning-traces/
