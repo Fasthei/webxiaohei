@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="850" height="900" viewBox="0 0 850 900" fill="none">
-<title>Spring returns</title><desc>An original botanical drawing: pale flowers opening on an enduring branch, against the circles of the seasons.</desc>
+<title>Botanical illustration</title><desc>An original botanical drawing: pale flowers opening on an enduring branch, against the circles of the seasons.</desc>
 <defs>
  <linearGradient id="branch" x1="230" y1="880" x2="650" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#53644f"/><stop offset="1" stop-color="#b8cba0"/></linearGradient>
  <radialGradient id="halo"><stop stop-color="#acbdaa" stop-opacity=".12"/><stop offset="1" stop-color="#acbdaa" stop-opacity="0"/></radialGradient>
@@ -24,7 +24,7 @@
  <path d="M105 401h740M475 32v735" stroke-opacity=".08"/>
  <path d="M475 104v15M475 681v15M177 400h15M759 400h15"/>
 </g>
-<g fill="#a3ad96" fill-opacity=".4" font-family="monospace" font-size="9" letter-spacing="3"><text x="446" y="88">SPRING</text><text x="443" y="727">RETURN</text></g>
+<g fill="#a3ad96" fill-opacity=".4" font-family="monospace" font-size="9" letter-spacing="3"></g>
 <!-- The main branch follows a single, unbroken line through the changing seasons. -->
 <path d="M223 929C299 827 309 736 345 647 390 539 415 439 467 348 513 265 590 209 632 124 644 101 656 81 662 60" stroke="url(#branch)" stroke-width="5"/>
 <path d="M306 753C354 693 429 643 490 566 536 509 555 435 571 383M375 576C360 504 343 460 314 411 290 371 273 324 271 283M449 381C510 375 574 330 610 276M526 252C548 193 532 146 536 107" stroke="url(#branch)" stroke-width="2.4"/>

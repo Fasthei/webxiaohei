@@ -14,3 +14,7 @@
 
 /* Keep the quieter verse and paper annotations readable. */
 :root{--muted:#626957}.poem-echo{color:#909d83}.season-stamp{color:#87957d}.topic-count{color:#707963}
+
+/* The verse inspires the visual theme; the opening contains no quotation. */
+html[lang=en] .bloom-title{font-family:Georgia,"Iowan Old Style",serif;font-size:clamp(70px,8vw,112px);line-height:1.05;letter-spacing:-.045em;margin-top:64px}html[lang=en] .hero-copy{max-width:570px}
+@media(max-width:760px){html[lang=en] .bloom-title{font-size:clamp(62px,15vw,88px);margin-top:65px}.bloom-hero{min-height:565px}}

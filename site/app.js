@@ -12,6 +12,7 @@
       if (element.dataset.markdown === 'true') renderInline(element, element.dataset[language]);
       else element.textContent = element.dataset[language];
     });
+    document.querySelectorAll('[data-aria-en]').forEach(node => {node.setAttribute('aria-label',node.dataset[language === 'en' ? 'ariaEn' : 'ariaZh']);});
     document.querySelectorAll('[data-placeholder-en]').forEach(node => {node.placeholder = node.dataset[language === 'en' ? 'placeholderEn' : 'placeholderZh'];});
     buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.language === language)));
   }
@@ -94,7 +95,9 @@
       const wrapper = element('div', 'article-table');
       wrapper.setAttribute('tabindex', '0');
       wrapper.setAttribute('role', 'region');
-      wrapper.setAttribute('aria-label', 'Data table / 数据表格');
+      wrapper.dataset.ariaEn='Data table';
+      wrapper.dataset.ariaZh='数据表格';
+      wrapper.setAttribute('aria-label', language==='zh'?'数据表格':'Data table');
       const table = element('table');
       const head = element('thead');
       const headings = element('tr');
