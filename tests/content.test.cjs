@@ -53,12 +53,12 @@ test('structured Markdown blocks render semantic elements as inert text and swit
  assert.equal(blocks[4].children[0].textContent,'const x = "<script>";\nalert(x);');
  assert.equal(blocks[4].children[0].dataset.language,'javascript');
  assert.deepEqual(blocks[5].children.map(n=>[n.tagName,n.textContent]),[['li','One'],['li','Two']]);
- assert.equal(r.document.title,'Test — TR');
+ assert.equal(r.document.title,'Test — 天秀之人 · TR');
  r.button.click();
  assert.equal(blocks[0].textContent,'中文 Section');
  assert.equal(blocks[5].children[0].textContent,'中文 One');
  assert.equal(blocks[8].textContent,'旧段落');
- assert.equal(r.document.title,'测试 — TR');
+ assert.equal(r.document.title,'测试 — 天秀之人 · TR');
 });
 test('invalid structured blocks reject the entire remote payload before application',async()=>{
  const invalid=[null,[],{type:'html',text:bilingual('<b>bad</b>')},
@@ -125,7 +125,7 @@ test('topic directory shows real counts and explicitly empty categories',async()
  const data=structuredClone(baseline);data.posts=[{...post,topic:'ai'}];const r=await run(data,{page:'topics'});
  const cards=r.ids['topic-directory'].children;assert.equal(cards.length,5);
  assert.equal(cards[0].children[0].children[1].textContent,'1 note');
- assert.equal(cards[1].children[3].textContent,'No notes published in this area yet.');
+ assert.equal(cards[1].children[3].textContent,'No entries yet.');
 });
 test('article table of contents targets stable headings in both languages',async()=>{
  const data=structuredClone(baseline);data.posts=[{...post,body:[{type:'heading',level:2,text:{en:'Overview',zh:'概览'}},{type:'heading',level:3,text:{en:'Evidence',zh:'证据'}}]}];

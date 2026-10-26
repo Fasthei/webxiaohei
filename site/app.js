@@ -6,7 +6,7 @@
   const buttons = [...document.querySelectorAll('[data-language]')];
   function render() {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
-    if (articleTitle) document.title = articleTitle[language] + ' — TR';
+    if (articleTitle) document.title = articleTitle[language] + ' — 天秀之人 · TR';
     else if (document.body.dataset.titleEn) document.title = document.body.dataset[language === 'en' ? 'titleEn' : 'titleZh'];
     document.querySelectorAll('[data-en]').forEach(element => {
       if (element.dataset.markdown === 'true') renderInline(element, element.dataset[language]);
@@ -185,12 +185,12 @@
       const date=element('time','',post.date);date.dateTime=post.date;
       meta.append(topic,date,element('span','',readingTime(post)));
       const title=element('h2');const titleLink=element('a','',post.title);titleLink.href='/post.html?id='+post.id;title.append(titleLink);
-      const link=element('a','read-link',{en:'Read note →',zh:'阅读全文 →'});link.href='/post.html?id='+post.id;
+      const link=element('a','read-link',{en:'Continue reading →',zh:'继续阅读 →'});link.href='/post.html?id='+post.id;
       card.append(meta,title,element('p','',post.summary),link);list.append(card);
     }
     const active=topics.find(t=>t.id===selectedTopic);
     setText(document.getElementById('writing-heading'),active?active.title:{en:'All notes',zh:'全部文章'});
-    setText(document.getElementById('catalog-description'),active?active.description:{en:'Research and learning, one note at a time.',zh:'从一篇笔记开始，积累研究与学习。'});
+    setText(document.getElementById('catalog-description'),active?active.description:(sortOrder==='oldest'?{en:'Oldest entries first.',zh:'从最早的文章开始。'}:{en:'Newest entries first.',zh:'从最近的文章开始。'}));
     setText(document.getElementById('article-count'),{en:posts.length+' '+(posts.length===1?'note':'notes'),zh:posts.length+' 篇'});
     const empty=document.getElementById('empty-results');if(empty)empty.hidden=posts.length>0;
     const clear=document.getElementById('clear-search');if(clear)clear.hidden=!searchQuery;
@@ -202,7 +202,7 @@
   }
   function setupLibrary(data) {
     libraryData=data;
-    const total=document.getElementById('total-notes');setText(total,{en:data.posts.length+' published notes',zh:data.posts.length+' 篇已发布文章'});
+    const total=document.getElementById('total-notes');setText(total,{en:data.posts.length+' entries',zh:data.posts.length+' 篇'});
     document.querySelectorAll('[data-topic]').forEach(a=>{
       const count=a.dataset.topic==='all'?data.posts.length:data.posts.filter(p=>topicFor(p).id===a.dataset.topic).length;
       a.append(element('span','topic-count',String(count)));
@@ -222,8 +222,8 @@
       const meta=element('div','directory-meta');meta.append(element('span','',String(index+1).padStart(2,'0')),element('span','',{en:posts.length+' '+(posts.length===1?'note':'notes'),zh:posts.length+' 篇'}));
       card.append(meta,element('h2','',t.title),element('p','',t.description));
       if(posts.length){const list=element('ul','directory-links');posts.forEach(p=>{const li=element('li');const a=element('a','',p.title);a.href='/post.html?id='+p.id;li.append(a);list.append(li);});card.append(list);}
-      else card.append(element('p','directory-empty',{en:'No notes published in this area yet.',zh:'此分类暂未发布文章。'}));
-      const link=element('a','directory-link',{en:'Explore this topic →',zh:'浏览此分类 →'});link.href='/?topic='+t.id;card.append(link);directory.append(card);
+      else card.append(element('p','directory-empty',{en:'No entries yet.',zh:'暂无文章。'}));
+      const link=element('a','directory-link',{en:'View notes →',zh:'查看文章 →'});link.href='/?topic='+t.id;card.append(link);directory.append(card);
     });}
     updateCatalog();
   }
