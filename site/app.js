@@ -164,7 +164,7 @@
     if(selectedTopic!=='all')p.set('topic',selectedTopic);
     if(searchQuery)p.set('q',searchQuery);
     if(sortOrder==='oldest')p.set('sort','oldest');
-    history.replaceState(null,'',location.pathname+(p.toString()?'?'+p.toString():''));
+    history.replaceState(null,'',location.pathname+(p.toString()?'?'+p.toString():'')+'#notes');
   }
   function updateCatalog() {
     if(!libraryData)return;
@@ -181,7 +181,7 @@
     for(const post of posts){
       const card=element('article','post-preview');
       const meta=element('div','post-meta');
-      const topic=element('a','topic-pill',topicFor(post).title);topic.href='/?topic='+topicFor(post).id;
+      const topic=element('a','topic-pill',topicFor(post).title);topic.href='/?topic='+topicFor(post).id+'#notes';
       const date=element('time','',post.date);date.dateTime=post.date;
       meta.append(topic,date,element('span','',readingTime(post)));
       const title=element('h2');const titleLink=element('a','',post.title);titleLink.href='/post.html?id='+post.id;title.append(titleLink);
@@ -223,7 +223,7 @@
       card.append(meta,element('h2','',t.title),element('p','',t.description));
       if(posts.length){const list=element('ul','directory-links');posts.forEach(p=>{const li=element('li');const a=element('a','',p.title);a.href='/post.html?id='+p.id;li.append(a);list.append(li);});card.append(list);}
       else card.append(element('p','directory-empty',{en:'No entries yet.',zh:'暂无文章。'}));
-      const link=element('a','directory-link',{en:'View notes →',zh:'查看文章 →'});link.href='/?topic='+t.id;card.append(link);directory.append(card);
+      const link=element('a','directory-link',{en:'View notes →',zh:'查看文章 →'});link.href='/?topic='+t.id+'#notes';card.append(link);directory.append(card);
     });}
     updateCatalog();
   }
