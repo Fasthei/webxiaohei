@@ -3,6 +3,9 @@ import html,json,re,shutil
 from pathlib import Path
 from html.parser import HTMLParser
 from xml.sax.saxutils import escape as xml_escape
+from growth_pages import topic_of
+DATA=None
+CONFIG={}
 HOST={'en':'https://www.xiaohei.co','zh':'https://cn.xiaohei.co'}
 def url(path,lang):return HOST[lang]+('/zh' if lang=='zh' else '')+path
 
@@ -53,10 +56,12 @@ class Localize(HTMLParser):
 def build(root):
  site=root/'site'
  if not (site/'index.html').exists():return
- data=json.loads((root/'content/site.json').read_text());posts=data['posts']
+ global DATA,CONFIG
+ data=json.loads((root/'content/site.json').read_text());posts=data['posts'];DATA=data
+ config_path=root/'config/marketing.json';CONFIG=json.loads(config_path.read_text()) if config_path.exists() else {}
  templates={name:re.sub(r'<meta name="robots"[^>]*>','',(site/name).read_text()) for name in ['index.html','topics.html','about.html','post.html']}
  # Rebuild generated directories to avoid retaining removed articles.
- for directory in [site/'articles',site/'zh']:
+ for directory in [site/'articles',site/'zh',site/'topics']:
   if directory.exists():shutil.rmtree(directory)
  pages=[]
  for lang in ['en','zh']:
@@ -70,7 +75,7 @@ def build(root):
    if name=='index.html':s=re.sub(r'(<div id="github-posts">).*?(</div>)',lambda m:m[1]+entries+m[2],s,count=1,flags=re.S)
    if name=='topics.html':
     ids=['ai','agents','cloud','identity','notes'];topics={t['id']:t for t in data.get('topics',[])}
-    entries=''.join('<section class="directory-card" id="'+tid+'"><h2>'+html.escape(topics[tid]['title'][lang])+'</h2><ul class="directory-links">'+''.join('<li><a href="'+('/zh' if lang=='zh' else '')+'/articles/'+p['id']+'/">'+html.escape(p['title'][lang])+'</a></li>' for p in posts if p.get('topic','notes')==tid)+'</ul></section>' for tid in ids)
+    entries=''.join('<section class="directory-card" id="'+tid+'"><h2>'+html.escape(topics[tid]['title'][lang])+'</h2><ul class="directory-links">'+''.join('<li><a href="'+('/zh' if lang=='zh' else '')+'/articles/'+p['id']+'/">'+html.escape(p['title'][lang])+'</a></li>' for p in posts if topic_of(p)==tid)+'</ul></section>' for tid in ids)
     s=re.sub(r'(<div id="topic-directory"[^>]*>).*?(</div>)',lambda m:m[1]+entries+m[2],s,count=1,flags=re.S)
    write_page(site,s,path,title,desc,lang,pages)
   for post in posts:
@@ -80,6 +85,10 @@ def build(root):
    s=re.sub(r'(<article id="github-article">).*?(</article>)',lambda m:m[1]+body+m[2],templates['post.html'],flags=re.S)
    s=s.replace('<body ','<body data-post-id="'+post['id']+'" ',1)
    write_page(site,s,path,title,desc,lang,pages,post)
+ from growth_pages import build as build_growth
+ build_growth(root,data,templates,pages,write_page)
+ for host,key in CONFIG.get('indexNow',{}).items():
+  if re.fullmatch(r'[a-f0-9]{32}',key):(site/(key+'.txt')).write_text(key)
  (site/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+xml_escape(u)+'</loc></url>' for u in pages)+'</urlset>\n')
  (site/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: https://www.xiaohei.co/sitemap.xml\nSitemap: https://cn.xiaohei.co/sitemap.xml\n')
  # Generic query-based article shell should not compete with permanent article pages.
@@ -90,12 +99,17 @@ def build(root):
 
 def write_page(site,s,path,title,desc,lang,pages,post=None):
  s=re.sub(r'<!-- SEO START -->.*?<!-- SEO END -->','',s,flags=re.S)
+ s=re.sub(r'<link rel="alternate" type="application/rss\+xml"[^>]*>','',s)
+ s=s.replace('<script defer src="/growth.js"></script>','')
+ s=re.sub(r'<a href="(?:/zh)?/feed.xml">RSS</a>','',s)
  s=re.sub(r'<title>.*?</title>','<title>'+html.escape(title)+'</title>',s,flags=re.S)
  s=re.sub(r'<meta name="description"[^>]*>','<meta name="description" content="'+html.escape(desc,quote=True)+'">',s)
  s=re.sub(r' data-(?:page-language|en-url|zh-url|seo-title)="[^"]*"','',s)
  s=s.replace('<body ','<body data-seo-title="'+html.escape(title,quote=True)+'" data-page-language="'+lang+'" data-en-url="'+path+'" data-zh-url="/zh'+path+'" ',1)
  s=re.sub(r'<aside class="ai-writing-note".*?</aside>','',s,flags=re.S)
  s=s.replace('<footer class="site-footer">',"<aside class=\"ai-writing-note\" aria-label=\"A note on the writing\" data-aria-en=\"A note on the writing\" data-aria-zh=\"内容说明\" style=\"margin-top:28px;padding:20px 0;border-top:1px solid #c9d3b72c;color:#b8c1ac;font-size:12px;line-height:1.9\"><p data-en=\"Written by AI and reviewed by the author before publication. Some AI flavor remains—the author is lazy and doesn't feel like polishing it away.\" data-zh=\"本站内容由 AI 代笔，发布前由作者审核。AI 味可能还在——作者比较懒，暂时不想调。\">Written by AI and reviewed by the author before publication. Some AI flavor remains—the author is lazy and doesn't feel like polishing it away.</p></aside>"+'<footer class="site-footer">')
+ from growth_pages import enrich
+ s=enrich(s,path,lang,post,DATA,CONFIG)
  parser=Localize(lang);parser.feed(s);s=''.join(parser.out)
  canonical=url(path,lang)
  structured={'@context':'https://schema.org','@type':'BlogPosting' if post else 'WebPage','name':title,'url':canonical,'inLanguage':'zh-CN' if lang=='zh' else 'en','description':desc,'isPartOf':{'@type':'WebSite','name':'TR Notes','url':HOST['en']}}

@@ -18,3 +18,5 @@
 /* The verse inspires the visual theme; the opening contains no quotation. */
 html[lang=en] .bloom-title{font-family:Georgia,"Iowan Old Style",serif;font-size:clamp(70px,8vw,112px);line-height:1.05;letter-spacing:-.045em;margin-top:64px}html[lang=en] .hero-copy{max-width:570px}
 @media(max-width:760px){html[lang=en] .bloom-title{font-size:clamp(62px,15vw,88px);margin-top:65px}.bloom-hero{min-height:565px}}
+
+.related-reading{border-top:1px solid var(--line);padding:26px 0;margin-top:35px}.related-reading h2{font:22px var(--serif);margin-bottom:14px}.related-reading ul{padding-left:18px}.related-reading li{margin:10px 0;font-size:14px}.related-reading a{text-decoration:underline;text-underline-offset:3px}

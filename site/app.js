@@ -187,7 +187,7 @@
     for(const post of posts){
       const card=element('article','post-preview');
       const meta=element('div','post-meta');
-      const topic=element('a','topic-pill',topicFor(post).title);topic.href=(language==='zh'?'/zh':'')+'/?topic='+topicFor(post).id+'#notes';
+      const topic=element('a','topic-pill',topicFor(post).title);topic.href=(language==='zh'?'/zh':'')+'/topics/'+topicFor(post).id+'/';
       const date=element('time','',post.date);date.dateTime=post.date;
       meta.append(topic,date,element('span','',readingTime(post)));
       const title=element('h2');const titleLink=element('a','',post.title);titleLink.href=(language==='zh'?'/zh':'')+'/articles/'+post.id+'/';title.append(titleLink);
@@ -229,7 +229,7 @@
       card.append(meta,element('h2','',t.title),element('p','',t.description));
       if(posts.length){const list=element('ul','directory-links');posts.forEach(p=>{const li=element('li');const a=element('a','',p.title);a.href=(language==='zh'?'/zh':'')+'/articles/'+p.id+'/';li.append(a);list.append(li);});card.append(list);}
       else card.append(element('p','directory-empty',{en:'No entries yet.',zh:'暂无文章。'}));
-      const link=element('a','directory-link',{en:'View notes →',zh:'查看文章 →'});link.href=(language==='zh'?'/zh':'')+'/?topic='+t.id+'#notes';card.append(link);directory.append(card);
+      const link=element('a','directory-link',{en:'View notes →',zh:'查看文章 →'});link.href=(language==='zh'?'/zh':'')+'/topics/'+t.id+'/';card.append(link);directory.append(card);
     });}
     updateCatalog();
   }
