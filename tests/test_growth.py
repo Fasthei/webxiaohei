@@ -13,7 +13,8 @@ class GrowthTests(unittest.TestCase):
    build_seo.build(r);build_seo.build(r)
    for lang,prefix in [('en',''),('zh','zh/')]:
     index=(r/'site'/prefix/'index.html').read_text()
-    self.assertEqual(index.count('https://analytics.ahrefs.com/analytics.js'),1)
+    self.assertEqual(index.count('src="/analytics-loader.js?v=1"'),1)
+    self.assertNotIn('src="https://analytics.ahrefs.com/analytics.js"',index)
     self.assertIn('data-key="',index)
     sitemap=(r/'site/sitemap.xml').read_text()
     ET.parse(r/'site'/prefix/'feed.xml')
@@ -27,4 +28,6 @@ class GrowthTests(unittest.TestCase):
       self.assertNotIn('/topics/'+topic['id']+'/',sitemap)
     article=(r/'site'/prefix/'articles'/data['posts'][0]['id']/'index.html').read_text()
     self.assertEqual(article.count('class="related-reading"'),int(len(data['posts'])>1))
-    self.assertEqual(article.count('https://analytics.ahrefs.com/analytics.js'),1)
+    self.assertEqual(article.count('src="/analytics-loader.js?v=1"'),1)
+    self.assertEqual(article.count('property="og:image"'),1)
+    self.assertIn('<!--email_off-->',index)

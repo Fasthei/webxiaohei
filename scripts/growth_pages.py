@@ -15,6 +15,7 @@ def canonical(path,lang):return HOST[lang]+('/zh' if lang=='zh' else '')+path
 def enrich(s,path,lang,post,data,config):
  s=re.sub(r'<!-- GROWTH START -->.*?<!-- GROWTH END -->','',s,flags=re.S)
  s=re.sub(r'<script\b[^>]*src="https://analytics\.ahrefs\.com/analytics\.js"[^>]*>\s*</script>','',s,flags=re.S)
+ s=re.sub(r'<script\b[^>]*src="/analytics-loader\.js[^\"]*"[^>]*>\s*</script>','',s,flags=re.S)
  for name in ['google-site-verification','msvalidate.01','ahrefs-site-verification']:
   provider={'google-site-verification':'google','msvalidate.01':'bing','ahrefs-site-verification':'ahrefs'}[name]
   if config.get('verification',{}).get(provider,{}).get(lang):s=re.sub(r'<meta name="'+re.escape(name)+r'"[^>]*>','',s)
@@ -30,7 +31,7 @@ def enrich(s,path,lang,post,data,config):
   value=config.get('verification',{}).get(provider,{}).get(lang,'')
   if value:s=s.replace('</head>','<meta name="'+meta+'" content="'+html.escape(value,quote=True)+'"></head>')
  key=config.get('ahrefsAnalytics',{}).get(lang,'')
- if key:s=s.replace('</head>','<script async src="https://analytics.ahrefs.com/analytics.js" data-key="'+html.escape(key,quote=True)+'"></script></head>')
+ if key:s=s.replace('</head>','<script defer src="/analytics-loader.js?v=1" data-key="'+html.escape(key,quote=True)+'"></script></head>')
  feed=canonical('/feed.xml',lang)
  s=s.replace('</head>','<link rel="alternate" type="application/rss+xml" title="TR Notes" href="'+feed+'"><script defer src="/growth.js"></script></head>')
  s=s.replace('<footer class="site-footer">','<footer class="site-footer"><a href="'+('/zh' if lang=='zh' else '')+'/feed.xml">RSS</a>')

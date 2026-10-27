@@ -7,8 +7,8 @@
   const buttons = [...document.querySelectorAll('[data-language]')];
   function render() {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
-    if (articleTitle) document.title = articleTitle[language] + ' — TR Notes';
-    else if(document.body.dataset.seoTitle) document.title=document.body.dataset.seoTitle;
+    if(document.body.dataset.seoTitle) document.title=document.body.dataset.seoTitle;
+    else if (articleTitle) document.title = articleTitle[language] + ' — TR Notes';
     else if (document.body.dataset.titleEn) document.title = document.body.dataset[language === 'en' ? 'titleEn' : 'titleZh'];
     document.querySelectorAll('[data-en]').forEach(element => {
       if (element.dataset.markdown === 'true') renderInline(element, element.dataset[language]);

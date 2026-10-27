@@ -20,3 +20,7 @@ html[lang=en] .bloom-title{font-family:Georgia,"Iowan Old Style",serif;font-size
 @media(max-width:760px){html[lang=en] .bloom-title{font-size:clamp(62px,15vw,88px);margin-top:65px}.bloom-hero{min-height:565px}}
 
 .related-reading{border-top:1px solid var(--line);padding:26px 0;margin-top:35px}.related-reading h2{font:22px var(--serif);margin-bottom:14px}.related-reading ul{padding-left:18px}.related-reading li{margin:10px 0;font-size:14px}.related-reading a{text-decoration:underline;text-underline-offset:3px}
+
+/* Reading and touch-target fixes for narrow screens. */
+.article-column,.library-main{min-width:0}.article-header h1,.article-body p,.article-body li,.article-body a{overflow-wrap:anywhere}.article-body img{max-width:100%;height:auto}.article-body pre,.article-table{max-width:100%;overflow-x:auto}.analytics-notice{margin:0;padding:12px 20px;background:#ebe7dc;color:#282e27;text-align:center;font-size:14px}
+@media(max-width:760px){.languages button,.main-nav a{display:inline-flex;align-items:center;min-height:44px}.languages button{min-width:44px;justify-content:center}.search-field input{font-size:16px;min-height:44px}.catalog-tools select{font-size:13px;min-height:44px}.article-body{font-size:16px;line-height:1.85}.toc-panel summary{min-height:36px;display:flex;align-items:center}.article-body img{height:auto}}

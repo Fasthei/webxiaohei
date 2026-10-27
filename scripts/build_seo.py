@@ -117,10 +117,15 @@ def write_page(site,s,path,title,desc,lang,pages,post=None):
  from growth_pages import enrich
  s=enrich(s,path,lang,post,DATA,CONFIG)
  parser=Localize(lang);parser.feed(s);s=''.join(parser.out)
+ # Keep public contact links usable without Cloudflare's email decoder.
+ s=re.sub(r'<a\b[^>]*href="mailto:[^"]+"[^>]*>.*?</a>',lambda m:'<!--email_off-->'+m[0]+'<!--/email_off-->',s,flags=re.S)
  canonical=url(path,lang)
  structured={'@context':'https://schema.org','@type':'BlogPosting' if post else 'WebPage','name':title,'url':canonical,'inLanguage':'zh-CN' if lang=='zh' else 'en','description':desc,'isPartOf':{'@type':'WebSite','name':'TR Notes','url':HOST['en']}}
  if post:structured.update(headline=post['title'][lang],datePublished=post['date'],mainEntityOfPage=canonical)
  meta='<!-- SEO START --><link rel="canonical" href="'+canonical+'">'+''.join('<link rel="alternate" hreflang="'+code+'" href="'+url(path,l)+'">' for code,l in [('en','en'),('zh-Hans','zh'),('x-default','en')])+'<meta property="og:type" content="'+('article' if post else 'website')+'"><meta property="og:site_name" content="TR Notes"><meta property="og:title" content="'+html.escape(title,quote=True)+'"><meta property="og:description" content="'+html.escape(desc,quote=True)+'"><meta property="og:url" content="'+canonical+'"><meta name="twitter:card" content="summary"><script type="application/ld+json">'+json.dumps(structured,ensure_ascii=False).replace('<','\\u003c')+'</script><!-- SEO END -->'
+ image=HOST[lang]+'/assets/social-card.png'
+ meta=meta.replace('<meta name="twitter:card" content="summary">','<meta name="twitter:card" content="summary_large_image">')
+ meta=meta.replace('<!-- SEO END -->','<meta property="og:image" content="'+image+'"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/png"><meta property="og:image:alt" content="TR Notes — Security research and learning"><meta name="twitter:image" content="'+image+'"><!-- SEO END -->')
  s=s.replace('</head>',meta+'</head>')
  output=site/(('zh/' if lang=='zh' else '')+('index.html' if path=='/' else path.lstrip('/')+('index.html' if path.endswith('/') else '')))
  output.parent.mkdir(parents=True,exist_ok=True);output.write_text(s);pages.append(canonical)

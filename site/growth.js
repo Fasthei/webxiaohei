@@ -1,7 +1,7 @@
 (() => {
   // No analytics provider is loaded until a real project key is configured.
   const emit = (name, props={}) => {
-    if (navigator.doNotTrack === '1') return;
+    if (navigator.doNotTrack === '1' || window.trAnalyticsExcluded) return;
     if (window.AhrefsAnalytics) window.AhrefsAnalytics.sendEvent(name,{props});
   };
   document.addEventListener('click', event => {
