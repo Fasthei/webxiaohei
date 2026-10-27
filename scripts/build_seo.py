@@ -6,6 +6,7 @@ from xml.sax.saxutils import escape as xml_escape
 from growth_pages import topic_of
 DATA=None
 CONFIG={}
+SEO={}
 HOST={'en':'https://www.xiaohei.co','zh':'https://cn.xiaohei.co'}
 def url(path,lang):return HOST[lang]+('/zh' if lang=='zh' else '')+path
 
@@ -56,9 +57,10 @@ class Localize(HTMLParser):
 def build(root):
  site=root/'site'
  if not (site/'index.html').exists():return
- global DATA,CONFIG
+ global DATA,CONFIG,SEO
  data=json.loads((root/'content/site.json').read_text());posts=data['posts'];DATA=data
  config_path=root/'config/marketing.json';CONFIG=json.loads(config_path.read_text()) if config_path.exists() else {}
+ seo_path=root/'config/seo.json';SEO=json.loads(seo_path.read_text()) if seo_path.exists() else {}
  templates={name:re.sub(r'<meta name="robots"[^>]*>','',(site/name).read_text()) for name in ['index.html','topics.html','about.html','post.html']}
  # Rebuild generated directories to avoid retaining removed articles.
  for directory in [site/'articles',site/'zh',site/'topics']:
@@ -98,6 +100,10 @@ def build(root):
  print(f'Generated {len(pages)} crawlable localized URLs')
 
 def write_page(site,s,path,title,desc,lang,pages,post=None):
+ # Editorial search snippets are separate from the full article headline and deck.
+ overrides=SEO.get(path,{}).get(lang,{})
+ title=overrides.get('title',title)
+ desc=overrides.get('description',desc)
  s=re.sub(r'<!-- SEO START -->.*?<!-- SEO END -->','',s,flags=re.S)
  s=re.sub(r'<link rel="alternate" type="application/rss\+xml"[^>]*>','',s)
  s=s.replace('<script defer src="/growth.js"></script>','')

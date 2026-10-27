@@ -1,0 +1,125 @@
+{
+  "/": {
+    "en": {
+      "description": "Explore AI security, cloud identity and red team research through practical experiments, technical articles and bilingual study notes by TR Notes."
+    },
+    "zh": {
+      "description": "TR Notes 是一个中英双语安全学习博客，记录八年红队实践中的身份安全、云与混合云、大模型基础设施、智能体与 RAG 安全研究，分享实验过程、技术分析和学习笔记。"
+    }
+  },
+  "/topics.html": {
+    "en": {
+      "description": "Browse research by topic: AI and LLM security, agents and RAG, cloud infrastructure, identity and red teaming. Find related experiments and learning notes."
+    },
+    "zh": {
+      "description": "按 AI 与大模型、Agent 与 RAG、云与混合云、身份与红队、学习笔记五个主题浏览文章，查找安全实验、身份认证分析、云平台访问边界以及相关研究记录。"
+    }
+  },
+  "/about.html": {
+    "en": {
+      "description": "Meet the author of TR Notes: eight years in red teaming, with experience in cloud identity, AI infrastructure and agent security. View certifications and contact details."
+    },
+    "zh": {
+      "description": "了解 TR Notes 作者的八年红队经历、云与混合云身份安全、大模型及智能体安全研究方向，查看专业认证与联系方式，并了解这个双语技术博客的内容与写作方式。"
+    }
+  },
+  "/articles/multicloud-routing-soc/": {
+    "en": {
+      "description": "Explore routing, interconnects, private endpoints and Kubernetes networking across OCI, Google Cloud, Azure and AWS in a multicloud security scenario.",
+      "title": "Multicloud Routing & Security Operations — TR Notes"
+    }
+  },
+  "/articles/google-identity-part3-gemini-offense/": {
+    "en": {
+      "description": "Examine Gemini data access across Google Workspace and Gemini Enterprise, administrative controls, and lessons from the patched GeminiJack injection case.",
+      "title": "Gemini & Workspace Security Boundaries — TR Notes"
+    }
+  },
+  "/articles/google-identity-part2-workspace-gmail-apple/": {
+    "en": {
+      "description": "Review Google Workspace identity, administrator roles, API access, domain-wide delegation and Apple Business Manager federation, with security boundaries in focus.",
+      "title": "Google Workspace Identity & Apple Federation — TR Notes"
+    }
+  },
+  "/articles/google-identity-part1-cloud-hierarchy-credentials-billing/": {
+    "en": {
+      "description": "Understand Google Cloud organizations, folders, projects, service accounts and billing boundaries, including managed identities and credential handling.",
+      "title": "Google Cloud Identity & Billing — TR Notes"
+    }
+  },
+  "/articles/microsoft-identity-part2-m365-copilot/": {
+    "en": {
+      "description": "Review Microsoft 365 permissions, Microsoft Graph application access, Copilot data boundaries and the roles of Sentinel, Purview, Defender and Intune.",
+      "title": "Microsoft 365 & Copilot Security — TR Notes"
+    }
+  },
+  "/articles/2026-10-27-ai-red-team-four-years/": {
+    "en": {
+      "description": "A reflection on AI red teaming since ChatGPT: lower entry barriers, changing control boundaries, and why disciplined security testing still matters.",
+      "title": "Four Years of AI Red Teaming — TR Notes"
+    },
+    "zh": {
+      "description": "从 ChatGPT 发布以来的变化出发，回顾 AI 红队的入门门槛、工具与控制边界，讨论技术普及带来的机会，以及安全研究仍然需要的方法、验证和实践纪律。"
+    }
+  },
+  "/articles/microsoft-cloud-identity-hybrid-auth/": {
+    "en": {
+      "description": "Examine Entra tenants, Azure subscriptions, role systems and workload identities, plus hybrid authentication paths connecting Active Directory and the cloud.",
+      "title": "Entra & Hybrid Authentication — TR Notes"
+    }
+  },
+  "/articles/aws-identity-root-payer-trust/": {
+    "en": {
+      "description": "Review AWS root users, management accounts, billing boundaries, credential lifetimes and cross-account trust to understand identity and access in practice.",
+      "title": "AWS Identity & Cross-Account Trust — TR Notes"
+    }
+  },
+  "/articles/azure-encrypted-reasoning/": {
+    "en": {
+      "description": "An Azure experiment on encrypted reasoning: cross-session replay, cross-model reuse and usage differences, examining boundaries between state, caching and trust.",
+      "title": "Azure Encrypted Reasoning Replay Tests — TR Notes"
+    }
+  },
+  "/articles/hello-lisg/": {
+    "en": {
+      "description": "Read about the background and purpose of TR Notes, a bilingual notebook covering red teaming, cloud security, identity and practical AI security experiments."
+    }
+  },
+  "/topics/cloud/": {
+    "en": {
+      "description": "Explore cloud and hybrid security notes on AWS, Azure, Google Cloud and OCI, including identity boundaries, cross-account trust and multicloud networking."
+    },
+    "zh": {
+      "description": "整理 AWS、Azure、Google Cloud 与 OCI 的云和混合云安全笔记，涵盖账户与身份边界、跨账户信任、专用终结点、多云互联和路由控制，帮助串联网络与访问控制的研究思路。"
+    }
+  },
+  "/topics/identity/": {
+    "en": {
+      "description": "Study identity and red teaming through Active Directory, Entra, AWS and Google Cloud notes, including authentication, trust boundaries and lateral movement."
+    },
+    "zh": {
+      "description": "围绕身份与红队实践，整理 Active Directory、Microsoft Entra、AWS 和 Google Cloud 的认证与访问控制笔记，分析租户边界、混合身份、跨账户信任与横向移动。"
+    }
+  },
+  "/topics/ai/": {
+    "en": {
+      "description": "Read AI and LLM security experiments covering encrypted reasoning, model state, infrastructure and trust boundaries, with links to related technical notes."
+    },
+    "zh": {
+      "description": "汇集 AI 与大模型安全实验，重点记录加密推理状态、跨会话重放、模型基础设施和信任边界，保留实验观察与结论的区别，并提供相关主题的延伸阅读入口。"
+    }
+  },
+  "/topics/agents/": {
+    "en": {
+      "description": "Explore the agents and RAG learning section, organized for future notes on tool use, retrieval, prompt injection and trust boundaries between AI systems."
+    }
+  },
+  "/topics/notes/": {
+    "en": {
+      "description": "Follow the TR Notes learning notebook: background, methods and reflections from studying red teaming, identity, cloud infrastructure and AI security."
+    },
+    "zh": {
+      "description": "记录安全研究中的学习方法、背景介绍与实践反思，整理红队、云安全、身份认证及 AI 安全相关笔记。内容由 AI 协助撰写并经作者审核，持续补充实验与理解。"
+    }
+  }
+}
