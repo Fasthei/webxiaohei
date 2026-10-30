@@ -5,7 +5,10 @@ from urllib.parse import urlparse
 ROOT=Path(__file__).resolve().parents[1]
 def submit():
  config=json.loads((ROOT/'config/marketing.json').read_text())
- urls=[n.text for n in ET.parse(ROOT/'site/sitemap.xml').iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
+ urls=[]
+ for sitemap in [ROOT/'site/sitemap.xml', ROOT/'site/zh/sitemap.xml']:
+  if sitemap.exists():
+   urls.extend(n.text for n in ET.parse(sitemap).iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc'))
  results=[]
  for host,key in config['indexNow'].items():
   key_url=f'https://{host}/{key}.txt'
