@@ -474,22 +474,29 @@
         {
           "type": "paragraph",
           "text": {
-            "zh": "测试起点只有前序阶段得到的低权限身份线索。最初围绕门户登录和常见服务反复尝试，实际进展有限。转折点来自成员服务器的部署残留：初始化介质在表面卸载后仍可通过系统保留的卷信息读取，残留元数据包含管理凭据。取得本地管理权限后，可见范围发生变化，早前无法访问的位置才具有重新检查的意义。",
-            "en": "The starting point was a low-privilege identity lead from an earlier authorized stage. Initial attempts around the portal login and common services made little progress. The turning point was deployment residue on the member server. Initialization media remained readable through retained volume information after an apparent unmount, and the metadata exposed administrative credentials. Local administrative access changed what could be seen, so locations that had been inaccessible before needed another inspection."
+            "zh": "测试起点只有前序阶段得到的低权限身份线索。权限验证显示：该身份可访问成员服务器，能对域目录做有限的只读查询，却不能据此在域控上交互式登录或执行命令。最初围绕门户登录和常见服务反复尝试，实际进展有限。转折点来自成员服务器的部署残留：初始化介质在表面卸载后仍可通过系统保留的卷信息读取，残留元数据包含本地管理账户的凭据。",
+            "en": "The starting point was a low-privilege identity lead from an earlier authorized stage. Permission checks showed that this identity could access the member server and make limited read-only domain queries, but could not interactively log on to or execute commands on the domain controller. Initial attempts around the portal login and common services made little progress. The turning point was deployment residue on the member server. Initialization media remained readable through retained volume information after an apparent unmount, and the metadata exposed credentials for a local management account."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "随后发现本地管理员与域管理员的凭据存在同源情况，本地凭据泄露因此不再只影响单机。这里的关键不是某个特定工具，而是镜像和初始化流程没有为不同身份建立独立秘密。域级权限的取得又扩大了调查范围，但仍不能把“凭据有效”直接等同于“每一种远程登录方式都获授权”。",
-            "en": "Local and domain administrative credentials were then found to share an origin, extending the effect of local credential exposure beyond one machine. No particular tool created that weakness. The imaging and initialization process had failed to establish separate secrets for separate identities. Domain-level access broadened the investigation, but a valid credential still did not imply permission for every remote logon method."
+            "zh": "首次验证残留凭据时，目标返回的是“密码正确但必须修改”，并非普通的登录失败。测试先在获授权的交互式登录流程中完成改密，再确认本地管理权限生效。随后检查本机凭据存储；常规远程转储没有产生可核对的结果，改用具备足够权限的本机执行通道后，才取得本机内置管理员的凭据材料。此处的内置管理员与前一步改密的本地管理账户不是同一个身份。",
+            "en": "The first validation returned “correct password, but password change required,” rather than an ordinary login failure. The password was changed through an authorized interactive logon flow, and local administrative access was verified. Local credential storage was then examined. A conventional remote dump yielded no verifiable result; a local execution channel with sufficient privilege was needed to obtain credential material for the built-in Administrator. That built-in account was distinct from the local management account whose password had just been changed."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "Linux 主机的入口来自另一处信任复用：成员服务器上的 SSH 私钥被 Linux 主机接受。前面围绕密码认证投入了大量时间，实际可用的认证路径却是公钥。权限变化后重新检查此前受限的文件位置，才把这条跨主机关系连起来。私钥内容、账户映射和路径细节不影响上述安全结论，因此没有公开。",
-            "en": "The route into the Linux host reflected another trust reuse: an SSH private key on the member server was accepted by the Linux machine. Considerable time had gone into password authentication, while the viable path used a public key. Rechecking files after the privilege change exposed the cross-host relationship. Key material, account mappings, and exact paths are omitted because those details are unnecessary to the security conclusion."
+            "zh": "对取得的材料逐项做域端身份验证后，发现本机内置管理员的凭据可作为域管理员身份通过认证。至此才有证据确认权限从单机跨到域级；后续目录凭据审计又核对了同源关系。本地管理权限、凭据提取、域端验证是三个连续步骤，不能合写成“残留凭据直接拿下域”。根本问题是镜像和初始化流程未把不同管理身份的秘密隔离。",
+            "en": "Each recovered item was then checked against domain identities. The built-in local Administrator credential authenticated as a domain Administrator, establishing the crossing from one host to domain-level privilege. Subsequent domain credential review corroborated the shared origin. Local access, credential extraction, and domain-side validation were three separate steps; the deployment residue did not directly grant domain privilege. The underlying weakness was a failure to separate administrative secrets during imaging and initialization."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "Linux 主机的入口来自另一处信任复用。先前用密码测试多个账户均未成功；本地权限提升后，重新检查成员服务器上此前不可读的用户资料，发现一把未设口令短语的 SSH 私钥。仅有私钥仍不足以登录：常见 Linux 用户名均被拒绝，重新纳入前序测试中出现的服务身份后，公钥认证才成功。成员服务器上的私钥、Linux 主机接受的公钥和对应身份共同构成跨主机路径。私钥内容、账户映射和路径细节不影响上述安全结论，因此没有公开。",
+            "en": "The route into the Linux host reflected another trust reuse. Password attempts against several accounts had failed. After local privilege increased, a previously inaccessible user profile on the member server was rechecked and an SSH private key without a passphrase was found. Possessing the key alone was insufficient: common Linux usernames were rejected. Public-key authentication succeeded only after an identity already present in the earlier authorized testing was reconsidered. The private key, the trusted public key on Linux, and the matching identity formed the cross-host path. Key material, account mappings, and exact paths remain withheld."
           }
         },
         {
@@ -503,15 +510,22 @@
         {
           "type": "paragraph",
           "text": {
-            "zh": "进入 Linux 主机后，真实数据面才被确认：Weaviate 只监听本机回环地址，外部端口扫描自然看不到。回环绑定降低了网络暴露，但主机访问一旦成立，向量库缺少独立认证的问题就显现出来。Schema 中有数类数据，敏感目标集中在密码重置策略相关对象；对象属性没有直接给出所需明文，嵌入向量却能够导出。",
-            "en": "Once access to the Linux host was established, the real data plane became clear. Weaviate listened on loopback, which explained its absence from external port scans. Loopback binding reduced network exposure, but the lack of independent database authentication mattered as soon as host access existed. The schema contained several data classes, with the sensitive target in a password-reset policy object. Plaintext properties did not reveal the desired value, while the embedding remained exportable."
+            "zh": "进入 Linux 主机后，真实数据面才被确认：Weaviate 只监听本机回环地址，外部端口扫描自然看不到。回环绑定降低了网络暴露，但主机访问一旦成立，向量库缺少独立认证的问题就显现出来。Schema 包含论文、内部文档和密码重置策略三类对象；前两类为背景数据，敏感目标集中在最后一类。目标对象没有明文内容属性，却仍有可导出的嵌入向量。",
+            "en": "Once access to the Linux host was established, the real data plane became clear. Weaviate listened on loopback, which explained its absence from external port scans. Loopback binding reduced network exposure, but the lack of independent database authentication mattered as soon as host access existed. The schema held research papers, internal documents, and password-reset policy objects. The first two classes supplied background data; the sensitive target was in the third. The target object had no plaintext content property, but its embedding remained exportable."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "向量维度和环境信息帮助缩小编码模型范围，不能仅凭维度断言模型身份。反演阶段使用已知候选词表和密码重置语境的多种模板，对候选进行排序。多条相互独立的模板指向同一候选，形成较强统计信号；统计一致不等于事实成立，最终结果仍由独立核验确认。具体候选值和原始向量不公开。",
-            "en": "Vector dimensions and environment evidence narrowed the possible encoder; dimensions alone could not establish a model identity. Inversion used a known candidate list and multiple templates matching the password-reset context to rank candidates. Agreement among independent templates supplied a strong statistical signal, but statistical agreement alone was not proof. Independent validation confirmed the final result. The candidate and raw vector are withheld."
+            "zh": "向量导出也经历了校验过程：首次跨类别查询使用了并非每类对象都有的字段，整个查询被 Schema 校验拒绝；按各类别实际字段分别查询后，才取得目标向量，并核对对象数量、向量维度与数据格式。向量维度和环境信息帮助缩小编码模型范围，不能仅凭维度断言模型身份。",
+            "en": "Export required its own checks. An initial query used a field not shared by every class and failed schema validation as a whole. Separate queries using the fields actually available for each class returned the target vector; object counts, vector dimensions, and data format were then checked. Vector dimensions and environment evidence narrowed the possible encoder, but dimensions alone could not establish a model identity."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "反演阶段使用约一万个已知候选词和约两万个密码重置语境模板，先筛出匹配度较高的模板，再去重并交叉比较候选。五条相互独立的模板指向同一候选，形成较强统计信号；模板相似度是排序指标，不是“结果正确的概率”。统计一致仍不等于事实成立，最终结果由独立核验确认。具体候选值和原始向量不公开。",
+            "en": "Inversion ranked roughly ten thousand known candidates against roughly twenty thousand password-reset context templates. High-scoring templates were filtered, deduplicated, and used to compare candidates. Five independent templates converged on one candidate, supplying a strong statistical signal. Template similarity is a ranking measure, not the probability that the answer is correct. Statistical agreement alone was not proof; independent validation confirmed the final result. The candidate and raw vector are withheld."
           }
         },
         {
@@ -573,8 +587,8 @@
               "en": "**DNS investigation ended too early.** A refused zone transfer, timed-out reverse lookups, and one failed directory query established only that those methods failed. They did not prove that relevant records were absent. “Not fully checked” must remain explicit rather than being written as a factual exclusion."
             },
             {
-              "zh": "**用不等价样本做反演校验。** 已知文本的对照样本与目标样本在模板条件上有差异，校验程序返回了错误候选。该失败暴露的是对照设计缺陷，不能单凭这一结果否定真实目标候选；对照实验应尽量只改变待检验的明文。",
-              "en": "**An unequal sample was used to validate inversion.** A known-text control differed from the target in template conditions, and the control returned an incorrect candidate. That failure exposed a design flaw in the control; by itself, it could not invalidate the real target candidate. A useful control changes only the plaintext under test wherever possible."
+              "zh": "**用不等价样本做反演校验。** 已知文本的对照样本包含特定链接，校验运行时却没有对齐模板中的链接槽位，程序因此返回错误候选。该失败暴露的是对照设计缺陷，不能单凭这一结果否定真实目标候选；对照实验应尽量只改变待检验的明文。",
+              "en": "**An unequal sample was used to validate inversion.** A known-text control contained a specific link, but the validation run did not align the corresponding link slot in its templates. The control returned an incorrect candidate. That failure exposed a design flaw in the control; by itself, it could not invalidate the real target candidate. A useful control changes only the plaintext under test wherever possible."
             },
             {
               "zh": "**把写入日志当成交付成功。** 初版报告出现“已保存”的消息，回读时文件并不存在。文件存在、可打开且内容完整，才构成交付证据。测试环境中服务重建、网络抖动等时间相关事件，也不能仅凭先后顺序归因于测试动作。",
