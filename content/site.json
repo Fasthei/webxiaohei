@@ -375,6 +375,149 @@
   },
   "posts": [
     {
+      "id": "embedding-inversion-environment-and-ai-errors",
+      "date": "2026-11-09",
+      "title": {
+        "zh": "向量反演演练：环境路径与自动化判断失误",
+        "en": "Embedding Inversion Exercise: The Access Path and Automation Errors"
+      },
+      "summary": {
+        "zh": "一次授权靶场演练的脱敏复盘：环境突破依赖辨认真正的数据面和追踪跨主机信任；自动化误判的根因是安全基础知识不足。",
+        "en": "A sanitized account of an authorized lab exercise: access depended on finding the real data plane and tracing cross-host trust; automation errors stemmed from gaps in security fundamentals."
+      },
+      "category": {
+        "zh": "AI 安全",
+        "en": "AI Security"
+      },
+      "body": [
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "一次授权靶场演练最终从嵌入向量中恢复了敏感短文本。最费时的工作并非反演计算，而是确认哪套服务持有真实数据，以及凭据如何跨越主机和权限边界。自动化辅助在途中多次误判，根本原因是对身份、授权、远程执行和验证方法的知识不足。以下只保留可供分析的技术关系；环境标识、地址、账户、口令、哈希、私钥和可直接复用的操作步骤均已省略。",
+            "en": "An authorized lab exercise ended with the recovery of a short sensitive text from an embedding. Locating the service that held the real data, and tracing credentials across host and privilege boundaries, took more work than the inversion itself. Automated assistance made several incorrect judgments along the way. The primary cause was insufficient knowledge of identity, authorization, remote execution, and validation methods. This account retains the technical relationships while omitting environment identifiers, addresses, accounts, passwords, hashes, private keys, and reusable execution steps."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "环境突破的思路",
+            "en": "How the environment was accessed"
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "先证伪看似完整的系统",
+            "en": "Disprove the apparent system first"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "入口主机展示了研究门户、向量数据库和元数据服务，看起来具备完整的检索增强生成链路。界面文案和活动记录都指向这一判断，但数据层没有对应写入：向量集合为空，元数据服务只有系统库，门户程序也没有实际调用后端的证据。界面叙事与遥测相矛盾时，以数据和调用关系为准，避免围绕诱饵继续投入时间。",
+            "en": "An entry host presented a research portal, a vector database, and a metadata service, suggesting a complete retrieval-augmented generation stack. Interface text and activity records supported that impression, but the data layer did not: vector collections were empty, the metadata service contained only system databases, and the portal program showed no evidence of calls to those backends. When the interface narrative conflicts with telemetry, data and call relationships provide the stronger basis for a decision. This check prevented further effort on a decoy."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "沿信任边界寻找真正入口",
+            "en": "Follow trust boundaries to the real entry point"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "后续路径由多处独立缺陷串联：部署介质留下了可读取的管理凭据；本地与域管理身份存在口令复用；跨主机的 SSH 私钥复用又把访问延伸到另一台主机。每一步都改变了可见范围，因此权限变化后重新检查此前无法读取的位置，比继续重复低权限枚举更有效。这条链路反映的是部署清理、凭据隔离和密钥管理同时失效，不能归结为单个工具或单个漏洞。",
+            "en": "Several independent weaknesses formed the later access path: deployment media retained readable administrative credentials; local and domain administrative identities shared a password; and SSH private key reuse extended access to another host. Each change in privilege altered the visible environment. Rechecking locations that had been inaccessible before the change proved more useful than repeating low-privilege enumeration. The chain reflects failures in deployment cleanup, credential separation, and key management rather than a single tool or vulnerability."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "主机访问打开了向量数据面",
+            "en": "Host access exposed the vector data plane"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "真正的向量服务只监听本机回环地址。外部扫描看不到服务，不等于服务不存在；取得对应主机访问后，回环服务才进入可达范围。该服务缺少独立认证，敏感文档虽未以明文属性暴露，嵌入向量仍可导出。借助有限候选词表和与文档语境相符的模板，反演得到一个候选值；多模板一致只提高候选可信度，最终结论还依赖独立的练习判定。嵌入向量保留语义信息，不能充当敏感文本的保密措施。",
+            "en": "The real vector service listened only on the host's loopback interface. An external scan could not see that service; host access brought the loopback endpoint within reach. The service lacked separate authentication. Although the sensitive document was not exposed as a plaintext property, the embedding remained exportable. A limited candidate list and templates matching the document context produced a candidate value. Agreement across multiple templates increased confidence, while an independent exercise adjudication established the final result. Embeddings retain semantic information and do not provide confidentiality for sensitive text."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "AI 犯错的根因是知识不足",
+            "en": "Insufficient knowledge caused the AI errors"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这些失误不宜笼统称为“幻觉”。问题首先出在基础语义没有弄清，随后又缺少证据门槛，导致错误判断被继续放大。",
+            "en": "Calling every error a “hallucination” obscures the mechanism. Basic security semantics were misunderstood first; weak evidence checks then allowed incorrect judgments to compound."
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "zh": "**混淆认证与授权。** 凭据有效、端口可达和会话初始化，都不能证明具备远程登录权，更不能证明目标主机执行了命令。演练中，登录错误画面曾被误判为命令正在运行。",
+              "en": "**Authentication was confused with authorization.** Valid credentials, an open port, and session initialization do not establish remote logon rights or command execution on the target. A login error screen was misread as an active command session during the exercise."
+            },
+            {
+              "zh": "**把工具回显当成目标效果。** 工具报告“已执行”后，目标侧既没有相应文件，也没有可核对的状态变化。成功回显只能证明工具走到了某一步，不能替代目标侧验证。",
+              "en": "**Tool messages were treated as target effects.** After a tool reported execution, the target had neither the expected file nor a verifiable state change. A success message can show progress inside the tool, but cannot replace target-side verification."
+            },
+            {
+              "zh": "**把观测缺口当成系统事实。** 终端缓冲区截断、跨多层 Shell 的转义错误和脚本吞掉的异常，都曾制造“没有输出”或“文件不存在”的假象。观测通道不完整时，应先修复采集方式，再解释结果。",
+              "en": "**Observation gaps were mistaken for system facts.** Terminal buffer truncation, quoting errors across multiple shells, and suppressed script exceptions created false impressions of missing output or absent files. Collection must be repaired before interpreting incomplete observations."
+            },
+            {
+              "zh": "**过早收窄认证路径。** 一段时间内只沿密码尝试，忽略了公钥认证和权限变化后的重新枚举。认证协议与授权范围的知识缺口，直接增加了无效尝试。",
+              "en": "**Authentication options were narrowed too early.** Password attempts continued while public-key authentication and renewed enumeration after a privilege change received insufficient attention. Gaps in protocol and authorization knowledge increased wasted effort."
+            },
+            {
+              "zh": "**用不等价实验验证结果。** 已知文本的校验样本与目标样本在模板条件上不一致，校验失败因此不能直接否定反演候选。对照实验必须尽量只改变被验证的变量。",
+              "en": "**An unequal experiment was used for validation.** A known-text check used template conditions different from those of the target. Its failure could not, by itself, invalidate the inversion candidate. A controlled comparison should change only the variable under test wherever possible."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "根因不是缺少更多命令，而是缺少对协议、权限和工具输出边界的准确理解。知识不足使错误假设更容易成立；证据检查不足则让错误假设持续影响后续行动。针对性的改进是先写清每个信号究竟证明什么，再要求目标侧状态或独立判定支持关键结论。",
+            "en": "The root cause was insufficient understanding of protocols, permissions, and the limits of tool output, rather than a shortage of commands. Knowledge gaps made incorrect assumptions plausible; weak evidence checks let those assumptions guide later steps. A better practice is to state exactly what each signal proves and require target-side effects or independent adjudication for consequential conclusions."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "防守与执行上的收获",
+            "en": "Lessons for defense and execution"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "部署后应彻底清理初始化介质与残留凭据，为不同主机和管理身份生成独立秘密，避免跨主机复用私钥。回环监听只能缩小网络暴露面，不能替代向量数据库认证；敏感内容进入检索系统前还需要数据分级。交战记录则应区分工具回显、实际效果与独立验证，并在权限或环境状态变化后重新检查先前的否定结果。",
+            "en": "Deployment media and retained credentials need complete cleanup. Hosts and administrative identities need distinct secrets, and SSH private keys should not be reused across hosts. Loopback binding narrows network exposure but does not replace vector database authentication; sensitive material also needs classification before entering a retrieval system. Exercise records should separate tool messages, observed effects, and independent validation, then revisit earlier negative findings when privilege or environment state changes."
+          }
+        }
+      ],
+      "sourcePath": "posts/2026-11-09-embedding-inversion-environment-and-ai-errors.md",
+      "topic": "ai"
+    },
+    {
       "id": "multicloud-routing-soc",
       "date": "2026-10-27",
       "title": {
