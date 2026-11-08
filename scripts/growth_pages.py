@@ -3,7 +3,7 @@ import html,json,re
 from xml.sax.saxutils import escape
 from email.utils import format_datetime
 from datetime import datetime,timezone
-HOST={'en':'https://www.xiaohei.co','zh':'https://cn.xiaohei.co'}
+HOST={'en':'https://www.xiaohei.co','zh':'https://www.xiaohei.co'}
 def topic_of(post):
  if post.get('topic') in {'ai','agents','cloud','identity','notes'}:return post['topic']
  label=' '.join(post['category'].values())

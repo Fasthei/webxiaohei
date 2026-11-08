@@ -1,5 +1,6 @@
 import unittest,json,tempfile,shutil,sys
 from pathlib import Path
+import xml.etree.ElementTree as ET
 sys.path.insert(0,str(Path(__file__).parents[1]/'scripts'))
 import build_seo
 class SEOTests(unittest.TestCase):
@@ -19,3 +20,13 @@ class SEOTests(unittest.TestCase):
      self.assertIn('article-body',s)
    self.assertIn('noindex,follow',(dest/'site/post.html').read_text())
    self.assertIn('sitemap.xml',(dest/'site/robots.txt').read_text())
+   for lang,prefix in [('en',''),('zh','zh/')]:
+    sitemap=ET.parse(dest/'site'/prefix/'sitemap.xml')
+    urls=[item.text for item in sitemap.iter() if item.tag.endswith('loc')]
+    self.assertTrue(urls)
+    self.assertTrue(all(u.startswith('https://www.xiaohei.co/') for u in urls))
+    self.assertTrue(all(u.startswith('https://www.xiaohei.co/zh/')==(lang=='zh') for u in urls))
+   chinese=(dest/'site/zh/index.html').read_text()
+   self.assertIn('rel="canonical" href="https://www.xiaohei.co/zh/"',chinese)
+   self.assertIn('hreflang="zh-Hans" href="https://www.xiaohei.co/zh/"',chinese)
+   self.assertNotIn('cn.xiaohei.co',chinese)

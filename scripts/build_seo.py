@@ -7,7 +7,7 @@ from growth_pages import topic_of
 DATA=None
 CONFIG={}
 SEO={}
-HOST={'en':'https://www.xiaohei.co','zh':'https://cn.xiaohei.co'}
+HOST={'en':'https://www.xiaohei.co','zh':'https://www.xiaohei.co'}
 def url(path,lang):return HOST[lang]+('/zh' if lang=='zh' else '')+path
 
 def inline(s):
@@ -91,12 +91,12 @@ def build(root):
  build_growth(root,data,templates,pages,write_page)
  for host,key in CONFIG.get('indexNow',{}).items():
   if re.fullmatch(r'[a-f0-9]{32}',key):(site/(key+'.txt')).write_text(key)
- # Each sitemap contains only URLs on its own hostname.
+ # Keep each language in its own sitemap on the public, non-redirecting host.
  for lang, sitemap_path in [('en', site/'sitemap.xml'), ('zh', site/'zh'/'sitemap.xml')]:
   sitemap_path.parent.mkdir(parents=True, exist_ok=True)
-  locs=[u for u in pages if u.startswith(HOST[lang]+'/')]
+  locs=[u for u in pages if u.startswith(HOST[lang]+'/zh/')== (lang=='zh')]
   sitemap_path.write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+xml_escape(u)+'</loc></url>' for u in locs)+'</urlset>\n')
- (site/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: https://www.xiaohei.co/sitemap.xml\nSitemap: https://cn.xiaohei.co/zh/sitemap.xml\n')
+ (site/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: https://www.xiaohei.co/sitemap.xml\nSitemap: https://www.xiaohei.co/zh/sitemap.xml\n')
  # Generic query-based article shell should not compete with permanent article pages.
  legacy=templates['post.html'];legacy=re.sub(r'<!-- SEO START -->.*?<!-- SEO END -->','',legacy,flags=re.S)
  legacy=legacy.replace('</head>','<meta name="robots" content="noindex,follow"></head>')
