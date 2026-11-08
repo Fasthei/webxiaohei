@@ -378,12 +378,12 @@
       "id": "embedding-inversion-environment-and-ai-errors",
       "date": "2026-11-09",
       "title": {
-        "zh": "向量反演客户测试：环境突破与 AI 判断失误",
-        "en": "Client Embedding Inversion Test: Access Path and AI Judgment Errors"
+        "zh": "从客户内网到嵌入向量反演：完整测试过程与 AI 误判复盘",
+        "en": "From a Client Network to Embedding Inversion: The Full Engagement and AI Errors"
       },
       "summary": {
-        "zh": "一次真实客户授权测试的脱敏复盘：从真假 RAG 资产辨认、跨主机信任链到向量反演，并逐项还原 AI 判断失误的证据和根因。",
-        "en": "A sanitized account of an authorized client test, from separating a decoy RAG stack from the real data plane to tracing cross-host trust and examining the evidence behind AI judgment errors."
+        "zh": "一次真实客户授权测试的完整脱敏记录：从低权限入口、伪 RAG 栈证伪、配置盘残留、本地与域权限验证，到 SSH 身份匹配、向量导出、候选恢复及十类 AI 判断错误。",
+        "en": "A complete sanitized account of an authorized client engagement, from initial access, a misleading RAG stack, and deployment remnants to local and domain privileges, SSH identity matching, vector export, candidate recovery, and ten types of AI error."
       },
       "category": {
         "zh": "AI 安全",
@@ -393,251 +393,2018 @@
         {
           "type": "paragraph",
           "text": {
-            "zh": "在一次真实客户授权安全测试中，目标是找到承载敏感文档的检索系统，取得嵌入向量，并判断能否从向量中恢复短文本。测试最终得到一个经独立核验的候选值。结果背后有两条值得分开讨论的主线：环境是如何一步步进入的，以及自动化分析为何反复在关键判断上犯错。",
-            "en": "An authorized security test for a real client sought to locate a retrieval system holding sensitive documents, obtain an embedding, and determine whether a short text could be recovered from that vector. The test produced a candidate confirmed through independent validation. Two lines of analysis matter: how access to the environment developed, and why automated analysis repeatedly made incorrect judgments at critical points."
+            "zh": "这次真实客户授权测试的目标，是识别承载敏感文档的检索系统，取得对应嵌入向量，并判断敏感信息能否从向量中恢复。最终得到的候选值通过了独立验证，但到达结果的过程远比“导出向量，运行反演脚本”复杂。多数时间消耗在真实资产识别、Windows 权限判断、跨主机认证和失败结果的解释上。",
+            "en": "This authorized engagement for a real client aimed to identify the retrieval system holding sensitive documents, obtain the relevant embeddings, and determine whether sensitive information could be recovered from them. The final candidate passed independent validation, but reaching that result involved far more than exporting a vector and running an inversion script. Most of the effort went into identifying the real assets, understanding Windows privileges, authenticating across hosts, and interpreting failed attempts."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "客户名称、域名、地址、账户、口令、哈希、私钥、原始向量和可直接复用的命令均不公开。以下保留测试中的服务关系、判断依据、失败路径与验证方法；脱敏不等于把因果链删掉。",
-            "en": "Client names, domains, addresses, accounts, passwords, hashes, private keys, raw vectors, and directly reusable commands are withheld. The service relationships, decision evidence, failed paths, and validation methods remain. Sanitization should not remove the causal chain."
+            "zh": "本文按有证据支持的推进关系重建全过程。每一阶段说明已有条件、实际检查、观察结果、失败分支，以及下一步为何成立。后半部分集中分析 AI 辅助执行中的错误：基础知识不足首先造成判断失准，缺少结果核验又让错误判断继续支配后续动作。",
+            "en": "This account reconstructs the full process according to the dependencies supported by evidence. Each phase explains the available access, checks performed, observations, failed branches, and justification for the next step. The later sections examine errors during AI-assisted execution: insufficient foundational knowledge first produced incorrect judgments, and missing outcome checks allowed those judgments to drive subsequent actions."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "客户名称、真实网段、账户、凭据、密钥、文档名称和最终敏感值均已替换。DC-A、WIN-A、LINUX-A 分别代表域控、Windows 成员服务器和 Linux 主机；SERVICE_USER、LOCAL_ADMIN_A、DOMAIN_ADMIN 为角色占位符。代码包含脱敏后的命令摘录，以及为解释检查方法整理的示例；数组回读、文件摘要核对和异常处理等示例不代表原始记录逐字包含了这些步骤。尖括号中的内容均为占位符。输出块是脱敏后的关键字段摘录，省略了原始日志中的身份信息。",
+            "en": "Client names, network ranges, accounts, credentials, keys, document names, and the final sensitive value have been replaced. DC-A, WIN-A, and LINUX-A represent the domain controller, Windows member server, and Linux host; SERVICE_USER, LOCAL_ADMIN_A, and DOMAIN_ADMIN are role placeholders. Code includes sanitized command excerpts and examples prepared to explain the checks. Examples such as array readback, checksum comparison, and exception handling do not imply that every step appeared verbatim in the original record. Angle brackets identify placeholders. Output blocks contain sanitized excerpts of key fields, with identity information removed from the original logs."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "zh": "环境突破：先找到真正的数据面",
-            "en": "Access path: finding the real data plane"
-          }
-        },
-        {
-          "type": "heading",
-          "level": 3,
-          "text": {
-            "zh": "入口主机上的 RAG 链路为什么是误导",
-            "en": "Why the apparent RAG stack misled the investigation"
+            "zh": "一、初始条件与任务拆分",
+            "en": "1. Initial Conditions and Task Breakdown"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "测试范围包含一台 Windows 域控、一台 Windows 成员服务器和一台 Linux 主机。成员服务器开放研究门户、Qdrant 和 MongoDB，门户文字声称具备“向量检索 + 元数据”的完整 RAG 链路，活动区还显示嵌入更新记录。只看页面和端口，成员服务器很容易被当成目标系统。",
-            "en": "The test scope included a Windows domain controller, a Windows member server, and a Linux host. The member server exposed a research portal, Qdrant, and MongoDB. Portal copy described a complete retrieval-augmented generation stack, and an activity area claimed that embeddings had been updated. The interface and open ports made the member server look like the target."
+            "zh": "最初可见三台主机，已有线索是一组来自前序授权测试的低权限凭据。Linux 主机没有可直接使用的登录凭据。目标提示指向 RAG 和嵌入向量，但没有指出哪台机器是真实数据载体。另有一个约一万条候选的词表可用于后续验证。",
+            "en": "Three hosts were initially visible. A set of low-privilege credentials from an earlier authorized test provided the starting point. No directly usable login credentials were available for the Linux host. The objective pointed toward RAG and embeddings without identifying the machine that actually held the data. A candidate list of approximately ten thousand entries was also available for later validation."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "数据层给出了相反证据。Qdrant 集合为空，遥测里没有与页面叙事对应的写入；MongoDB 只见系统库；门户程序中的 Qdrant、MongoDB 字样只出现在介绍文案，未发现实际后端调用。页面显示的文档计数也缺少数据层支撑。单一空集合仍可能是权限或时点问题，但遥测、程序引用和数据库内容三项相互印证，足以把这套门户从主要目标中排除。",
-            "en": "The data layer contradicted that account. Qdrant had no collections and no writes matching the portal story in its telemetry. MongoDB held only system databases. References to Qdrant and MongoDB in the portal program appeared in descriptive copy, with no evidence of backend calls. The displayed document count had no supporting data. A single empty collection could reflect permissions or timing, but telemetry, program references, and database contents together justified deprioritizing this stack."
+            "zh": "任务拆成五个可独立验证的问题：真实检索系统在哪里；什么身份能进入该系统；敏感内容是否以明文属性保存；若只有向量，编码模型和候选范围是否足够明确；得到候选后如何确认正确。顺序不能倒过来：如果没有确认真实数据面，后面的反演方法选择再精细也没有对象。",
+            "en": "The task was split into five independently verifiable questions: where the real retrieval system was; which identity could access it; whether sensitive content remained in plaintext properties; whether the encoder and candidate space were sufficiently clear if only vectors remained; and how a recovered candidate would be confirmed. This sequence mattered. Without a verified data source, even a carefully chosen inversion method would have nothing relevant to analyze."
           }
         },
         {
-          "type": "paragraph",
-          "text": {
-            "zh": "这一阶段最重要的动作是证伪。门户可以把“系统存在”展示得很像事实，真正需要确认的却是数据写在哪里、请求是否真的到达后端、所谓活动记录能否在存储和遥测中找到对应事件。",
-            "en": "The decisive work in this stage was falsification. A portal can make the existence of a system look convincing. The actual questions are where data is stored, whether requests reach a backend, and whether claimed activity has a corresponding event in storage or telemetry."
-          }
-        },
-        {
-          "type": "heading",
-          "level": 3,
-          "text": {
-            "zh": "双视角枚举排除了网络假设",
-            "en": "Two vantage points ruled out a network assumption"
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "外部测试机看到 Linux 主机主要暴露 SSH，未看到向量服务。为排除“服务仅向内网成员服务器开放”的可能，又从已获授权访问的成员服务器观察域控和 Linux 主机的可达端口。两个视角都没有发现对外监听的 RAG 服务。与此同时，DNS 中还存在指向另一网段的旧记录；该网段的连通性和端口验证未支持存在对应目标主机。",
-            "en": "From the external test host, the Linux machine mainly exposed SSH; no vector service appeared. A second view from the authorized member-server foothold checked whether a RAG service was available only to internal hosts. Neither view found an externally listening RAG service. DNS also contained an old record pointing to a different subnet, but connectivity and port checks did not support a live target there."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "这些否定结果缩小了搜索空间，但并不证明 Linux 主机没有向量服务。服务可能只绑定回环地址。区分“扫描不到”与“不存在”，是后续路径能够收敛的前提。",
-            "en": "These negative results reduced the search space without proving that the Linux host had no vector service. A service could listen only on loopback. The distinction between “not visible in a scan” and “nonexistent” was essential to the next step."
-          }
-        },
-        {
-          "type": "heading",
-          "level": 3,
-          "text": {
-            "zh": "配置残留与凭据复用打开了权限边界",
-            "en": "Deployment residue and credential reuse crossed privilege boundaries"
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "测试起点只有前序阶段得到的低权限身份线索。权限验证显示：该身份可访问成员服务器，能对域目录做有限的只读查询，却不能据此在域控上交互式登录或执行命令。最初围绕门户登录和常见服务反复尝试，实际进展有限。转折点来自成员服务器的部署残留：初始化介质在表面卸载后仍可通过系统保留的卷信息读取，残留元数据包含本地管理账户的凭据。",
-            "en": "The starting point was a low-privilege identity lead from an earlier authorized stage. Permission checks showed that this identity could access the member server and make limited read-only domain queries, but could not interactively log on to or execute commands on the domain controller. Initial attempts around the portal login and common services made little progress. The turning point was deployment residue on the member server. Initialization media remained readable through retained volume information after an apparent unmount, and the metadata exposed credentials for a local management account."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "首次验证残留凭据时，目标返回的是“密码正确但必须修改”，并非普通的登录失败。测试先在获授权的交互式登录流程中完成改密，再确认本地管理权限生效。随后检查本机凭据存储；常规远程转储没有产生可核对的结果，改用具备足够权限的本机执行通道后，才取得本机内置管理员的凭据材料。此处的内置管理员与前一步改密的本地管理账户不是同一个身份。",
-            "en": "The first validation returned “correct password, but password change required,” rather than an ordinary login failure. The password was changed through an authorized interactive logon flow, and local administrative access was verified. Local credential storage was then examined. A conventional remote dump yielded no verifiable result; a local execution channel with sufficient privilege was needed to obtain credential material for the built-in Administrator. That built-in account was distinct from the local management account whose password had just been changed."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "对取得的材料逐项做域端身份验证后，发现本机内置管理员的凭据可作为域管理员身份通过认证。至此才有证据确认权限从单机跨到域级；后续目录凭据审计又核对了同源关系。本地管理权限、凭据提取、域端验证是三个连续步骤，不能合写成“残留凭据直接拿下域”。根本问题是镜像和初始化流程未把不同管理身份的秘密隔离。",
-            "en": "Each recovered item was then checked against domain identities. The built-in local Administrator credential authenticated as a domain Administrator, establishing the crossing from one host to domain-level privilege. Subsequent domain credential review corroborated the shared origin. Local access, credential extraction, and domain-side validation were three separate steps; the deployment residue did not directly grant domain privilege. The underlying weakness was a failure to separate administrative secrets during imaging and initialization."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "Linux 主机的入口来自另一处信任复用。先前用密码测试多个账户均未成功；本地权限提升后，重新检查成员服务器上此前不可读的用户资料，发现一把未设口令短语的 SSH 私钥。仅有私钥仍不足以登录：常见 Linux 用户名均被拒绝，重新纳入前序测试中出现的服务身份后，公钥认证才成功。成员服务器上的私钥、Linux 主机接受的公钥和对应身份共同构成跨主机路径。私钥内容、账户映射和路径细节不影响上述安全结论，因此没有公开。",
-            "en": "The route into the Linux host reflected another trust reuse. Password attempts against several accounts had failed. After local privilege increased, a previously inaccessible user profile on the member server was rechecked and an SSH private key without a passphrase was found. Possessing the key alone was insufficient: common Linux usernames were rejected. Public-key authentication succeeded only after an identity already present in the earlier authorized testing was reconsidered. The private key, the trusted public key on Linux, and the matching identity formed the cross-host path. Key material, account mappings, and exact paths remain withheld."
-          }
-        },
-        {
-          "type": "heading",
-          "level": 3,
-          "text": {
-            "zh": "回环服务与向量反演",
-            "en": "Loopback service and embedding inversion"
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "进入 Linux 主机后，真实数据面才被确认：Weaviate 只监听本机回环地址，外部端口扫描自然看不到。回环绑定降低了网络暴露，但主机访问一旦成立，向量库缺少独立认证的问题就显现出来。Schema 包含论文、内部文档和密码重置策略三类对象；前两类为背景数据，敏感目标集中在最后一类。目标对象没有明文内容属性，却仍有可导出的嵌入向量。",
-            "en": "Once access to the Linux host was established, the real data plane became clear. Weaviate listened on loopback, which explained its absence from external port scans. Loopback binding reduced network exposure, but the lack of independent database authentication mattered as soon as host access existed. The schema held research papers, internal documents, and password-reset policy objects. The first two classes supplied background data; the sensitive target was in the third. The target object had no plaintext content property, but its embedding remained exportable."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "向量导出也经历了校验过程：首次跨类别查询使用了并非每类对象都有的字段，整个查询被 Schema 校验拒绝；按各类别实际字段分别查询后，才取得目标向量，并核对对象数量、向量维度与数据格式。向量维度和环境信息帮助缩小编码模型范围，不能仅凭维度断言模型身份。",
-            "en": "Export required its own checks. An initial query used a field not shared by every class and failed schema validation as a whole. Separate queries using the fields actually available for each class returned the target vector; object counts, vector dimensions, and data format were then checked. Vector dimensions and environment evidence narrowed the possible encoder, but dimensions alone could not establish a model identity."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "反演阶段使用约一万个已知候选词和约两万个密码重置语境模板，先筛出匹配度较高的模板，再去重并交叉比较候选。五条相互独立的模板指向同一候选，形成较强统计信号；模板相似度是排序指标，不是“结果正确的概率”。统计一致仍不等于事实成立，最终结果由独立核验确认。具体候选值和原始向量不公开。",
-            "en": "Inversion ranked roughly ten thousand known candidates against roughly twenty thousand password-reset context templates. High-scoring templates were filtered, deduplicated, and used to compare candidates. Five independent templates converged on one candidate, supplying a strong statistical signal. Template similarity is a ranking measure, not the probability that the answer is correct. Statistical agreement alone was not proof; independent validation confirmed the final result. The candidate and raw vector are withheld."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "从最初入口到结果，主要成本落在资产辨认、权限边界和认证路径上。向量反演本身在目标向量、模型范围和候选空间明确后才快速收敛。敏感文本即使不以明文属性保存，只要嵌入保留了足够语义，仍可能在受约束的候选空间内泄露。",
-            "en": "Most of the effort from initial access to the final result went into identifying the asset, crossing privilege boundaries, and selecting the right authentication method. Once the vector, encoder range, and candidate space were known, inversion converged quickly. Omitting a plaintext property does not eliminate disclosure risk when an embedding retains enough semantics for recovery within a constrained candidate space."
-          }
-        },
-        {
-          "type": "heading",
-          "level": 2,
-          "text": {
-            "zh": "AI 犯错：逐项看证据，而不是只贴“幻觉”标签",
-            "en": "AI errors: examine the evidence, not just the “hallucination” label"
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "自动化流程的失误并非随机口误。多个错误都发生在基础安全语义没有掌握、工具输出又未被目标侧证据校验的交界处。",
-            "en": "The automation errors were not random slips of wording. They appeared where security fundamentals were poorly understood and tool output was not checked against evidence from the target."
-          }
-        },
-        {
-          "type": "list",
-          "ordered": true,
-          "items": [
+          "type": "table",
+          "headers": [
             {
-              "zh": "**把认证成功当成远程执行权。** 凭据测试出现积极标记，远程桌面连接也完成了画面初始化，于是登录错误画面被误读为命令会话。实际缺少远程登录权限。端口开放、身份有效、交互式登录权和命令执行权是四个不同命题，不能用会话时长拼出执行成功。",
-              "en": "**Authentication was mistaken for remote execution rights.** A credential check produced a positive marker and a remote desktop connection initialized a display, leading to a login error screen being interpreted as a command session. Remote logon rights were absent. An open port, a valid identity, interactive logon rights, and command execution are four different claims; session duration cannot establish execution."
+              "zh": "主机代号",
+              "en": "Host"
             },
             {
-              "zh": "**把“已执行”回显当成执行结果。** 远程管理工具打印成功消息后，目标侧没有预期文件，直接调用还返回拒绝访问。错误并不在回传设计不够复杂，而在没有先证明目标上发生了可核对的状态变化。",
-              "en": "**An “executed” message was treated as an execution result.** After a remote management tool printed a success message, the expected file was absent on the target and a direct call returned access denied. The problem was not an insufficiently elaborate output channel. Target-side state change had never been established."
+              "zh": "初始观察",
+              "en": "Initial observation"
             },
             {
-              "zh": "**把输出截断当成枚举完成。** 终端窗口的缓冲区吞掉了服务清单后半段，实时回显被误当作完整结果。关键枚举需要记录条数、保存完整输出并回读；屏幕上“看完了”不能证明数据采集完整。",
-              "en": "**Truncated output was treated as complete enumeration.** The terminal buffer discarded the later part of a service list, and the visible text was mistaken for the complete result. Critical enumeration needs a count, retained full output, and readback. Reaching the bottom of a screen does not prove complete collection."
-            },
-            {
-              "zh": "**忽略多层 Shell 的语义变化。** 复杂筛选经过终端、命令解释器和 PowerShell 后，引号、变量和管道符发生变化。空结果有时来自命令本身失效，并非目标不存在。每层实际收到的参数必须核对。",
-              "en": "**Semantics changed across multiple shells.** Complex filters crossed a terminal, a command interpreter, and PowerShell; quotation marks, variables, and pipe characters changed meaning. Empty results sometimes came from a broken command rather than an absent target. The arguments received at each layer need verification."
-            },
-            {
-              "zh": "**误用非交互认证选项。** 文件传输时启用禁止交互的 SSH 模式，却仍期望密码认证完成，导致连接失败。对协议选项的含义不清，制造了并不存在的访问障碍。",
-              "en": "**A non-interactive authentication option was misused.** An SSH file transfer disabled interaction while still expecting password authentication, causing failure. Misunderstanding the protocol option created an artificial access obstacle."
-            },
-            {
-              "zh": "**把密码认证当成唯一入口。** 密码尝试持续推进，公钥认证与主机侧密钥关系检查却滞后。首次看到服务器接受的认证方式时，就应并列分析各条合法路径，而非把一条路径跑到尽头。",
-              "en": "**Password authentication was treated as the only route.** Password attempts continued while public-key authentication and host-side key relationships received insufficient attention. The server's advertised authentication methods should have been considered in parallel rather than exhausting one path first."
-            },
-            {
-              "zh": "**权限升级后未重做受限枚举。** 低权限阶段读不到的目录被当作“没有文件”；提升权限后的遍历脚本又吞掉异常，形成第二次假阴性。拒绝访问、遍历失败与确实不存在必须分别记录。",
-              "en": "**Restricted enumeration was not repeated after privilege increased.** A directory inaccessible at low privilege was treated as if no file existed. A later traversal script swallowed errors, producing a second false negative. Access denied, traversal failure, and genuine absence must be recorded separately."
-            },
-            {
-              "zh": "**过早结束 DNS 线索。** 区传送被拒、反向解析超时和一次目录查询失败，只能证明对应方法失败，不能证明域内没有相关记录。需要明确“未查完”的边界，避免把排除法写成事实。",
-              "en": "**DNS investigation ended too early.** A refused zone transfer, timed-out reverse lookups, and one failed directory query established only that those methods failed. They did not prove that relevant records were absent. “Not fully checked” must remain explicit rather than being written as a factual exclusion."
-            },
-            {
-              "zh": "**用不等价样本做反演校验。** 已知文本的对照样本包含特定链接，校验运行时却没有对齐模板中的链接槽位，程序因此返回错误候选。该失败暴露的是对照设计缺陷，不能单凭这一结果否定真实目标候选；对照实验应尽量只改变待检验的明文。",
-              "en": "**An unequal sample was used to validate inversion.** A known-text control contained a specific link, but the validation run did not align the corresponding link slot in its templates. The control returned an incorrect candidate. That failure exposed a design flaw in the control; by itself, it could not invalidate the real target candidate. A useful control changes only the plaintext under test wherever possible."
-            },
-            {
-              "zh": "**把写入日志当成交付成功。** 初版报告出现“已保存”的消息，回读时文件并不存在。文件存在、可打开且内容完整，才构成交付证据。测试环境中服务重建、网络抖动等时间相关事件，也不能仅凭先后顺序归因于测试动作。",
-              "en": "**A saved message was treated as a completed deliverable.** An initial report printed a success message, but the file was missing on readback. Existence, readability, and content completeness are the delivery evidence. Service rebuilds and network instability during the test also cannot be attributed to test actions merely because of temporal proximity."
+              "zh": "需要回答的问题",
+              "en": "Question to resolve"
             }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "DC-A",
+                "en": "DC-A"
+              },
+              {
+                "zh": "域目录、文件共享、远程桌面及标准域服务",
+                "en": "Directory services, file sharing, Remote Desktop, and standard domain services"
+              },
+              {
+                "zh": "已知身份能读什么，不能执行什么",
+                "en": "What could the known identity read, and what could it not execute?"
+              }
+            ],
+            [
+              {
+                "zh": "WIN-A",
+                "en": "WIN-A"
+              },
+              {
+                "zh": "研究门户、Qdrant、MongoDB、Windows 管理接口",
+                "en": "Research portal, Qdrant, MongoDB, and Windows management interfaces"
+              },
+              {
+                "zh": "门户是否连接真实数据，是否存在可验证的本地权限路径",
+                "en": "Did the portal connect to real data, and was there a verifiable path to local privileges?"
+              }
+            ],
+            [
+              {
+                "zh": "LINUX-A",
+                "en": "LINUX-A"
+              },
+              {
+                "zh": "外部主要看到 SSH",
+                "en": "Primarily SSH visible externally"
+              },
+              {
+                "zh": "是否承载仅本机可达的服务，以及可用认证方式是什么",
+                "en": "Did it host local-only services, and which authentication methods were usable?"
+              }
+            ]
           ]
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "这些问题的根本原因是相关知识不够扎实：Windows 登录权与凭据有效性的区别、SSH 认证选项、Shell 转义层次、日志和缓冲区语义、对照实验的变量控制，都需要准确理解。知识缺口先制造错误假设，缺少证据门槛再让错误假设驱动更多动作。单纯增加工具调用次数，只会把错误放大。",
-            "en": "The root cause was insufficient knowledge of the relevant domain: Windows logon rights versus credential validity, SSH authentication options, shell quoting layers, log and buffer semantics, and controlled experimental design. Knowledge gaps produced incorrect assumptions first; weak evidence gates then allowed those assumptions to drive more work. More tool calls alone would have amplified the error."
+            "zh": "初始网络探测出现了一个误导：大范围存活探测把大量地址标为在线，但后续端口探测并没有发现相应主机服务。初步分析将此归因于网关代答；现有证据只能确认“存活标记不能用来证明真实资产数量”，缺少抓包证据时不把具体代答机制写成定论。",
+            "en": "Initial network discovery was misleading: a broad host-discovery scan marked many addresses as alive, while subsequent port checks found no corresponding host services. The initial analysis attributed this to gateway responses. The defensible conclusion is narrower: an alive marker did not establish the number of real assets, and the specific response mechanism remained unproven without packet captures."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "ip route\nnmap -Pn -sT -p 22,53,88,135,139,389,445,464,636,3389,5985,5986 <HOST>",
+            "en": "ip route\nnmap -Pn -sT -p 22,53,88,135,139,389,445,464,636,3389,5985,5986 <HOST>"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这里关注的是同一地址能否返回稳定、可解释的服务响应。端口拒绝、超时、认证失败和应用层报错分别属于不同层，不能全部压成一个“通”或“不通”。",
+            "en": "The relevant question was whether a given address returned stable, interpretable service responses. Connection refusal, timeout, authentication failure, and application errors occur at different layers and cannot all be reduced to a single reachable/unreachable label."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "zh": "防守和执行如何改",
-            "en": "Changes for defense and execution"
+            "zh": "二、先测身份边界，再谈远程执行",
+            "en": "2. Establish Identity Boundaries Before Assuming Remote Execution"
           }
         },
         {
-          "type": "list",
-          "ordered": false,
-          "items": [
+          "type": "paragraph",
+          "text": {
+            "zh": "已知身份在不同主机和协议上的能力并不相同。WIN-A 的文件共享和远程桌面可用；DC-A 的域共享和部分目录查询可读，但管理共享、WMI 和远程管理接口拒绝访问。SSH 也没有因为 Windows 侧密码有效就自动接受同一组凭据。",
+            "en": "The known identity had different capabilities across hosts and protocols. File sharing and Remote Desktop worked on WIN-A. Domain shares and some directory queries were readable on DC-A, but administrative shares, WMI, and remote management interfaces rejected access. SSH did not automatically accept credentials simply because they worked on Windows."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
             {
-              "zh": "**清理部署残留。** 初始化介质、元数据和临时凭据需要在交付前验证不可再读，不能只确认盘符消失。",
-              "en": "**Remove deployment residue.** Verify that initialization media, metadata, and temporary credentials cannot be read after handoff; the disappearance of a drive letter is insufficient."
+              "zh": "验证面",
+              "en": "Validation surface"
             },
             {
-              "zh": "**隔离每个身份的秘密。** 本地与域管理身份、不同主机的账户和 SSH 私钥应独立生成、轮换并限制使用范围。",
-              "en": "**Separate secrets by identity.** Local and domain administrators, accounts on different hosts, and SSH private keys need independent generation, rotation, and scoped use."
+              "zh": "观察结果",
+              "en": "Observation"
             },
             {
-              "zh": "**保护向量数据面。** 回环监听之外仍需认证与最小权限；敏感文档进入检索系统前应做数据分级，不能把“删除明文属性”误当成向量脱敏。",
-              "en": "**Protect the vector data plane.** Loopback binding does not replace authentication and least privilege. Sensitive documents need classification before entering retrieval; removing a plaintext property does not sanitize an embedding."
-            },
-            {
-              "zh": "**为自动化判断设证据门槛。** 把工具回显、目标侧状态和独立验证分栏记录；权限变化后重做此前因权限受限而失败的检查；环境异常单列时间线，不凭时间相邻推断因果。",
-              "en": "**Set evidence gates for automation.** Record tool messages, target-side state, and independent validation separately. Repeat checks previously blocked by insufficient privilege after access changes. Track environment incidents on a separate timeline, without inferring causation from timing alone."
+              "zh": "能支持的结论",
+              "en": "Supported conclusion"
             }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "WIN-A SMB 与 RDP",
+                "en": "WIN-A SMB and RDP"
+              },
+              {
+                "zh": "可认证并访问相应资源",
+                "en": "Authentication and relevant resource access succeeded"
+              },
+              {
+                "zh": "已建立成员服务器访问入口",
+                "en": "An entry point to the member server was established"
+              }
+            ],
+            [
+              {
+                "zh": "DC-A 普通域共享",
+                "en": "DC-A ordinary domain shares"
+              },
+              {
+                "zh": "可读",
+                "en": "Readable"
+              },
+              {
+                "zh": "存在受限文件读取能力",
+                "en": "Limited file-reading capability existed"
+              }
+            ],
+            [
+              {
+                "zh": "DC-A 管理共享",
+                "en": "DC-A administrative shares"
+              },
+              {
+                "zh": "拒绝",
+                "en": "Access denied"
+              },
+              {
+                "zh": "不能据此声明管理权限",
+                "en": "Administrative privileges were not established"
+              }
+            ],
+            [
+              {
+                "zh": "DC-A LDAP",
+                "en": "DC-A LDAP"
+              },
+              {
+                "zh": "可做部分只读查询",
+                "en": "Some read-only queries succeeded"
+              },
+              {
+                "zh": "可以收集目录信息",
+                "en": "Directory information could be collected"
+              }
+            ],
+            [
+              {
+                "zh": "DC-A RDP",
+                "en": "DC-A RDP"
+              },
+              {
+                "zh": "探测标记积极，但实际登录报权限不足",
+                "en": "A positive probe marker, but insufficient login rights in the actual session"
+              },
+              {
+                "zh": "凭据有效与远程登录权必须分开",
+                "en": "Valid credentials and remote logon rights had to be distinguished"
+              }
+            ],
+            [
+              {
+                "zh": "WinRM、WMI",
+                "en": "WinRM and WMI"
+              },
+              {
+                "zh": "对初始身份拒绝",
+                "en": "Rejected the initial identity"
+              },
+              {
+                "zh": "没有获得相应执行通道",
+                "en": "No corresponding execution channel was available"
+              }
+            ],
+            [
+              {
+                "zh": "SSH",
+                "en": "SSH"
+              },
+              {
+                "zh": "拒绝",
+                "en": "Rejected access"
+              },
+              {
+                "zh": "需要继续区分账户、密钥、认证方式与授权配置",
+                "en": "Account, key, authentication method, and authorization configuration required separate checks"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "whoami\nwhoami /groups\nwhoami /priv\nnet localgroup Administrators\nnet localgroup \"Remote Desktop Users\"\nnet localgroup \"OpenSSH Users\"",
+            "en": "whoami\nwhoami /groups\nwhoami /priv\nnet localgroup Administrators\nnet localgroup \"Remote Desktop Users\"\nnet localgroup \"OpenSSH Users\""
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这一步原本应该成为后续行动的边界，实际却出现严重误判。DC-A 的 RDP 探测工具给出积极标记，客户端日志也出现 framebuffer 初始化，于是连接被当成了命令会话。会话持续几十秒，又被拿来解释成某条等待命令执行结束。",
+            "en": "These findings should have bounded subsequent actions, but a major misinterpretation followed. The DC-A RDP probe produced a positive marker, and the client log reported framebuffer initialization, so the connection was treated as a command session. Its duration of several dozen seconds was then interpreted as a waiting command reaching completion."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "真正的反证来自登录界面：",
+            "en": "The login screen supplied the decisive contradiction:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "To sign in remotely you need the right to sign in\nthrough Remote Desktop Services.",
+            "en": "To sign in remotely you need the right to sign in\nthrough Remote Desktop Services."
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "此前看到的是登录错误画面存活到超时，没有证据证明进入了可执行命令的用户会话。建立在这一假设上的命名管道、回传脚本和输出通道设计都失去了前提。判断应当退回到已经验证的边界：初始身份对域控主要只有只读访问，远程执行尚未成立。",
+            "en": "The visible connection had kept a login-error screen open until timeout. There was no evidence of a user session capable of executing commands. Named-pipe, callback-script, and output-channel plans built on that assumption therefore lacked a prerequisite. The analysis had to return to the verified boundary: the initial identity primarily had read-only access to the domain controller, and remote execution had not been established."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这不是偶然看错一条日志。基础知识缺口在于没有分清四个状态：网络可达、身份认证、登录授权、目标执行。只有前两项成立时，不能把后两项补出来。",
+            "en": "This was more than a misread log line. The knowledge gap was a failure to distinguish four states: network reachability, identity authentication, logon authorization, and target execution. The first two do not establish the latter two."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "三、研究门户看起来像 RAG，数据层却不支持",
+            "en": "3. The Research Portal Looked Like RAG, but the Data Layer Did Not Support It"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "WIN-A 上的门户具备研究资料列表、仪表盘、登录入口和活动区。介绍页写明依赖 Qdrant 做嵌入检索，MongoDB 保存元数据，活动区还有更新嵌入的记录。这些界面元素很容易形成“目标已经找到”的判断。",
+            "en": "The WIN-A portal had research listings, a dashboard, a login page, and an activity feed. Its introduction described Qdrant-based embedding retrieval and MongoDB metadata storage, while the activity feed included embedding-update entries. Together, these interface elements made it easy to conclude that the target had been found."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "第一轮核对从 Qdrant 的只读接口开始：",
+            "en": "The first verification pass used Qdrant's read-only interfaces:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "curl -sS http://<WIN_A>:6333/collections\ncurl -sS http://<WIN_A>:6333/telemetry",
+            "en": "curl -sS http://<WIN_A>:6333/collections\ncurl -sS http://<WIN_A>:6333/telemetry"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "关键观察为集合为空，遥测没有显示与门户声称的数据活动相匹配的写入。查询记录主要对应测试期间发起的读取。单靠这个结果还不能排除权限、加载时机或错误实例，因此又继续检查门户程序和元数据服务。",
+            "en": "The collection list was empty, and telemetry did not show writes corresponding to the portal's claimed data activity. Query records mainly matched reads initiated during testing. This alone did not exclude permission issues, loading delays, or the wrong instance, so the portal program and metadata service were examined next."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "Qdrant:\n  collections = []\n  没有与门户活动对应的写入证据\n\nMongoDB:\n  admin\n  config\n  local\n\nPortal:\n  Qdrant / MongoDB 引用出现在介绍文案\n  未发现对应的实际后端调用证据",
+            "en": "Qdrant:\n  collections = []\n  No write evidence corresponding to portal activity\n\nMongoDB:\n  admin\n  config\n  local\n\nPortal:\n  Qdrant / MongoDB references appeared in descriptive copy\n  No evidence of corresponding backend calls was found"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "门户程序的可见模板与页面路由基本对应，关于数据库的字符串出现在介绍内容中。MongoDB 则只显示系统库，没有承载页面所宣称的研究资料。对本机常见向量及模型数据扩展名的查找，也没有得到支持真实数据管道存在的结果。",
+            "en": "The program's visible templates largely matched the page routes, and database-related strings appeared in descriptive content. MongoDB showed only system databases, without the research material advertised by the portal. Searches for common vector and model-data file extensions on the host also failed to establish the presence of a real data pipeline."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这些证据的组合比“页面写了 RAG”更可靠：空向量集合、缺少业务元数据、程序未见对应调用，互相指向同一个问题。结论收敛为“这套门户不是当前目标数据的有效入口”。这不等于证明任何时候都没有外部后端，更不能仅凭字符串扫描宣布彻底逆向完成。",
+            "en": "The combined evidence was stronger than a page claiming to use RAG: empty vector collections, missing business metadata, and no observed corresponding program calls all pointed toward the same issue. The conclusion narrowed to this portal being an ineffective entry point to the target data. It did not prove that no external backend had ever existed, and a string scan did not constitute complete reverse engineering."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "门户登录也走过失败分支。多个已知身份与候选口令组合返回相同错误，表单响应没有提供新的状态差异。继续扩大尝试不能补上后端数据缺失的问题，因此该方向被降级。后续精力转向主机内部和另一台 Linux 机器。",
+            "en": "Portal authentication was another unsuccessful branch. Several known identities and candidate passwords produced the same error, without useful differences in form responses. Expanding those attempts could not resolve the missing backend data, so the branch was deprioritized. Attention shifted to host internals and the Linux machine."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "为什么还要从内网再看一次",
+            "en": "Why the Internal Network View Also Needed Checking"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "外部只见 LINUX-A 的 SSH，不足以排除“服务对内网来源开放”。因此又从 WIN-A 的已有访问位置检查域控和 Linux 主机的关键端口，比较外部视角与内部视角是否存在差异。",
+            "en": "Seeing only SSH externally on LINUX-A did not rule out services restricted to internal sources. From the existing WIN-A access, key ports on the domain controller and Linux host were therefore checked again to compare the external and internal views."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "Test-NetConnection <LINUX_A> -Port 22\nTest-NetConnection <LINUX_A> -Port <CANDIDATE_PORT>\nTest-NetConnection <DC_A> -Port <CANDIDATE_PORT>",
+            "en": "Test-NetConnection <LINUX_A> -Port 22\nTest-NetConnection <LINUX_A> -Port <CANDIDATE_PORT>\nTest-NetConnection <DC_A> -Port <CANDIDATE_PORT>"
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "两种视角都没有发现可直接访问的真实 RAG 接口。这个结果排除了若干来源地址差异假设，但没有证明服务不存在。服务仍可能只监听 Linux 本机回环地址；只有取得主机内访问后，才能检查这个假设。",
+            "en": "Neither vantage point revealed a directly accessible, genuine RAG interface. This ruled out several source-address hypotheses but did not establish that the service was absent. It could still listen only on the Linux loopback interface, a hypothesis that required access inside the host to test."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "DNS 中另有指向旧网段的记录。区传送被拒，反向查询和部分目录查询也失败。旧网段未通过实际服务验证，因此不能把 DNS 返回的地址直接当成新增攻击目标。这些记录具有陈旧迹象，但 DNS 枚举没有完成，仍有未验证部分。",
+            "en": "DNS also contained records pointing to an older network range. Zone transfers were refused, and reverse lookups and some directory queries failed. The older addresses were not verified through actual services and could not be treated as additional targets merely because DNS returned them. The stale-record interpretation had supporting evidence, but DNS enumeration remained incomplete and its gaps needed to remain explicit."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "四、Windows 枚举经历了哪些否定结果",
+            "en": "4. Negative Results During Windows Enumeration"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "在 WIN-A 取得低权限访问后，winPEAS 两次未能提供有效报告。输出文件很小，内容是可执行文件不存在或无法运行。记录显示文件落地受到终端防护影响；这只能说明工具交付或运行受阻，不能用来证明主机没有提权面。",
+            "en": "After low-privilege access to WIN-A was established, winPEAS twice failed to produce a useful report. The output files were small and contained errors indicating that the executable was missing or could not run. The notes showed endpoint protection interfering with file delivery. This established a delivery or execution failure, not the absence of privilege-escalation opportunities."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "于是改为逐项检查原生系统状态。每个检查都对应明确假设，保留失败结果，是为了避免后面在相同条件下重复尝试。",
+            "en": "Native system state was then checked individually. Each check tested a specific hypothesis, and failed results were retained to avoid repeating the same attempts under unchanged conditions."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "whoami /priv\nsc.exe query state= all\nschtasks.exe /query /fo LIST /v\ncmdkey.exe /list\nGet-Volume",
+            "en": "whoami /priv\nsc.exe query state= all\nschtasks.exe /query /fo LIST /v\ncmdkey.exe /list\nGet-Volume"
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "zh": "检查方向",
+              "en": "Check"
+            },
+            {
+              "zh": "本次记录",
+              "en": "Recorded result"
+            },
+            {
+              "zh": "决策",
+              "en": "Decision"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "令牌权限",
+                "en": "Token privileges"
+              },
+              {
+                "zh": "初始身份未见关键模拟权限",
+                "en": "The initial identity lacked relevant impersonation privileges"
+              },
+              {
+                "zh": "不继续把依赖该权限的路线当作默认选项",
+                "en": "Routes requiring those privileges were not treated as defaults"
+              }
+            ],
+            [
+              {
+                "zh": "安装策略",
+                "en": "Installer policies"
+              },
+              {
+                "zh": "未发现已启用的高权限安装组合",
+                "en": "No enabled combination supporting elevated installation was found"
+              },
+              {
+                "zh": "暂不沿该配置路线推进",
+                "en": "This configuration route was not pursued"
+              }
+            ],
+            [
+              {
+                "zh": "服务权限与文件 ACL",
+                "en": "Service permissions and file ACLs"
+              },
+              {
+                "zh": "被检查服务未见低权限可写入口",
+                "en": "No low-privilege writable entry point was found among the services checked"
+              },
+              {
+                "zh": "未证明服务替换或路径劫持可行",
+                "en": "Service replacement or path hijacking was not established"
+              }
+            ],
+            [
+              {
+                "zh": "已缓存凭据",
+                "en": "Cached credentials"
+              },
+              {
+                "zh": "常用凭据管理位置未得到有效线索",
+                "en": "Common credential stores produced no useful lead"
+              },
+              {
+                "zh": "转向部署与初始化文件",
+                "en": "Attention shifted to deployment and initialization files"
+              }
+            ],
+            [
+              {
+                "zh": "计划任务、启动项",
+                "en": "Scheduled tasks and startup entries"
+              },
+              {
+                "zh": "未找到与目标进程对应的启动项",
+                "en": "No startup entry corresponding to the target process was found"
+              },
+              {
+                "zh": "仅记录启动来源尚未查明",
+                "en": "The launch source remained unresolved"
+              }
+            ],
+            [
+              {
+                "zh": "用户配置目录",
+                "en": "User profiles"
+              },
+              {
+                "zh": "部分管理用户目录无法读取",
+                "en": "Some administrative profiles were unreadable"
+              },
+              {
+                "zh": "标记为权限受限，等待权限变化后重查",
+                "en": "The permission limit was recorded for rechecking after privilege changes"
+              }
+            ],
+            [
+              {
+                "zh": "安装与初始化残留",
+                "en": "Installation and initialization remnants"
+              },
+              {
+                "zh": "出现历史口令和配置介质线索",
+                "en": "Historical passwords and configuration-media clues appeared"
+              },
+              {
+                "zh": "继续判断当前有效性及清理状态",
+                "en": "Current validity and cleanup state required further examination"
+              }
+            ]
           ]
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "这次客户测试的核心教训并非“AI 会犯错”这一句空话。更具体的结论是：缺少领域知识时，自动化流程会把认证、授权、可达性、执行和验证混成同一个“成功”；只有补齐知识并按证据逐级确认，才可能让攻击路径和最终结论同时可信。",
-            "en": "The central lesson from this client test is more precise than “AI makes mistakes.” With insufficient domain knowledge, an automated workflow can merge authentication, authorization, reachability, execution, and validation into one vague notion of success. Knowledge and staged evidence checks are both necessary for a credible access path and a credible final conclusion."
+            "zh": "初步分析曾从“常见启动位置没有命中”推导出进程必由宿主平台拉起。这一步超出了证据。没有找到计划任务、服务或启动项，只能说明这些位置未解释进程来源；缺少完整父进程链和宿主日志时，不能把启动者写死。",
+            "en": "The initial analysis inferred that the host platform must have launched a process because common startup locations had no matching entry. That exceeded the evidence. Missing scheduled-task, service, or startup entries only meant those locations did not explain the launch. Without the complete parent-process chain and host logs, the launcher could not be identified conclusively."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "漏洞库搜索同样没有直接带来入口。检索结果中有不同版本、不同操作系统、不同虚拟化前提或只造成拒绝服务的条目。产品名一致不是适用性证明。未使用条件不匹配的漏洞，也不把“未检索到现成漏洞”写成软件绝对安全。",
+            "en": "Vulnerability-database searches also failed to produce a direct entry point. Results concerned different versions, operating systems, virtualization prerequisites, or denial of service only. A matching product name did not establish applicability. Inapplicable vulnerabilities were not used, and the absence of a ready-made exploit was not treated as proof that the software was secure."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "终端和脚本本身制造了假阴性",
+            "en": "The Terminal and Scripts Created False Negatives"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "多次枚举失败来自执行通道。复杂 PowerShell 表达式穿过终端、cmd 和 PowerShell 后，引号、变量及管道含义发生变化，最终表现成空输出或语法错误。另有服务列表被终端缓冲区截断，视觉上像是已经列举完成。",
+            "en": "Several enumeration failures originated in the execution channel itself. Complex PowerShell expressions crossed the terminal, cmd, and PowerShell, changing the meaning of quotes, variables, and pipes. The result looked like empty output or syntax errors. A service listing was also truncated by the terminal buffer, making an incomplete listing appear complete."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "修正办法是把复杂逻辑写进脚本，在目标上明确调用，并把标准输出和错误一起保存。下面是这一处理方式的示意，不是原始输出全文：",
+            "en": "The correction was to put complex logic in a script, invoke it explicitly on the target, and save standard output together with errors. The following illustrates that handling pattern rather than reproducing the complete original output:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "powershell.exe -NoProfile -File .\\inventory.ps1 *> .\\inventory.log\nGet-Item .\\inventory.log | Select-Object Length, LastWriteTime\nGet-Content .\\inventory.log",
+            "en": "powershell.exe -NoProfile -File .\\inventory.ps1 *> .\\inventory.log\nGet-Item .\\inventory.log | Select-Object Length, LastWriteTime\nGet-Content .\\inventory.log"
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "对目录遍历也需要保留失败路径。只在异常后继续循环而不记录，会把“没有权限”“路径不可读”和“没有目标文件”混成同一个零结果。",
+            "en": "Directory traversal also needed to preserve failed paths. Continuing after an exception without recording it merged permission denial, unreadable paths, and absent files into the same zero-result outcome."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "try {\n    Get-ChildItem -LiteralPath $CandidatePath -Force -ErrorAction Stop\n}\ncatch {\n    Write-Warning (\"Enumeration failed: \" + $CandidatePath)\n    Write-Warning $_.Exception.Message\n}",
+            "en": "try {\n    Get-ChildItem -LiteralPath $CandidatePath -Force -ErrorAction Stop\n}\ncatch {\n    Write-Warning (\"Enumeration failed: \" + $CandidatePath)\n    Write-Warning $_.Exception.Message\n}"
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这类错误直接影响后续判断。若输出没有完整采集，任何“排除该路线”的结论都应暂停。",
+            "en": "These errors directly affected later judgments. If output collection was incomplete, any conclusion eliminating a route had to be suspended."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "原生枚举具体查了什么",
+            "en": "What Native Enumeration Actually Covered"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "服务检查不仅列名字，还核对运行身份、二进制路径、服务 DACL 与目录 ACL。MongoDB 以 NetworkService 运行，其路径带引号；已检查的程序目录对普通用户只开放读和执行，没有发现可直接替换程序的写权限。初始令牌仅见有限的普通权限，没有观察到 SeImpersonatePrivilege，因此依赖该前提的路线没有继续推进。",
+            "en": "Service inspection covered execution identities, binary paths, service DACLs, and directory ACLs as well as names. MongoDB ran as NetworkService with a quoted binary path. Checked application directories granted ordinary users read and execute access, with no write access allowing direct executable replacement. The initial token contained only limited ordinary privileges, and SeImpersonatePrivilege was not observed, so routes requiring it were not pursued."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "sc.exe qc MongoDB\nsc.exe sdshow MongoDB\nsc.exe sdshow sshd\nicacls \"C:\\<APPLICATION_DIRECTORY>\"\nreg.exe query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated\nreg.exe query HKCU\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated",
+            "en": "sc.exe qc MongoDB\nsc.exe sdshow MongoDB\nsc.exe sdshow sshd\nicacls \"C:\\<APPLICATION_DIRECTORY>\"\nreg.exe query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated\nreg.exe query HKCU\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated"
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "启动来源检查覆盖计划任务、Run/RunOnce、启动目录、Winlogon、Active Setup 以及 WMI 永久事件订阅。任务清单没有命中目标进程名称，其他检查也未解释启动来源。这里仍然只能保留“来源未查明”，不能因为检查项目多就把猜测升级成事实。",
+            "en": "Launch-source checks covered scheduled tasks, Run/RunOnce, startup directories, Winlogon, Active Setup, and permanent WMI event subscriptions. The task list did not match the target process name, and other checks also failed to explain its origin. The launch source remained unresolved; a longer checklist did not turn a hypothesis into fact."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "凭据侧检查了凭据管理器、用户 Credentials/Protect 目录、浏览器配置及 Windows 诊断日志。部分位置为空，部分位置未得到可用内容。VSS 查询返回权限不足，这一项没有完成。安装残留中，Panther 下的应答文件提供了旧口令线索，另一份 Sysprep 应答文件主要是设备配置，没有提供新凭据。每项的失败原因不同，下一步才会收敛到初始化流程，而不是继续无差别地搜密码。",
+            "en": "Credential checks covered Credential Manager, user Credentials/Protect directories, browser profiles, and Windows diagnostic logs. Some locations were empty, while others yielded nothing usable. The VSS query returned insufficient privileges and remained incomplete. Among installation remnants, an answer file under Panther provided the old-password lead, while another Sysprep answer file mainly held device configuration and supplied no new credentials. These distinct failure reasons narrowed the next step to initialization rather than indiscriminate password searching."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "漏洞检索也按产品逐项展开：MongoDB 的旧版本条目、QEMU Guest Agent 的拒绝服务条目，以及依赖特定虚拟化接口的 Windows 提权条目，都没有与当时主机的版本和运行前提对齐。这一轮没有得到可直接使用的已知漏洞，因此配置残留和身份关系成为优先方向。",
+            "en": "Vulnerability searches also proceeded product by product. Older MongoDB entries, QEMU Guest Agent denial-of-service entries, and Windows privilege-escalation entries requiring particular virtualization interfaces did not match the host's version and runtime prerequisites. No directly applicable known vulnerability emerged, so configuration remnants and identity relationships took priority."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "五、从历史口令到仍可读取的配置介质",
+            "en": "5. From a Historical Password to Readable Configuration Media"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "安装应答文件先暴露了一条旧口令。第一反应是把它当作当前管理员凭据，但针对不同身份范围的验证均失败。后续凭据记录又显示它属于历史状态，因此不能把明文出现本身等同于当前可用。",
+            "en": "An installation answer file first exposed an old password. It was initially treated as a current administrative credential, but validation against different identity scopes failed. Later credential records also placed it in a historical state. Finding plaintext alone therefore did not establish current usability."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这条失败线索仍然有价值：文件内容指向自动初始化和口令轮换过程，于是检查从“还有哪些密码”转向“初始化系统如何取得并清理新密码”。清理脚本声称卸载配置介质，系统卷信息却仍能看到对应介质。",
+            "en": "The failed lead still mattered. Its contents pointed to automated initialization and password rotation, shifting the question from which other passwords might exist to how the initialization system obtained and cleaned up the new password. A cleanup script claimed to unmount configuration media, yet the corresponding media remained visible in volume information."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "初始化组件是 cloudbase-init，配置介质带有 configdrive 的典型标识。检查把安装应答文件、初始化脚本与卷状态连起来：应答文件保存的是旧值，初始化流程负责设置另一组值，而配置介质可能仍保留输入元数据。旧口令验证失败没有让这条线索终止，反而说明需要追踪轮换后的来源。",
+            "en": "The initialization component was cloudbase-init, and the configuration media carried typical configdrive identifiers. Inspection connected the installation answer file, initialization script, and volume state: the answer file held an old value, the initialization process set another value, and the configuration media might still retain its input metadata. Failure of the old password did not end the lead; it indicated a need to trace the source after rotation."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "Get-Volume |\n    Select-Object DriveLetter, FileSystemLabel, DriveType, HealthStatus, Size\n\nGet-CimInstance Win32_Volume |\n    Select-Object DeviceID, DriveLetter, Label",
+            "en": "Get-Volume |\n    Select-Object DriveLetter, FileSystemLabel, DriveType, HealthStatus, Size\n\nGet-CimInstance Win32_Volume |\n    Select-Object DeviceID, DriveLetter, Label"
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "关键不是发现一个盘符，而是确认“卸载盘符”和“数据不可再读”并非同一件事。该实例中，普通 dir 调用没有正确处理卷 GUID 路径，改用 PowerShell 的 Get-ChildItem -LiteralPath 后才能列出初始化内容。问题出在路径传递和解释方式，不能把第一次列举失败当成卷已不可读。路径与元数据字段摘录如下：",
+            "en": "The key finding was not a drive letter. It was the distinction between removing a drive letter and making data unreadable. In this instance, an ordinary dir invocation failed to handle the volume GUID path correctly. PowerShell Get-ChildItem -LiteralPath then listed the initialization content. The problem concerned path passing and interpretation; the first failed listing did not establish that the volume was unreadable. Sanitized path and metadata excerpts follow:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "\\\\?\\Volume{REDACTED-VOLUME-ID}\\openstack\\latest\\meta_data.json\n\n{\n  \"machine_name\": \"<WIN_A>\",\n  \"admin_pass\": \"<REDACTED_BOOTSTRAP_SECRET>\"\n}",
+            "en": "\\\\?\\Volume{REDACTED-VOLUME-ID}\\openstack\\latest\\meta_data.json\n\n{\n  \"machine_name\": \"<WIN_A>\",\n  \"admin_pass\": \"<REDACTED_BOOTSTRAP_SECRET>\"\n}"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这里可以确认初始化秘密残留并可读。不能进一步声称执行某个卸载选项就等于安全擦除：清理必须覆盖介质本身、后端挂载和秘密轮换，并从实际可读性验证结果。",
+            "en": "This established that an initialization secret remained readable. It did not establish that any particular unmount option performed secure erasure. Cleanup needed to cover the media, backend attachment, and secret rotation, with actual readability used to verify the result."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "清理逻辑中的 mountvol /D 主要移除挂载点。卷仍能经 GUID 路径读取，是本次关键证据。把它简单改成另一条卸载命令，也不能自动证明元数据已经销毁；这一区别关系到修复是否真正阻断了同一路径。",
+            "en": "The cleanup logic used mountvol /D primarily to remove a mount point. Continued readability through the volume GUID path was the key evidence in this instance. Simply replacing that command with another unmount operation would not establish that the metadata had been destroyed. This distinction determined whether remediation actually blocked the same access path."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "密码正确，但账户状态阻止登录",
+            "en": "The Password Was Correct, but Account State Blocked Login"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这组残留秘密并没有直接打开管理共享。针对本地管理账户验证时，出现了明确状态码：",
+            "en": "The residual secret did not immediately unlock administrative shares. Validation against the local administrative account returned a specific status:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "STATUS_PASSWORD_MUST_CHANGE\n0xc0000224",
+            "en": "STATUS_PASSWORD_MUST_CHANGE\n0xc0000224"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这一状态不同于密码错误。多种远程登录和改密尝试受到限制，改变传入格式或改用同一密码的哈希表示也没有解决账户状态。继续把问题当作密码编码错误，方向就错了。",
+            "en": "This differed from an incorrect password. Several remote-login and password-change attempts were restricted. Changing the supplied format or using a hash representation of the same password did not resolve the account state. Continuing to treat the problem as password encoding would therefore have pursued the wrong cause."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "实际成功路径是调整 RDP 的认证协商：此前的 NLA 登录返回 ERRCONNECT_PASSWORD_MUST_CHANGE，没有进入可完成改密的交互界面，改用该实例支持的 TLS 连接方式后，进入交互式强制改密流程。完成密码修改后，再验证新的本地管理身份。这里记录的是本次实例中走通的方法；此前几个协议尝试失败，不能推广为“所有协议都无解”或“任何环境都只有这一条路”。",
+            "en": "The successful route adjusted RDP authentication negotiation. The earlier NLA login returned ERRCONNECT_PASSWORD_MUST_CHANGE without reaching an interface where the change could be completed. Using the TLS connection mode supported by this instance reached the interactive forced-password-change flow. After the change, the new local administrative identity was verified. This records the method that worked in this instance; earlier failures through several protocols did not establish that every protocol was impossible or that every environment had only one solution."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "完成后核对的是目标侧可观察状态：新凭据可以认证，管理共享可访问，令牌和账户关系符合预期。至此才能把“残留秘密”提升为“本地管理权限已确认”。",
+            "en": "The checks concerned observable target state: the new credentials authenticated, administrative shares became accessible, and the token and account relationships matched expectations. Only then could a residual secret be described as confirmed local administrative access."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "注意此处身份是 LOCAL_ADMIN_A。下一阶段提取的内置管理员凭据属于另一个身份，不能把两者混写，否则会出现“同一口令既改了又没改”的逻辑冲突。",
+            "en": "This identity was LOCAL_ADMIN_A. The built-in administrator credentials obtained in the next phase belonged to a different identity. Combining the two would create an apparent contradiction in which the same password had both changed and remained unchanged."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "六、本地权限如何进一步关联到域权限",
+            "en": "6. How Local Privileges Connected to Domain Privileges"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "取得本地管理权限后，首先尝试常规远程凭据审计。工具输出停在读取本地凭据的位置，退出状态没有报出足够明确的错误，却没有生成预期结果文件。第二次仍无有效产物。该结果应记作“未成功取得凭据材料”，而不是因为退出码为零就记成功。",
+            "en": "After local administrative access was established, standard remote credential auditing was attempted first. Tool output stopped at local credential reading, and the exit status did not clearly report an error, but the expected result files were absent. A second attempt also produced no useful artifacts. The correct result was that credential material had not been obtained, regardless of a zero exit code."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "后续在获授权的本机执行通道中继续检查。不同通道的令牌、完整性级别和可访问注册表范围不同：一种通道对受保护位置返回拒绝访问，另一种临时结果读取又出现文件不存在。UAC、终端防护和时序都曾被列为可能原因，但并非每个解释都被独立验证，不能把这些猜测当成已查明的原因。",
+            "en": "Investigation continued through an authorized local execution channel. Different channels had different tokens, integrity levels, and registry access: one returned access denied for a protected location, while another attempt to read temporary results returned file not found. UAC, endpoint protection, and timing were considered possible explanations, but not every explanation was independently verified, so observations had to remain distinct from possible causes."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "具体使用了 mimikatz 检查不同凭据来源。文件上传先遇到两个接口用法问题：SMBConnection.putFile 需要可调用的读取回调，直接传字节对象报错；另一种客户端的 put 参数被当成一个路径处理，目标命名写法不符合该版本语法。调整后核对远端文件存在且长度一致，才进入执行阶段。上传成功、程序执行和取得凭据是三个独立检查点。",
+            "en": "mimikatz was used to examine different credential sources. File upload first encountered two interface errors: SMBConnection.putFile required a callable read callback, and passing a bytes object failed; another client's put arguments were interpreted as one path, so the destination-naming syntax did not match that version. Execution began only after correcting the calls and verifying the remote file's existence and matching length. Successful upload, program execution, and credential recovery were three separate checkpoints."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "WMI 通道读 SECURITY 时返回 0x00000005；计划任务通道第一次读取临时输出又遇到 STATUS_OBJECT_NAME_NOT_FOUND。改用能完整回收标准输出的调用方式后，才获得可分析的结果。记录同时涉及令牌、防护状态和输出回收方式变化，无法仅凭最终成功把前两次失败归于唯一因素。",
+            "en": "The WMI channel returned 0x00000005 when reading SECURITY; the scheduled-task channel initially returned STATUS_OBJECT_NAME_NOT_FOUND when reading temporary output. An invocation that collected standard output completely finally produced analyzable results. Token state, protection state, and output collection all changed during the recorded attempts, so eventual success could not identify a single cause for the earlier failures."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "privilege::debug\n  返回权限启用成功\n\nsekurlsa::logonpasswords\n  日志会话读取失败\n\nlsadump::sam\n  返回本地账户材料\n\nlsadump::secrets\n  返回部分 LSA secrets",
+            "en": "privilege::debug\n  Reported successful privilege enablement\n\nsekurlsa::logonpasswords\n  Logon-session reading failed\n\nlsadump::sam\n  Returned local account material\n\nlsadump::secrets\n  Returned some LSA secrets"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "最终取得了本机账户凭据材料和部分本地秘密。LSASS 内存读取没有成功，不妨碍另外的本地账户存储读取已经得到结果；“凭据提取”不是一个只有成功或失败两种状态的整体动作。",
+            "en": "Local account credential material and some local secrets were eventually obtained. LSASS memory extraction failed, but separate reads of local account storage had succeeded. Credential extraction was not a single action with only a binary success or failure outcome."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "LOCAL_ADMIN_A:\n  当前凭据状态与前一步改密一致\n\nBUILTIN_LOCAL_ADMIN:\n  获得可核对的本地账户凭据材料\n\nHistorical secret:\n  与先前安装文件中的旧口令线索对应\n\nLSASS memory extraction:\n  未获得成功结果",
+            "en": "LOCAL_ADMIN_A:\n  Current credential state matched the preceding password change\n\nBUILTIN_LOCAL_ADMIN:\n  Verifiable local account credential material was obtained\n\nHistorical secret:\n  Corresponded to the old password in the installation file\n\nLSASS memory extraction:\n  No successful result was obtained"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "随后按身份逐项验证，避免把任意一个本地哈希都当成域凭据。真正的转折是：本机内置管理员的材料可以作为域管理员身份通过认证，其他候选组合并没有同样成功。",
+            "en": "Validation then proceeded identity by identity, avoiding the assumption that any local hash was a domain credential. The decisive finding was that material from the local built-in administrator authenticated as the domain administrator. Other candidate combinations did not succeed in the same way."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这说明至少存在有效的跨身份凭据复用。仅凭相同哈希本身不能推断两个账户拥有相同授权；本次域端验证与后续权限确认，才证明影响已经跨出本机。",
+            "en": "This established at least one effective instance of credential reuse across identities. Identical hashes alone did not imply identical authorization. Authentication at the domain endpoint and subsequent privilege verification established that the impact extended beyond the local host."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "授权范围内的目录凭据审计随后获得了域账户材料，并与前述身份关系交叉核对。该阶段的命令形式如下，执行目标、账户和哈希均已替换：",
+            "en": "Directory credential auditing within the authorized scope subsequently obtained domain-account material and cross-checked the identity relationships. The sanitized command preserves the tool and parameter relationships; the target, account, and hash are not disclosed:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "impacket-secretsdump \\\n  -just-dc \\\n  -hashes :<REDACTED_NT_HASH> \\\n  '<DOMAIN>/<DOMAIN_ADMIN>@<DC_A>' \\\n  -outputfile <AUTHORIZED_OUTPUT_PREFIX>",
+            "en": "impacket-secretsdump \\\n  -just-dc \\\n  -hashes :<REDACTED_NT_HASH> \\\n  '<DOMAIN>/<DOMAIN_ADMIN>@<DC_A>' \\\n  -outputfile <AUTHORIZED_OUTPUT_PREFIX>"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "结果文件按用途分别保存，检查是否存在、是否包含预期类型的记录，以及相同身份在不同来源的材料能否对上。公开文章不包含这些文件或任何真实凭据。",
+            "en": "Result files were stored by purpose and checked for existence, expected record types, and consistency of material for the same identity across sources. These files and all actual credentials are excluded from the public article."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "域侧导出产生了 NTLM、Kerberos 密钥及其他账户材料对应的结果文件。本机机器账户材料与域侧相应记录也做了交叉核对。最初一次调用还受到 Network unreachable 影响，恢复网络后重试才完成；网络失败不能用来判断凭据无效。",
+            "en": "The domain export produced files for NTLM material, Kerberos keys, and other account records. Local machine-account material was also cross-checked against the corresponding domain record. An initial invocation encountered Network unreachable and completed only after network recovery and retry. Network failure could not establish invalid credentials."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "本地输出中的历史秘密与安装应答文件旧值相符，LOCAL_ADMIN_A 的当前与历史材料则对应本次改密前后状态。这些关系解释了为何同一机器里会出现多个不同阶段的秘密。模板或部署流程可能是复用来源，但没有构建流水线证据，不能直接把具体设置过程写成已查明事实。",
+            "en": "Historical secrets in the local output matched the old value in the installation answer file, while LOCAL_ADMIN_A's current and historical material corresponded to the states after and before the password change. These relationships explained why secrets from different stages appeared on the same machine. A template or deployment process might have caused reuse, but without build-pipeline evidence the specific provisioning process remained unconfirmed."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "之后曾把已有词表用于部分域口令候选核对，没有得到命中。这个结果只说明受测候选没有匹配，不能说明口令无法恢复。更重要的是，域权限并没有自动带来 LINUX-A 的 SSH 登录；Windows 域身份与 Linux 的账户和认证配置需要单独验证。",
+            "en": "The available wordlist was later used to check some domain-password candidates without a match. That showed only that the tested candidates did not match, not that the password was unrecoverable. More importantly, domain privileges did not automatically provide SSH access to LINUX-A. Windows domain identities and Linux account and authentication configuration required separate validation."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "七、Kerberos、时钟和无效服务线索",
+            "en": "7. Kerberos, Clocks, and Unproductive Service Leads"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "域侧还走过 Kerberos、服务主体、无需预认证账户以及托管秘密等方向。过程中出现时钟偏差错误，校时又与本机自动授时和 VPN 稳定性相互影响。",
+            "en": "Other domain-side branches included Kerberos, service principals, accounts not requiring preauthentication, and managed secrets. Clock-skew errors appeared, while clock correction interacted with local time synchronization and VPN stability."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "KRB_AP_ERR_SKEW\nKDC_ERR_ETYPE_NOSUPP\nNetwork unreachable",
+            "en": "KRB_AP_ERR_SKEW\nKDC_ERR_ETYPE_NOSUPP\nNetwork unreachable"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "三个错误属于不同问题：时钟容差、加密类型协商以及网络路径。把它们都叫“Kerberos 不通”，会导致在网络已经中断时继续换认证参数。校时后应先确认隧道和目标可达，再确认绝对时间，最后处理认证协商。",
+            "en": "These errors concerned different problems: clock tolerance, encryption-type negotiation, and network routing. Treating them all as Kerberos failure encouraged authentication-parameter changes even after the network path was down. After adjusting time, the tunnel and target reachability needed checking first, then absolute time, and finally authentication negotiation."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "date -u\nsystemctl is-active systemd-timesyncd chrony ntp\nip route",
+            "en": "date -u\nsystemctl is-active systemd-timesyncd chrony ntp\nip route"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "初步分析曾把两个不同显示时区的时间直接相减，夸大了表面时差。正确比较应统一时区或比较时间戳。VPN 在校时后发生中断是观察到的顺序，具体握手为何失败则需要 VPN 日志支持，不能仅凭先后关系锁定原因。",
+            "en": "The initial notes directly subtracted times displayed in different time zones, exaggerating the apparent offset. A valid comparison required a common time zone or timestamps. VPN disruption after clock correction was an observed sequence; explaining the handshake failure required VPN logs rather than timing alone."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "服务主体枚举还出现一个数据库服务标记，但目标没有对应监听、没有对应服务，也没有运行实例。该标记未能支持新的服务入口。AS-REP 查询未得到符合条件的账户，LAPS 与 gMSA 查询也未取得相应对象。这些都是本次检查的否定结果，不代表整个域不存在其他问题。",
+            "en": "Service-principal enumeration also revealed a database-service marker, but the target had no corresponding listener, service, or running instance. The marker did not establish a new service entry point. The AS-REP query returned no qualifying account, and LAPS and gMSA queries obtained no corresponding objects. These were negative results from the checks performed, not proof that the domain had no other weaknesses."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "对 LINUX-A 尝试域认证时，先遇到了客户端能力和选项问题：一条客户端路径无法使用所需 GSSAPI 功能，另一条路径拒绝相关选项。这些本地失败都不能说明服务器是否接受域认证。换到能够发起该方式的客户端后，才得到服务器实际仅接受公钥和密码的响应：",
+            "en": "Domain-authentication attempts against LINUX-A first encountered client capability and option problems: one client path could not use the required GSSAPI functionality, while another rejected the relevant options. Neither local failure established whether the server accepted domain authentication. After switching to a client capable of initiating that method, the server response advertised only public-key and password authentication:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "allowed authentication methods:\n  publickey\n  password",
+            "en": "allowed authentication methods:\n  publickey\n  password"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "因此，当前 SSH 入口不支持所尝试的 GSSAPI 路径。不能从这个接口的响应进一步推导“Linux 绝不可能加入域”；只能停止在该端点继续投入不匹配的方法。",
+            "en": "The current SSH endpoint therefore did not support the attempted GSSAPI route. Its response did not establish that Linux could not be joined to a domain. It only justified ending further attempts with that mismatched method at this endpoint."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "八、Linux 突破的关键是密钥与身份同时匹配",
+            "en": "8. Linux Access Required Both the Key and the Correct Identity"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "LINUX-A 是最难推进的一段。多组已有口令、常见账户、域账户格式和部分词表尝试均被拒绝。持续扩大密码尝试没有增加有效信息，但公钥认证本来就是服务器已声明支持的方式。",
+            "en": "LINUX-A was the hardest stage to advance. Several existing passwords, common accounts, domain-account formats, and limited wordlist attempts were rejected. Expanding password attempts produced no useful new information, while public-key authentication had already been advertised by the server."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "检查先落在 Windows OpenSSH 的服务配置和主机密钥位置。这里发现的是 sshd 的配置与主机身份密钥。主机密钥用于服务器证明自身身份，并不自动等于能够登录另一台机器的用户私钥。将两者混淆，会在“找到很多 key 文件”的表象下继续走错方向。",
+            "en": "The first inspection focused on Windows OpenSSH configuration and host-key locations. These contained sshd configuration and server identity keys. Host keys let a server prove its identity; they do not automatically serve as user private keys for logging into another machine. Confusing these roles encouraged further investigation in the wrong direction simply because many key files had been found."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "C:\\ProgramData\\ssh 中可见 RSA、ECDSA、Ed25519 主机密钥及 sshd_config，未在该位置找到预期的用户授权文件。配置同时区分普通用户和管理员的授权文件路径，并限制允许登录的组：",
+            "en": "C:\\ProgramData\\ssh contained RSA, ECDSA, and Ed25519 host keys and sshd_config, but the expected user authorization file was not found there. The configuration distinguished ordinary-user and administrator authorization-file paths and restricted the groups allowed to log in:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "AuthorizedKeysFile .ssh/authorized_keys\nAllowGroups administrators \"openssh users\"\nMatch Group administrators\n    AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys",
+            "en": "AuthorizedKeysFile .ssh/authorized_keys\nAllowGroups administrators \"openssh users\"\nMatch Group administrators\n    AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "本机 OpenSSH Users 组为空，初始身份也不在管理员组中。这与该身份无法登录 WIN-A 的 SSH 相符，却不能替代 LINUX-A 的配置检查。两台主机的 sshd 是不同认证边界，不能把 Windows 上读到的规则套到 Linux。",
+            "en": "The local OpenSSH Users group was empty, and the initial identity was not an administrator. This was consistent with that identity's inability to access WIN-A over SSH, but did not replace inspection of LINUX-A. The two sshd instances had separate authentication boundaries; Windows rules could not be applied to Linux."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "随后检查用户资料目录。低权限阶段某些管理用户目录不可读；取得管理权限后的第一次遍历，又因为脚本吞掉异常得到零命中。两次错误叠加，使同一处文件连续被遗漏。最终重新直接核对受限目录，才找到用户 SSH 私钥与公钥。",
+            "en": "User profiles were examined next. Some administrative profiles had been unreadable under the initial low-privilege identity. The first traversal after obtaining administrative privileges then returned zero matches because the script swallowed exceptions. These two errors caused the same files to be missed twice. A direct recheck of the restricted profile finally located a user SSH private key and its public key."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "Get-ChildItem -LiteralPath \"C:\\Users\\<PROFILE>\\.ssh\" -Force |\n    Select-Object Name, Length, LastWriteTime",
+            "en": "Get-ChildItem -LiteralPath \"C:\\Users\\<PROFILE>\\.ssh\" -Force |\n    Select-Object Name, Length, LastWriteTime"
+          },
+          "language": "powershell"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "发现私钥后，仍不能宣布“Linux 已拿下”。需要确认文件格式、是否需要口令短语、对应公钥，以及远端哪一个账户接受该公钥。公钥注释只能提供线索，不能替代远端授权验证。",
+            "en": "Finding a private key did not establish Linux access. Its format, passphrase requirement, corresponding public key, and the remote account accepting that public key still needed checking. A public-key comment was a lead, not a substitute for remote authorization verification."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "ssh-keygen -y -f <USER_PRIVATE_KEY> > <DERIVED_PUBLIC_KEY>\nssh-keygen -lf <DERIVED_PUBLIC_KEY>",
+            "en": "ssh-keygen -y -f <USER_PRIVATE_KEY> > <DERIVED_PUBLIC_KEY>\nssh-keygen -lf <DERIVED_PUBLIC_KEY>"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "本次私钥没有口令短语，最初搭配几个常见 Linux 用户名依然被拒绝。之后把前序 Windows 测试中出现过的服务身份放回候选，公钥认证才成功。此前错误地把“Windows 域用户名”和“Linux 用户名”当成互不相交的集合，导致最有线索依据的身份排在后面。",
+            "en": "The private key had no passphrase, but pairing it with several common Linux usernames still failed. Public-key authentication succeeded only after a service identity from the earlier Windows testing was reconsidered. Treating Windows domain usernames and Linux usernames as disjoint sets had pushed the most evidence-backed identity down the candidate list."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "ssh \\\n  -i <USER_PRIVATE_KEY> \\\n  -o IdentitiesOnly=yes \\\n  -o PreferredAuthentications=publickey \\\n  <SERVICE_USER>@<LINUX_A>",
+            "en": "ssh \\\n  -i <USER_PRIVATE_KEY> \\\n  -o IdentitiesOnly=yes \\\n  -o PreferredAuthentications=publickey \\\n  <SERVICE_USER>@<LINUX_A>"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "拒绝响应不能单独区分密钥不被信任、账户不存在、账户被限制等原因。成功时则核对实际用户名与主机身份，再进行本机服务观察。",
+            "en": "A rejection alone could not distinguish an untrusted key, a nonexistent account, or an account restriction. On success, the actual username and host identity were verified before inspecting local services."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "whoami\nhostname\nss -lntp",
+            "en": "whoami\nhostname\nss -lntp"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "至此形成的跨主机关系是：WIN-A 的用户私钥，对应 LINUX-A 某账户信任的公钥。此前取得域权限有助于扩大调查，但真正跨到 Linux 的直接认证依据是这组密钥与账户的组合。",
+            "en": "The established cross-host relationship was a user private key on WIN-A matching a public key trusted by an account on LINUX-A. Domain privileges had helped broaden the investigation, but the direct authentication basis for Linux access was the key-and-account combination."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "九、回环地址上才出现真实向量库",
+            "en": "9. The Real Vector Database Appeared on Loopback"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "登录后观察到 SSH 以外还有多个仅回环监听的服务。它们分别涉及向量接口及本地模型相关服务，解释了外部扫描为何主要只见 SSH。端口号只能产生候选指纹，必须继续看协议响应。",
+            "en": "After login, several services besides SSH were found listening only on loopback. They included a vector interface and local model-related services, explaining why external scans had primarily found SSH. Port numbers supplied candidate fingerprints, which still required protocol-level verification."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "curl -sS http://127.0.0.1:<VECTOR_PORT>/\ncurl -sS http://127.0.0.1:<VECTOR_PORT>/v1/schema",
+            "en": "curl -sS http://127.0.0.1:<VECTOR_PORT>/\ncurl -sS http://127.0.0.1:<VECTOR_PORT>/v1/schema"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "响应路径、服务元信息与 Schema 共同指向 Weaviate。几个按其他产品习惯猜测的路径返回 404，并不代表服务故障；改按实际 API 路由请求后，Schema 正常返回。",
+            "en": "Response paths, service metadata, and the schema together identified Weaviate. Several paths guessed from other products returned 404, which did not establish a service fault. Requests using the actual API routes returned the schema successfully."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "在当前访问范围内，读取 Schema 和目标对象没有要求 API 凭据。这证明相应读取缺少独立认证。初步分析据此进一步断言“所有数据均可任意读写”，范围过大。本次没有保留写入验证证据，能够确认的是目标对象可读，任意写权限尚未得到证明。",
+            "en": "Within the current access scope, reading the schema and target objects required no API credentials. This established a lack of independent authentication for those reads. The initial analysis extended that result to unrestricted reading and writing of all data, which exceeded the evidence. Without retained write-validation evidence, a read result could not establish arbitrary write access."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "zh": "对象类别",
+              "en": "Object class"
+            },
+            {
+              "zh": "对象数",
+              "en": "Object count"
+            },
+            {
+              "zh": "可见属性",
+              "en": "Visible properties"
+            },
+            {
+              "zh": "对本次目标的意义",
+              "en": "Relevance to the objective"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "ResearchRecords",
+                "en": "ResearchRecords"
+              },
+              {
+                "zh": "3",
+                "en": "3"
+              },
+              {
+                "zh": "标题、正文及来源等",
+                "en": "Title, body, source, and related properties"
+              },
+              {
+                "zh": "背景资料",
+                "en": "Background material"
+              }
+            ],
+            [
+              {
+                "zh": "InternalRecords",
+                "en": "InternalRecords"
+              },
+              {
+                "zh": "2",
+                "en": "2"
+              },
+              {
+                "zh": "标题、正文、类别及来源等",
+                "en": "Title, body, category, source, and related properties"
+              },
+              {
+                "zh": "系统与管道背景",
+                "en": "System and pipeline context"
+              }
+            ],
+            [
+              {
+                "zh": "SensitivePolicy",
+                "en": "SensitivePolicy"
+              },
+              {
+                "zh": "1",
+                "en": "1"
+              },
+              {
+                "zh": "标题、来源和摘要标识，无正文属性",
+                "en": "Title, source, and digest identifier, without a body property"
+              },
+              {
+                "zh": "敏感目标向量",
+                "en": "Sensitive target vector"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "表中的类名已替换。目标对象缺少明文正文，但仍保留向量。Schema 中的 vectorizer 设置还表明向量由外部生成后写入，而非当前库内自动编码。没有看到量化启用，也不能直接宣称“反演一定成功”，只能把它视为影响恢复方法选择的一个条件。",
+            "en": "Class names have been replaced. The target object lacked a plaintext body but retained its vector. The schema's vectorizer setting also indicated that vectors had been generated externally and inserted, rather than encoded automatically inside the current database. No enabled quantization was observed, but this did not guarantee successful inversion; it was one condition affecting method selection."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十、向量导出必须按实际 Schema 查询",
+            "en": "10. Vector Export Had to Follow the Actual Schema"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "第一次导出把同一组字段套在三个类别上，其中一个类别有 category 字段，另外两个没有。GraphQL 校验直接拒绝不合法查询。这个错误来自不了解类型边界，和网络、认证或向量数据不存在都无关。",
+            "en": "The first export applied the same fields to all three classes. One class had a category field and the other two did not, so GraphQL validation rejected the invalid query. This was a type-boundary error, unrelated to networking, authentication, or whether vector data existed."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "Cannot query field \"category\" on type \"<CLASS_WITHOUT_CATEGORY>\"",
+            "en": "Cannot query field \"category\" on type \"<CLASS_WITHOUT_CATEGORY>\""
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "修正是先按 Schema 确认字段，再按类别分别请求。下面是替换类名后的目标对象查询结构：",
+            "en": "The correction was to verify fields against the schema and query each class separately. The following target-object query uses a replacement class name:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "{\n  Get {\n    SensitivePolicy {\n      title\n      _additional {\n        id\n        vector\n      }\n    }\n  }\n}",
+            "en": "{\n  Get {\n    SensitivePolicy {\n      title\n      _additional {\n        id\n        vector\n      }\n    }\n  }\n}"
+          },
+          "language": "graphql"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "响应中的业务字段、对象标识和向量分别保存。导出后先检查响应是否含 errors，再核对返回对象数与向量长度，避免把错误 JSON 当成数据文件继续送入反演程序。",
+            "en": "Business fields, object identifiers, and vectors were saved separately. After export, responses were first checked for errors, followed by object counts and vector lengths. This prevented an error JSON response from being passed to the inversion program as a data file."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "import json\nfrom pathlib import Path\n\npayload = json.loads(Path(\"target-response.json\").read_text())\nif payload.get(\"errors\"):\n    raise RuntimeError(\"GraphQL export failed\")\n\nrecords = payload[\"data\"][\"Get\"][\"SensitivePolicy\"]\nassert len(records) == 1\nvector = records[0][\"_additional\"][\"vector\"]\nassert len(vector) == 384\nassert all(isinstance(value, (int, float)) for value in vector)",
+            "en": "import json\nfrom pathlib import Path\n\npayload = json.loads(Path(\"target-response.json\").read_text())\nif payload.get(\"errors\"):\n    raise RuntimeError(\"GraphQL export failed\")\n\nrecords = payload[\"data\"][\"Get\"][\"SensitivePolicy\"]\nassert len(records) == 1\nvector = records[0][\"_additional\"][\"vector\"]\nassert len(vector) == 384\nassert all(isinstance(value, (int, float)) for value in vector)"
+          },
+          "language": "python"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "三个类别共得到六个向量，目标对象对应一个 384 维向量。随后转换为反演程序使用的数组格式，保留原始响应以便回查。",
+            "en": "Six vectors were obtained across the three classes, including one 384-dimensional vector for the target object. They were converted to the array format used by the inversion program, while the original responses were retained for cross-checking."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "import numpy as np\n\nmatrix = np.asarray([vector], dtype=np.float32)\nassert matrix.shape == (1, 384)\nassert np.isfinite(matrix).all()\n\nnp.save(\"target-vector.npy\", matrix)\nloaded = np.load(\"target-vector.npy\", allow_pickle=False)\nassert loaded.shape == matrix.shape\nassert np.array_equal(loaded, matrix)",
+            "en": "import numpy as np\n\nmatrix = np.asarray([vector], dtype=np.float32)\nassert matrix.shape == (1, 384)\nassert np.isfinite(matrix).all()\n\nnp.save(\"target-vector.npy\", matrix)\nloaded = np.load(\"target-vector.npy\", allow_pickle=False)\nassert loaded.shape == matrix.shape\nassert np.array_equal(loaded, matrix)"
+          },
+          "language": "python"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "数组形状、数值类型、文件回读和有限值检查，比仅凭文件大小判断格式更可靠。数组文件还包含格式头，不能只用简化的字节数公式判断完整性；加载后的结构和数值核对更直接。",
+            "en": "Array shape, numeric type, readback, and finite-value checks were more reliable than file size alone. Array files also contain format headers, so a simplified byte-count formula cannot establish completeness. Checking the loaded structure and values is more direct."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "384 维、归一化特征和距离度量可以帮助缩小编码器范围，但不能唯一识别模型。测试采用 all-MiniLM-L6-v2 作为候选编码器，还参考了环境线索和后续匹配结果。维度指纹本身不能作为编码器身份的确定证据。",
+            "en": "Dimensionality, normalization, and distance metrics could narrow the encoder candidates but did not uniquely identify a model. all-MiniLM-L6-v2 was used as a candidate encoder, also informed by environmental clues and subsequent matching results. This evidence boundary matters: a dimensional fingerprint is not a definitive model identity."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "其余模型服务没有继续深入，因为当前目标向量已经取得，反演路径也不依赖在线聊天接口。观察到某个 gRPC 端口，不足以把服务直接命名为某个推理框架。",
+            "en": "Other model services were not investigated further because the target vector had been obtained and inversion did not depend on an online chat interface. Observing a particular gRPC port was insufficient to name a specific inference framework."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十一、反演环境、方法选择与文件传输",
+            "en": "11. Analysis Environment, Method Selection, and File Transfer"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "向量导出后转到专用分析环境执行恢复计算。备选方法和工具包括模板候选匹配、束搜索以及需要专门模型或训练准备的方案。实际选择的是准备条件与当前证据最匹配的模板方法。",
+            "en": "After export, recovery calculations moved to a dedicated analysis environment. The notes considered several methods and tools, including template-based candidate matching, beam search, and approaches requiring specialized models or training preparation. The selected template method best matched the available prerequisites and evidence."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "分析环境具备 T4 GPU 和 Python 虚拟环境，也已有 ALGEN、Vec2Text 相关目录，但缺少本次要用的零样本脚本。随后补齐 generate_templates.py、emb_fin.py、zero2text_impl.py，以及候选词表和导出的数组。准备工作先核对依赖与输入，再启动计算；目录里有某个工具，不等于其模型和运行条件已经准备完成。",
+            "en": "The analysis environment had a T4 GPU and a Python virtual environment, along with ALGEN and Vec2Text directories, but lacked the zero-shot scripts needed for this run. generate_templates.py, emb_fin.py, zero2text_impl.py, the candidate wordlist, and the exported array were then supplied. Dependencies and inputs were checked before computation began. A tool directory's presence did not establish that its models and runtime prerequisites were ready."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "zh": "备选路径",
+              "en": "Candidate approach"
+            },
+            {
+              "zh": "本次取舍",
+              "en": "Choice in this engagement"
+            },
+            {
+              "zh": "结论边界",
+              "en": "Limit of the conclusion"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "emb_fin.py 模板候选匹配",
+                "en": "emb_fin.py template candidate matching"
+              },
+              {
+                "zh": "目标语境、编码器线索和词表均已具备，优先使用",
+                "en": "Prioritized because target context, encoder clues, and a wordlist were available"
+              },
+              {
+                "zh": "只搜索当前模板和候选空间",
+                "en": "Searched only the current template and candidate space"
+              }
+            ],
+            [
+              {
+                "zh": "zero2text_impl.py 束搜索",
+                "en": "zero2text_impl.py beam search"
+              },
+              {
+                "zh": "作为模板结果不足时的后备，没有实际运行",
+                "en": "Reserved as a fallback if template results were insufficient; not run"
+              },
+              {
+                "zh": "未对它在本目标上的效果下结论",
+                "en": "No conclusion about its effectiveness on this target"
+              }
+            ],
+            [
+              {
+                "zh": "ALGEN 相关方案",
+                "en": "ALGEN-related approaches"
+              },
+              {
+                "zh": "当时未准备完整的数据与接口条件",
+                "en": "Required data and interface conditions were not fully prepared"
+              },
+              {
+                "zh": "不把单个实验配置概括为方法的必要条件",
+                "en": "One experimental setup did not define universal method requirements"
+              }
+            ],
+            [
+              {
+                "zh": "Vec2Text 相关方案",
+                "en": "Vec2Text-related approaches"
+              },
+              {
+                "zh": "没有准备对应模型或训练流程",
+                "en": "Corresponding models or training workflow were not prepared"
+              },
+              {
+                "zh": "不把固定训练时长套用于所有实现",
+                "en": "No fixed training duration could be generalized to all implementations"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "计算安排在专用分析环境，前端测试机负责导出与传输。这个分工是本次执行约束，与模板法能否在 CPU 上运行是两回事。",
+            "en": "Computation ran in the dedicated analysis environment, while the testing machine handled export and transfer. This division was an execution constraint for the engagement, separate from whether the template method could run on a CPU."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "选择依据包括：已经有目标向量，编码器候选范围较小，文本领域接近密码重置通知，而且有明确候选词表。此时可以把问题收窄为“在给定上下文中，哪一个候选最能解释目标向量”。这不等于对任意未知文本进行通用恢复。",
+            "en": "The basis was a target vector already in hand, a relatively narrow set of encoder candidates, text apparently related to password-reset notices, and a defined candidate wordlist. This allowed the problem to be narrowed to which candidate best explained the target vector within a given context. It was not general recovery of arbitrary unknown text."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "没有采用其他方法，并不意味着其他方法普遍要求固定的训练时长或写权限。不同实现的前提不同。本次取舍仅说明当时未准备好对应模型、训练资源或接口条件。",
+            "en": "Not using other methods did not mean that those methods universally required a fixed training duration or write access. Implementations have different prerequisites. The choice here established only that the corresponding models, training resources, or interface conditions had not been prepared at the time."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "传输也出现一次配置错误：SSH 设置了 BatchMode=yes，却仍期望密码交互完成。该选项适合已经配置好非交互认证的情形，不能在需要输入密码时随意加上。取消不符合当前认证流程的选项后完成了文件传输，并核对文件内容。",
+            "en": "File transfer also encountered a configuration error: SSH was set to BatchMode=yes while password interaction was still expected. That option suits already-configured noninteractive authentication and should not be added when password entry is required. Removing the option that conflicted with the authentication flow allowed transfer to complete, followed by content verification."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "sha256sum target-vector.npy\nscp target-vector.npy <ANALYSIS_USER>@<ANALYSIS_HOST>:<WORK_DIRECTORY>/\nssh <ANALYSIS_USER>@<ANALYSIS_HOST> \\\n  'sha256sum <WORK_DIRECTORY>/target-vector.npy'",
+            "en": "sha256sum target-vector.npy\nscp target-vector.npy <ANALYSIS_USER>@<ANALYSIS_HOST>:<WORK_DIRECTORY>/\nssh <ANALYSIS_USER>@<ANALYSIS_HOST> \\\n  'sha256sum <WORK_DIRECTORY>/target-vector.npy'"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这段代码展示的是文件完整性核对方式。两端摘要一致证明传输未改变文件，不证明向量来源、模型选择或恢复算法正确。",
+            "en": "This code illustrates file-integrity verification. Matching digests at both ends established that transfer did not alter the file, not that the vector source, model choice, or recovery algorithm was correct."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十二、模板匹配如何产生候选",
+            "en": "12. How Template Matching Produced a Candidate"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "分析脚本首先判断目标向量更接近哪类企业文本。密码重置语境获得较高匹配，随后围绕通知句式、上下文顺序和语言变体生成约两万个模板。模板保留密码和链接等槽位，避免把一个候选孤立地与整段文档向量比较。",
+            "en": "The analysis script first assessed which type of business text best matched the target vector. Password-reset context scored highly, after which approximately twenty thousand templates were generated around notification wording, context order, and language variations. Templates retained password and URL slots rather than comparing an isolated candidate against the vector of an entire document."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "The default password after resetting is {PASSWORD}.\nPlease open {URL} and update the password after signing in.\n\nYour account has been reset.\nUse {PASSWORD} to sign in at {URL}.",
+            "en": "The default password after resetting is {PASSWORD}.\nPlease open {URL} and update the password after signing in.\n\nYour account has been reset.\nUse {PASSWORD} to sign in at {URL}."
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "恢复过程先选出得分较高的模板，再去除高度相似的模板，避免五条近乎重复的句子制造虚假的“五票一致”。候选词表约一万条，先做粗筛，再对缩小后的候选集用多条模板比较。",
+            "en": "Recovery first selected high-scoring templates and then removed highly similar ones, preventing five nearly identical sentences from creating a misleading five-way consensus. The candidate list contained approximately ten thousand entries. A coarse pass narrowed the list before multiple templates compared the remaining candidates."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "记录中的参数过程更具体：先对约两万条模板评分，取前 50 条，再通过成对余弦相似度去重选出 5 条模板。候选粗筛保留约 200 个值，随后进行多模板比较。去重能减少近似句式重复计票，但不意味着这五条模板在统计意义上相互独立。",
+            "en": "The recorded parameters were more specific: approximately twenty thousand templates were scored, the top fifty were retained, and pairwise cosine similarity was used to select five deduplicated templates. Coarse candidate filtering retained roughly two hundred values for comparison across templates. Deduplication reduced repeated voting by similar wording; it did not make the five templates statistically independent."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "模板生成从企业文本领域识别开始，在约 20 个领域中，密码重置相关语境得分突出。生成器由 7 条基础模板，通过模式、语言、结构和上下文变体扩展。模板与目标文档的句式接近，是本次方法奏效的重要条件；不能把这种有领域约束的恢复包装成“只给任意向量就能找回任意秘密”。",
+            "en": "Template generation began with business-text domain identification. Among approximately twenty domains, password-reset context scored prominently. The generator expanded seven base templates through pattern, language, structure, and context variations. Similarity between the templates and the target document's wording was an important condition for success. This domain-constrained recovery did not establish that any secret could be recovered from an arbitrary vector."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "1. 模板匹配与排序\n2. 高分模板去重\n3. 候选粗筛\n4. 多模板交叉比较\n5. 输出候选及分数\n6. 进行独立核验",
+            "en": "1. Match and rank templates\n2. Deduplicate high-scoring templates\n3. Coarsely filter candidates\n4. Compare candidates across multiple templates\n5. Output candidates and scores\n6. Perform independent validation"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "原始工具调用的脱敏形式如下。这里的文件名和参数属于该次使用的脚本接口，不应被当成所有向量反演工具的通用参数。",
+            "en": "The sanitized tool invocation follows. These filenames and parameters belong to the script interface used in this engagement and are not universal options for all embedding-inversion tools."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "python3 generate_templates.py \\\n  --output templates.json \\\n  target-vector.npy \\\n  --count 20000\n\npython3 emb_fin.py \\\n  target-vector.npy \\\n  --chunk 0 \\\n  --templates templates.json \\\n  --wordlist candidates.txt \\\n  --slots PASSWORD",
+            "en": "python3 generate_templates.py \\\n  --output templates.json \\\n  target-vector.npy \\\n  --count 20000\n\npython3 emb_fin.py \\\n  target-vector.npy \\\n  --chunk 0 \\\n  --templates templates.json \\\n  --wordlist candidates.txt \\\n  --slots PASSWORD"
+          },
+          "language": "bash"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "最终有五条经去重的模板支持同一个候选。工具报告较高相似度及 Strong 标签。其含义是当前模板、候选集和评分策略下，某个候选占优；它不是正确概率，也不能证明原文被逐字还原。",
+            "en": "Five deduplicated templates ultimately supported the same candidate. The tool reported high similarity and a Strong label. This meant one candidate ranked favorably under the current templates, candidate set, and scoring strategy. It was not a probability of correctness and did not prove word-for-word recovery of the source text."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "运行过程中先出现约 71.6% 的模板匹配，汇总输出的最佳值为 75.6%。工具没有报告亚军，并将分离比显示为无穷大；这只是该输出规则下缺少可比较的第二名，不能直接解释成候选与所有其他答案存在无限差距。当时依据较高匹配分数及 Strong 标签，没有继续运行束搜索；这只是执行阶段的停止决定。随后获得的独立确认才支持最终正确性结论，不能倒过来把后来的确认写成当时作出决定的原因。",
+            "en": "During execution, an initial template match of approximately 71.6% appeared, followed by a best value of 75.6% in the summary. The tool did not report a runner-up and displayed an infinite separation ratio. This reflected the absence of a comparable second-ranked result under its output rules, not an infinite gap between the candidate and every other answer. At the time, the high match score and Strong label led to a decision not to run beam search. That was an execution-stage stopping decision. Independent confirmation obtained later supported the final correctness claim; it could not retrospectively be presented as the reason for the earlier decision."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "Candidate: <REDACTED_VALUE>\nTemplate agreement: 5 / 5\nBest template match: 75.6%\nRunner-up: not reported\nTool label: Strong\nIndependent validation: confirmed",
+            "en": "Candidate: <REDACTED_VALUE>\nTemplate agreement: 5 / 5\nBest template match: 75.6%\nRunner-up: not reported\nTool label: Strong\nIndependent validation: confirmed"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "独立验证确认了最终敏感值。公开文章保留验证结论，不披露敏感值本身、原始向量或可重建客户敏感资料的产物。",
+            "en": "Independent validation confirmed the final sensitive value. This article retains that conclusion without disclosing the value, raw vectors, or artifacts that could reconstruct the client's sensitive material."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十三、已知文本校验失败为何必须单独分析",
+            "en": "13. Why the Failed Known-Text Check Needed Separate Analysis"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "成功结果旁边还有一个很重要的失败实验：构造一段包含已知值的文本，编码成向量，再交给同一套恢复脚本。如果管线与候选条件合适，应该找回已知值；实际却返回了另一个候选，而且仍显示高置信标签。",
+            "en": "An important failed experiment accompanied the successful target result. A text containing a known value was constructed, encoded, and passed to the same recovery script. With suitable pipeline and candidate conditions, the known value should have been recovered. Instead, another candidate was returned with a high-confidence label."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这个失败意味着不能把工具标签直接当证明。需要逐项检查：候选词表是否包含已知值，大小写及预处理是否一致，编码器是否相同，模板中的链接和上下文是否匹配，以及粗筛是否提前丢掉了正确候选。",
+            "en": "This failure showed that the label could not serve as proof. Checks needed to cover whether the known value was in the candidate list, whether case and preprocessing matched, whether the encoder was the same, whether URL and context slots aligned, and whether coarse filtering had discarded the correct candidate too early."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "实际核对在候选文件中找到了已知值的小写形式，因此“词表里完全没有它”不是充分解释。构造句采用了不同大小写；即使编码器的分词处理会折叠大小写，恢复脚本的候选处理与输出比较仍需单独检查。已知值是否在粗筛时被剔除，没有保留完整排名证据，也不能凭猜测确认。",
+            "en": "The candidate file contained a lowercase form of the known value, so complete absence from the wordlist was not a sufficient explanation. The constructed sentence used different casing. Even if the encoder's tokenization folded case, candidate processing and output comparison in the recovery script still needed separate checks. Complete ranking evidence was not retained to establish whether coarse filtering had removed the known value, so that possibility also remained unconfirmed."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "对照检查发现构造句使用了一个具体链接，而恢复运行没有对齐该链接槽位。这是明确的实验条件差异，但未记录修复后重跑成功，因此不能断言它就是失败的唯一原因。链接槽位不一致应列为待验证原因，只有对齐条件后的复测才能检验这一解释。",
+            "en": "The constructed sentence used a specific URL, while the recovery run did not align that URL slot. This was an observed difference in experimental conditions, but no successful rerun after correcting it was recorded. It therefore could not be identified as the sole cause. The URL mismatch remained a hypothesis to test through a rerun with aligned conditions."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "known_text = (\n    \"The default password after resetting is <KNOWN_VALUE>. \"\n    \"Please sign in at <CONTROL_URL>.\"\n)\n\ncontrol_settings = {\n    \"encoder\": \"<SAME_ENCODER_AND_PREPROCESSING>\",\n    \"candidate_list\": \"<SAME_CANDIDATE_LIST>\",\n    \"url_slot\": \"<CONTROL_URL>\",\n    \"template_strategy\": \"<MATCHED_TEMPLATE_STRATEGY>\",\n}",
+            "en": "known_text = (\n    \"The default password after resetting is <KNOWN_VALUE>. \"\n    \"Please sign in at <CONTROL_URL>.\"\n)\n\ncontrol_settings = {\n    \"encoder\": \"<SAME_ENCODER_AND_PREPROCESSING>\",\n    \"candidate_list\": \"<SAME_CANDIDATE_LIST>\",\n    \"url_slot\": \"<CONTROL_URL>\",\n    \"template_strategy\": \"<MATCHED_TEMPLATE_STRATEGY>\",\n}"
+          },
+          "language": "python"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "合理的对照应尽量保持编码、上下文、候选集和模板条件一致，只改变待验证值。还可以加入多个不同语义类别的已知值，观察是否总有某类候选反复胜出。两次不同实验得到同一语义类别的候选，只能提示可能存在偏置，不能凭两个点就确认系统性机制。",
+            "en": "A meaningful control would hold encoding, context, candidate set, and template conditions as constant as possible while changing only the value under test. Known values from several semantic categories could also reveal whether a particular candidate category repeatedly won. Two experiments producing candidates from the same semantic category suggested possible bias but did not establish a systematic mechanism."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "最终目标候选已经独立确认，不等于整套恢复管线在任意文本上都可靠。控制实验失败仍然是方法有效性上的限制，应该与客户目标结果一并保留。",
+            "en": "Independent confirmation of the target candidate did not establish that the recovery pipeline was reliable for arbitrary text. The failed control remained a limitation of the method and needed to be retained alongside the client-objective result."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十四、环境波动与失败路线如何收束",
+            "en": "14. Interpreting Environmental Instability and Closing Failed Branches"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "测试期间多次出现服务不可达、RDP 握手失败、VPN 中断和 SMB 工具超时。部分事件恰好发生在测试请求之后，最容易被写成“某次请求导致服务崩溃”。服务恢复、目录时间戳变化和其他工具可达性提供了更多线索，但没有宿主和服务端日志就无法完全归因。",
+            "en": "The engagement included repeated service unavailability, RDP handshake failures, VPN interruptions, and SMB tool timeouts. Some occurred shortly after test requests, inviting the claim that a particular request crashed a service. Recovery, changed directory timestamps, and reachability through other tools supplied additional clues, but attribution remained incomplete without host and server logs."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "因此将异常按四项记下：发生时间、当时操作、目标侧观测、独立复测结果。时间相邻只能说明相关，不能直接说明因果。某个 SMB 客户端超时、另一个直连方式成功，优先提示客户端路径或协议差异，不应立即宣布目标宕机。",
+            "en": "Anomalies were therefore recorded through four elements: time, concurrent action, target-side observation, and independent retest result. Temporal proximity established correlation, not causation. A timeout in one SMB client while another direct method succeeded primarily suggested a client-path or protocol difference, not immediate proof of a target outage."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "其中一次，门户、Qdrant 和 MongoDB 同时不可达，数小时后恢复，存储目录时间戳也发生变化。中断前恰好进行过集合接口测试，但没有服务端日志证明该请求造成故障；时间戳变化同样不足以证明虚拟机一定经历了快照恢复。",
+            "en": "In one incident, the portal, Qdrant, and MongoDB became unavailable together and recovered several hours later; storage-directory timestamps also changed. Collection-interface tests had occurred shortly before the interruption, but no server logs established that those requests caused it. Changed timestamps likewise did not prove that the virtual machine had undergone snapshot restoration."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "另一次 RDP 客户端报 ERRCONNECT_TLS_CONNECT_FAILED，同一时段端口仍开放，独立 TLS 检查能完成握手，重连后恢复。它支持“客户端或会话路径的短暂故障”这一方向，但没有精确定位触发点。SMB 的 NETBIOS 超时也与其他客户端能直连的结果并存，因此后续切换客户端并继续核对目标状态，没有把单一工具超时当作全机失联。",
+            "en": "In another incident, the RDP client reported ERRCONNECT_TLS_CONNECT_FAILED while the port remained open. An independent TLS check completed a handshake, and reconnection later succeeded. This supported investigating a transient client or session-path failure but did not identify the precise trigger. SMB NETBIOS timeouts also coexisted with successful direct connections through other clients. The response was to switch clients and continue checking target state rather than treating one tool's timeout as complete host loss."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "终端防护状态在测试期间发生过调整。早期 winPEAS 落地失败、后续某些凭据读取成功，不能据此拼成“所有失败都由防护造成”的单一故事：中间还同时改变了权限、执行方式和输出读取方式。复盘必须保留这些变量，才能分清观察到的阻断与尚未证实的推断。",
+            "en": "Endpoint-protection state was adjusted during testing. Early winPEAS delivery failure and later credential-reading success could not establish that protection caused every failure: privileges, execution methods, and output collection also changed. Retaining these variables was necessary to distinguish observed blocking from unverified explanations."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "zh": "已检查路线",
+              "en": "Investigated route"
+            },
+            {
+              "zh": "记录中的否定或限制",
+              "en": "Negative result or limitation"
+            },
+            {
+              "zh": "是否可推广",
+              "en": "Scope of the conclusion"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "WIN-A 门户即真实 RAG",
+                "en": "WIN-A portal as the real RAG system"
+              },
+              {
+                "zh": "集合、元数据与程序调用不支持",
+                "en": "Collections, metadata, and observed program calls did not support it"
+              },
+              {
+                "zh": "仅针对观察到的实例",
+                "en": "Limited to the observed instance"
+              }
+            ],
+            [
+              {
+                "zh": "Linux 密码认证",
+                "en": "Linux password authentication"
+              },
+              {
+                "zh": "已测试组合均被拒",
+                "en": "Tested combinations were rejected"
+              },
+              {
+                "zh": "不代表所有账户密码无效",
+                "en": "Not proof that all account passwords were invalid"
+              }
+            ],
+            [
+              {
+                "zh": "Linux GSSAPI",
+                "en": "Linux GSSAPI"
+              },
+              {
+                "zh": "当前 SSH 端点未接受该方式",
+                "en": "The current SSH endpoint did not accept the method"
+              },
+              {
+                "zh": "不代表 Linux 不能加入域",
+                "en": "Not proof that Linux could not join a domain"
+              }
+            ],
+            [
+              {
+                "zh": "域数据库服务标记",
+                "en": "Domain database-service marker"
+              },
+              {
+                "zh": "未找到实际实例与监听",
+                "en": "No actual instance or listener was found"
+              },
+              {
+                "zh": "不能用 SPN 证明服务正在运行",
+                "en": "An SPN did not prove a running service"
+              }
+            ],
+            [
+              {
+                "zh": "自动提权工具",
+                "en": "Automated privilege-enumeration tool"
+              },
+              {
+                "zh": "文件交付或执行受阻",
+                "en": "File delivery or execution was blocked"
+              },
+              {
+                "zh": "不能证明没有提权路径",
+                "en": "Not proof that no privilege-escalation path existed"
+              }
+            ],
+            [
+              {
+                "zh": "若干本地提权配置",
+                "en": "Several local privilege configurations"
+              },
+              {
+                "zh": "未满足被检查方法的前提",
+                "en": "Checked methods lacked required prerequisites"
+              },
+              {
+                "zh": "不能证明主机无其他弱点",
+                "en": "Not proof that the host had no other weakness"
+              }
+            ],
+            [
+              {
+                "zh": "管理用户资料目录",
+                "en": "Administrative user profiles"
+              },
+              {
+                "zh": "低权限读取失败",
+                "en": "Reading failed under low privileges"
+              },
+              {
+                "zh": "权限提升后必须重查",
+                "en": "Required rechecking after privilege elevation"
+              }
+            ],
+            [
+              {
+                "zh": "DC-A 低权限远程执行",
+                "en": "Low-privilege execution on DC-A"
+              },
+              {
+                "zh": "登录权不足或缺少目标侧结果",
+                "en": "Insufficient logon rights or missing target-side results"
+              },
+              {
+                "zh": "不能继续基于假通道设计回传",
+                "en": "Callback designs could not rely on the unproven channel"
+              }
+            ],
+            [
+              {
+                "zh": "已知文本反演对照",
+                "en": "Known-text inversion control"
+              },
+              {
+                "zh": "返回错误候选，条件未完全对齐",
+                "en": "Wrong candidate, with conditions not fully aligned"
+              },
+              {
+                "zh": "不能宣称管线已普遍验证",
+                "en": "Not evidence of generally validated pipeline reliability"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "否定表的价值在于明确每条路线在哪些条件下未走通，而不是宣称“其他所有门都关死了”。后续权限、网络或环境状态一旦变化，部分否定结果需要重新检查。",
+            "en": "This table defined the conditions under which each route failed. It did not declare every other route closed. Changes in privileges, networking, or environmental state required some negative findings to be revisited."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十五、AI 十类错误与对应的知识缺口",
+            "en": "15. Ten Types of AI Error and Their Knowledge Gaps"
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "1. 把连接和认证当成登录授权",
+            "en": "1. Treating Connection and Authentication as Logon Authorization"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "RDP 客户端完成部分连接步骤，不代表目标允许当前身份远程登录。错误画面存活几十秒也不能证明命令执行了几十秒。缺口是 Windows 登录权、认证阶段和会话状态的基础知识，纠正必须落到真实界面或目标侧事件。",
+            "en": "Partial RDP connection completion did not establish that the target permitted remote logon for the identity. An error screen lasting dozens of seconds did not prove that a command ran for that duration. The missing foundations concerned Windows logon rights, authentication stages, and session state. Correction required the actual interface or target-side events."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "2. 把工具积极标记当成执行结果",
+            "en": "2. Treating Positive Tool Markers as Execution Results"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "远程管理工具显示“Executed”后，目标没有预期产物，直接操作又返回拒绝访问。初步分析还试图据此解释工具内部完成了哪个 API 阶段，但缺少对应版本源码或调用记录，这一解释无法确认。可以确认的只有：积极回显没有被目标效果支持。",
+            "en": "A remote management tool reported Executed, yet the expected target artifact was absent and direct operations returned access denied. The analysis also attempted to identify exactly which internal API stage the tool had completed, without the corresponding version's source or call trace. That specific explanation was unsupported. The defensible finding was that target effects did not corroborate the positive message."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "3. 把输出截断当成枚举结束",
+            "en": "3. Treating Truncated Output as Complete Enumeration"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "终端缓存不足、旧输出混入以及只读取尾部，都让完整性失去保障。错误根源是不了解观测通道的限制，表现出来却像“没有服务”“没有文件”。采集状态与目标状态必须分开验证。",
+            "en": "Insufficient terminal buffering, mixed old output, and tail-only reads undermined completeness. A misunderstanding of the observation channel appeared as no services or no files. Collection state and target state required separate verification."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "4. 把多层转义当作机械拼接",
+            "en": "4. Treating Multiple Escaping Layers as Mechanical Concatenation"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "脚本跨越多个解释器时，每层都有自己的引号、转义和变量规则。继续修改一串越来越复杂的内联命令，增加的是不可见差异。把复杂逻辑固化到脚本，保存错误输出，再核对实际执行内容，才能确认失败来自目标还是来自命令自身。",
+            "en": "Each interpreter in a command chain has its own rules for quoting, escaping, and variables. Repeatedly modifying an increasingly complex inline command added hidden differences. Moving complex logic into a script, retaining errors, and checking what actually executed helped distinguish target failures from command-construction failures."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "5. 错用 SSH 交互控制",
+            "en": "5. Misusing SSH Interaction Controls"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "密码传输时禁用交互导致失败，公钥测试时又可能被其他认证方式干扰。选项是否正确取决于要验证的认证方式。不了解 BatchMode、IdentitiesOnly 与认证偏好之间的作用，就无法解释拒绝响应。",
+            "en": "Disabling interaction broke password-based transfer, while other authentication methods could interfere with public-key testing. Whether an option was appropriate depended on the method being tested. Without understanding BatchMode, IdentitiesOnly, and authentication preferences, rejection responses could not be interpreted reliably."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "6. 把密码作为唯一搜索方向",
+            "en": "6. Treating Passwords as the Only Search Direction"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "服务器已经说明支持公钥，却仍在密码组合上持续投入。应尽早把密码、用户密钥、账户范围和授权限制列成独立假设，按证据排序。更多候选不是更完整的思路。",
+            "en": "The server already advertised public-key authentication, yet password combinations continued to receive disproportionate attention. Passwords, user keys, account scope, and authorization restrictions should have become separate hypotheses early, ranked by evidence. A larger candidate list was not a more complete approach."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "7. 权限改变后沿用旧的“零结果”",
+            "en": "7. Reusing Old Zero Results After Privileges Changed"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "低权限下不可读的目录，在获得管理权限后可能包含关键材料。遍历异常再被静默吞掉，会形成第二层假阴性。错误不仅是少查一个目录，更是把“在某个身份下的观察”误当成环境不变事实。",
+            "en": "A directory unreadable under low privileges could contain crucial material after administrative access was obtained. Silently swallowed traversal errors then created a second false negative. The mistake extended beyond missing one directory: an observation under one identity was treated as an unchanging environmental fact."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "8. 把查询方法失败当成对象不存在",
+            "en": "8. Treating a Failed Query Method as an Absent Object"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "区传送拒绝、PTR 超时和目录查询中断都只说明对应方法没有给出结果。本次并未完成所有 DNS 路径，相关检查仍有缺口。把未完成检查写成排除结论，会制造虚假的搜索收敛。",
+            "en": "Refused zone transfers, PTR timeouts, and interrupted directory queries established only that those methods did not return results. DNS paths had not all been completed, and the gaps needed to remain visible. Turning unfinished checks into exclusions created false confidence that the search space had narrowed."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "9. 忽略反演对照实验的变量控制",
+            "en": "9. Ignoring Variable Control in Inversion Experiments"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "已知值恢复失败却仍有高置信标签，说明标签与真实性不能画等号。对照条件不同又使失败难以解释。领域知识不足不仅影响渗透操作，也影响对机器学习实验的设计、评分解释和可推广性判断。",
+            "en": "A failed known-value recovery with a high-confidence label showed that labels and truth were not equivalent. Differing control conditions also made the failure difficult to explain. Domain-knowledge gaps affected machine-learning experimental design, score interpretation, and generalization claims as well as penetration-testing operations."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "10. 把成功日志当成交付物",
+            "en": "10. Treating Success Logs as Deliverables"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "报告脚本显示已保存，文件却未在回读时找到。原因未完全查明，但交付不成立是可确定的事实。存在性、可读性、内容完整性和最终路径都必须核对，不能只引用写文件函数的返回值。",
+            "en": "A report script claimed to save a file, but the file could not be found during readback. The cause remained unresolved, while failed delivery was certain. Existence, readability, completeness, and final location all required checking; the write function's return value was insufficient."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这十类错误的共同根源，是对当前安全领域、协议细节和实验方法的知识不足。证据检查缺失又放大了这些知识缺口，使错误前提不断生成后续动作。增加调用次数、让执行持续更久，无法自行补上概念上的错误。",
+            "en": "The common root of these ten errors was insufficient knowledge of the security domain, protocol details, and experimental methods. Missing evidence checks amplified those gaps, allowing incorrect premises to generate further actions. More tool calls or longer execution could not independently correct conceptual errors."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十六、按证据重建完整路径",
+            "en": "16. Reconstructing the Full Path from Evidence"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "原始操作中存在并行、回头检查和多次重试，下面给出依赖关系顺序，便于理解哪些步骤必须成立后才能推进。它不是把所有尝试伪装成一次顺利完成的线性过程。",
+            "en": "The original operations included parallel work, revisits, and repeated attempts. The sequence below follows dependencies so that the prerequisites for each advance are clear. It does not recast every attempt as a smooth, linear success."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "已有低权限身份\n  → 验证成员服务器入口与域侧只读范围\n  → 核对门户、Qdrant、MongoDB，排除错误目标\n  → 双视角网络检查，保留回环服务假设\n  → 原生枚举与部署残留检查\n  → 旧口令失效，继续追踪初始化与轮换过程\n  → 配置介质仍可读，发现另一组本地管理凭据\n  → 处理必须改密状态，确认本地管理权限\n  → 检查本机凭据，区分不同本地管理员身份\n  → 域端验证发现凭据复用，确认域级影响\n  → 权限变化后重查用户资料，发现 SSH 私钥\n  → 私钥与对应 Linux 账户匹配，确认主机访问\n  → 本机监听和 API 核对，定位 Weaviate\n  → 按 Schema 导出目标向量，验证数据格式\n  → 在分析环境完成模板候选比较\n  → 目标候选独立核验成立\n  → 已知文本对照失败作为方法限制单独保留",
+            "en": "Existing low-privilege identity\n  → Verify member-server access and domain-side read-only scope\n  → Check the portal, Qdrant, and MongoDB; reject the wrong target\n  → Compare two network vantage points; retain the loopback-service hypothesis\n  → Perform native enumeration and inspect deployment remnants\n  → Reject the old password; trace initialization and rotation\n  → Find readable configuration media and another local administrative secret\n  → Resolve the must-change state; verify local administrative access\n  → Inspect local credentials; distinguish local administrator identities\n  → Verify credential reuse at the domain endpoint and confirm domain-level impact\n  → Revisit user profiles after privilege changes; find an SSH private key\n  → Match the key to the Linux account and confirm host access\n  → Inspect local listeners and APIs; identify Weaviate\n  → Export the target vector according to schema and validate its format\n  → Compare template candidates in the analysis environment\n  → Independently validate the target candidate\n  → Retain the failed known-text control as a separate method limitation"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "两条主线到这里才真正连接：环境突破提供了向量访问条件；反演方法在明确模型线索、文本领域和候选空间后提供了敏感值候选。任何一段缺少独立证据，最终结论都应停在相应层级。",
+            "en": "Only at this point did the two main threads connect: access to the environment made the vectors available, while inversion produced a sensitive-value candidate after model clues, text context, and candidate space had been narrowed. If any stage lacked independent evidence, the conclusion needed to stop at that stage."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十七、客户环境暴露出的改进点",
+            "en": "17. Improvements Indicated by the Client Environment"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "部署初始化的秘密应当有完整生命周期。删除盘符、隐藏路径或只打印清理成功日志，都不足以证明介质和元数据不可读取。应验证实际挂载状态、数据可达性和秘密是否已轮换。",
+            "en": "Deployment secrets need a complete lifecycle. Removing a drive letter, hiding a path, or printing a successful cleanup message does not establish that media and metadata are unreadable. Actual mount state, data accessibility, and secret rotation must be verified."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "本地管理账户、内置管理员、域管理身份以及服务身份应分别管理秘密。复用让单机凭据泄露扩大为域级影响；跨主机复用 SSH 私钥又打开了另一条访问路径。密钥口令短语、用途限制与使用审计都需要结合部署方式设计，不能只检查文件是否存在。",
+            "en": "Local administrative accounts, the built-in administrator, domain administrators, and service identities need separately managed secrets. Reuse expanded a local credential exposure into domain-level impact, while an SSH private key available across hosts opened another access path. Passphrases, purpose restrictions, and usage auditing need to fit the deployment model rather than merely checking whether a key file exists."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "向量库应有独立认证与最小权限。回环监听有助于减少网络暴露，但主机访问、代理或转发一旦成立，缺少认证的数据面仍可被读取。敏感文档进入检索管道前需要分类和必要性审查，移除正文属性不等于嵌入已经脱敏。",
+            "en": "Vector databases need independent authentication and least privilege. Loopback binding reduces network exposure, but host access, a proxy, or forwarding can still expose an unauthenticated data interface. Sensitive documents need classification and a necessity review before entering a retrieval pipeline. Removing a body property does not mean its embedding has been sanitized."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "日志应能支持进程来源、权限变化和数据访问的回溯。没有常见启动项，不证明进程来自某个宿主动作；没有记录到某次读取，也不证明读取没有发生。每个调查结论都要说明日志覆盖范围。",
+            "en": "Logs need to support reconstruction of process origin, privilege changes, and data access. Missing common startup entries do not establish a particular host-side launch action; missing read events do not establish that a read never occurred. Each conclusion needs an explicit account of log coverage."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "自动化测试需要同时具备领域知识和验证机制。对身份、协议和实验方法理解不准确时，流程会反复把“可以连接”“凭据有效”“工具说成功”写成“已经执行并验证”。这次测试真正需要保留的，是这些混淆如何发生、如何被证据否定，以及每次纠正如何让路径重新成立。",
+            "en": "Automated testing needs both domain knowledge and outcome verification. Inaccurate understanding of identities, protocols, and experimental methods repeatedly turns reachable, valid credentials, or tool-reported success into executed and verified. The essential record of this engagement is how those distinctions were lost, how evidence disproved the resulting assumptions, and how each correction restored a viable path."
           }
         }
       ],
