@@ -692,3 +692,52 @@ RDP 客户端完成部分连接步骤，不代表目标允许当前身份远程�
 日志应能支持进程来源、权限变化和数据访问的回溯。没有常见启动项，不证明进程来自某个宿主动作；没有记录到某次读取，也不证明读取没有发生。每个调查结论都要说明日志覆盖范围。
 
 自动化测试需要同时具备领域知识和验证机制。对身份、协议和实验方法理解不准确时，流程会反复把“可以连接”“凭据有效”“工具说成功”写成“已经执行并验证”。这次测试真正需要保留的，是这些混淆如何发生、如何被证据否定，以及每次纠正如何让路径重新成立。
+
+## 十八、攻击矩阵映射与原始出处
+
+补充日期：2026-11-10。以下是作者根据本文保留证据作出的技术映射，不是 MITRE 或 OWASP 对本案例的认证。ATT&CK 用于描述主机与身份侧的行为，ATLAS 用于对照 AI 系统相关技术，OWASP LLM Top 10 是风险分类，不是逐步攻击矩阵。一次操作可以关联多个条目，但编号不能替代成功证据，也不能反推出未执行的步骤。
+
+### 1. 主机、凭据与横向访问：MITRE ATT&CK
+
+| 本文证据与位置 | 官方技术与出处 | 映射及结论边界 |
+| --- | --- | --- |
+| 第一节：端口扫描与服务响应核对 | [T1046 Network Service Discovery](https://attack.mitre.org/techniques/T1046/) | 已执行网络服务发现；大范围存活标记不证明对应主机真实存在。 |
+| 第二、八节：检查本地管理组、远程登录组和 SSH 用户组 | [T1069.001 Local Groups](https://attack.mitre.org/techniques/T1069/001/) | 已执行权限组发现；组信息需要结合目标服务的实际登录规则解释。 |
+| 第四、五、八节：检查卷、部署残留与用户资料目录 | [T1083 File and Directory Discovery](https://attack.mitre.org/techniques/T1083/) | 已执行文件与目录发现；早期不可读或异常被吞掉的结果不代表文件不存在。 |
+| 第五节：安装应答文件和 configdrive 元数据中的秘密 | [T1552.001 Credentials In Files](https://attack.mitre.org/techniques/T1552/001/) | 已确认文件中的凭据暴露；旧值失效与后续有效值必须分开。 |
+| 第二、五、六节：使用有效本地或域身份验证访问 | [T1078 Valid Accounts](https://attack.mitre.org/techniques/T1078/) | 本地身份与域身份分别对应其 Local Accounts、Domain Accounts 子类；认证成功不自动等于获得所有权限。 |
+| 第二、五节：成员服务器 RDP 会话与交互改密 | [T1021.001 Remote Desktop Protocol](https://attack.mitre.org/techniques/T1021/001/) | 成员服务器入口及后续管理身份已验证；初始身份对域控的 RDP 登录失败必须保留。 |
+| 第六节：本地账户材料与部分 LSA secrets 返回 | [T1003.002 Security Account Manager](https://attack.mitre.org/techniques/T1003/002/)；[T1003.004 LSA Secrets](https://attack.mitre.org/techniques/T1003/004/) | 两类结果分别有记录；不能将其写成 LSASS 内存提取成功。 |
+| 第六节：使用已有 NT 哈希进行域端认证 | [T1550.002 Pass the Hash](https://attack.mitre.org/techniques/T1550/002/) | 对应使用哈希作为认证材料的行为；跨账户凭据复用是导致范围扩大的环境条件。 |
+| 第六节：域账户材料导出及结果文件核对 | [T1003.006 DCSync](https://attack.mitre.org/techniques/T1003/006/) | 与文中 secretsdump 的目录复制路径相符；属于依据工具模式及结果作出的映射，未额外声称保留了复制协议抓包。 |
+| 第八节：在用户目录找到可用于远端认证的私钥 | [T1552.004 Private Keys](https://attack.mitre.org/techniques/T1552/004/) | 已确认用户私钥暴露；服务器主机密钥不等于用户登录私钥。 |
+| 第八节：私钥与 Linux 服务账户匹配后成功登录 | [T1021.004 SSH](https://attack.mitre.org/techniques/T1021/004/) | 成功的是具体账户与公钥信任关系，不能由 Windows 域权限直接推导。 |
+| 第九、十节：经数据库接口读取对象并导出向量 | [T1213 Data from Information Repositories](https://attack.mitre.org/techniques/T1213/) | 对应信息库数据收集；读取成立，不证明写入权限、投毒能力或模型输出操控成立。 |
+
+PowerShell、WMI 和计划任务是文中出现的执行或尝试执行通道，可分别参考 [T1059.001 PowerShell](https://attack.mitre.org/techniques/T1059/001/)、[T1047 Windows Management Instrumentation](https://attack.mitre.org/techniques/T1047/) 与 [T1053.005 Scheduled Task](https://attack.mitre.org/techniques/T1053/005/)。映射只描述所用机制；本文没有把一次性任务执行写成持久化，也没有把 WMI 拒绝访问写成成功提权。
+
+### 2. 向量访问与反演：OWASP 和 MITRE ATLAS
+
+| 本文问题 | 官方分类与出处 | 适用程度 |
+| --- | --- | --- |
+| 向量库读取缺少独立认证，敏感正文移除后仍保留向量 | [OWASP LLM08:2025 Vector and Embedding Weaknesses](https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/) | 直接相关。该条目明确覆盖访问控制缺陷、数据泄漏与 embedding inversion；本文主要对应这些部分。 |
+| 从目标向量得到并独立确认敏感值候选 | [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/) | 对应机密性影响；实际入口仍是向量数据面，不应改写为聊天模型直接泄露答案。 |
+| 利用模型表示推断原始敏感信息 | [MITRE ATLAS 官方数据更新](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437)：Invert AI Model，新编号 AML.T0137.002，旧编号 AML.T0024.001 | 概念相关，不作完整等同。ATLAS 此条位于模型训练数据信息相关分类；本文恢复的是外部文档嵌入中的候选值，没有证明它来自编码器训练集。 |
+| AI 系统知识库数据收集 | 同一 [ATLAS 官方数据更新](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437)中的 AML.T0085.000 RAG Databases | 作为相邻技术参考；本文直接访问数据库接口，不据此声称通过提示词诱导 AI 服务检索。 |
+
+ATLAS 在 v6.1.0 / 内容版本 v2026.10 中将 Invert AI Model 从 AML.T0024.001 迁移到 AML.T0137.002。部分旧文章及 OWASP 2025 页仍引用旧编号；这里同时保留新旧编号并说明版本。技术详情页本次未能稳定读取，因此编号变更引用 MITRE 自己的发布记录，而不是第三方转载。对本案例而言，最直接的风险对应仍是 OWASP LLM08 中的嵌入反演与访问控制问题。
+
+### 3. 哪些条目不能写成已完成攻击
+
+- [T1003.001 LSASS Memory](https://attack.mitre.org/techniques/T1003/001/)：第六节有尝试但未取得成功结果；与 SAM、LSA secrets 的成功结果分开。
+- [T1110.002 Password Cracking](https://attack.mitre.org/techniques/T1110/002/)：第六节对域口令材料做过词表候选核对但未命中。第十二节的嵌入模板匹配不是密码哈希破解，不能因为都使用候选词表就归成同一机制。
+- [T1552.005 Cloud Instance Metadata API](https://attack.mitre.org/techniques/T1552/005/)：本文读取的是挂载介质中的元数据文件，不是请求云实例元数据 API；实际凭据来源按 T1552.001 描述。
+- 提示注入、RAG 投毒、检索劫持、成员推断和模型窃取：本文没有相应执行与验证证据；向量可读和候选恢复成功，不足以证明这些技术成立。
+
+### 4. 嵌入反演的原始研究
+
+[Song 与 Raghunathan：Information Leakage in Embedding Models（2020）](https://arxiv.org/abs/2004.00053)研究了嵌入表示中的信息泄漏，支持“嵌入不能自动视为脱敏数据”的风险判断。该论文不是本次客户实验的验证记录，其实验指标不能直接搬来充当本文的成功率。
+
+[Morris 等：Text Embeddings Reveal (Almost) As Much As Text（EMNLP 2023）](https://aclanthology.org/2023.emnlp-main.765/)研究了从文本嵌入重建文本，并关联 Vec2Text 实现。本文仅把 Vec2Text 列为备选，没有实际运行这条路线；实际结果来自第十二节所述的受限模板与候选匹配，不宣称复现了该论文。
+
+这些出处解释技术分类及研究背景，不会消除第十三节保留的对照失败。目标候选独立确认、对照实验未通过、通用恢复能力未验证，是三个应当同时保留的结论。
