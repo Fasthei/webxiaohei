@@ -3350,6 +3350,372 @@
             "zh": "自动化测试需要同时具备领域知识和验证机制。对身份、协议和实验方法理解不准确时，流程会反复把“可以连接”“凭据有效”“工具说成功”写成“已经执行并验证”。这次测试真正需要保留的，是这些混淆如何发生、如何被证据否定，以及每次纠正如何让路径重新成立。",
             "en": "Automated testing needs both domain knowledge and outcome verification. Inaccurate understanding of identities, protocols, and experimental methods repeatedly turns reachable, valid credentials, or tool-reported success into executed and verified. The essential record of this engagement is how those distinctions were lost, how evidence disproved the resulting assumptions, and how each correction restored a viable path."
           }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "十八、攻击矩阵映射与原始出处",
+            "en": "18. Attack Framework Mapping and Original Sources"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "补充日期：2026-11-10。以下是作者根据本文保留证据作出的技术映射，不是 MITRE 或 OWASP 对本案例的认证。ATT&CK 用于描述主机与身份侧的行为，ATLAS 用于对照 AI 系统相关技术，OWASP LLM Top 10 是风险分类，不是逐步攻击矩阵。一次操作可以关联多个条目，但编号不能替代成功证据，也不能反推出未执行的步骤。",
+            "en": "Added November 10, 2026. These mappings are the author's interpretation of the evidence retained in this article, not certification of the case by MITRE or OWASP. ATT&CK describes host and identity behaviors; ATLAS provides AI-related techniques; the OWASP LLM Top 10 is a risk taxonomy rather than a sequential attack matrix. An operation may relate to multiple entries, but identifiers cannot substitute for evidence or establish unperformed steps."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "1. 主机、凭据与横向访问：MITRE ATT&CK",
+            "en": "1. Hosts, Credentials and Lateral Access: MITRE ATT&CK"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "zh": "本文证据与位置",
+              "en": "Evidence and location"
+            },
+            {
+              "zh": "官方技术与出处",
+              "en": "Official technique and source"
+            },
+            {
+              "zh": "映射及结论边界",
+              "en": "Mapping and boundary"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "第一节：端口扫描与服务响应核对",
+                "en": "Section 1: port scanning and service-response validation"
+              },
+              {
+                "zh": "[T1046 Network Service Discovery](https://attack.mitre.org/techniques/T1046/)",
+                "en": "[T1046 Network Service Discovery](https://attack.mitre.org/techniques/T1046/)"
+              },
+              {
+                "zh": "已执行网络服务发现；大范围存活标记不证明对应主机真实存在。",
+                "en": "Discovery was performed; broad positive liveness markers did not establish that every reported host existed."
+              }
+            ],
+            [
+              {
+                "zh": "第二、八节：检查本地管理组、远程登录组和 SSH 用户组",
+                "en": "Sections 2 and 8: inspecting local administrator, remote-login and SSH groups"
+              },
+              {
+                "zh": "[T1069.001 Local Groups](https://attack.mitre.org/techniques/T1069/001/)",
+                "en": "[T1069.001 Local Groups](https://attack.mitre.org/techniques/T1069/001/)"
+              },
+              {
+                "zh": "已执行权限组发现；组信息需要结合目标服务的实际登录规则解释。",
+                "en": "Permission-group discovery was performed; membership must be interpreted alongside the target service's login rules."
+              }
+            ],
+            [
+              {
+                "zh": "第四、五、八节：检查卷、部署残留与用户资料目录",
+                "en": "Sections 4, 5 and 8: inspecting volumes, deployment remnants and user profiles"
+              },
+              {
+                "zh": "[T1083 File and Directory Discovery](https://attack.mitre.org/techniques/T1083/)",
+                "en": "[T1083 File and Directory Discovery](https://attack.mitre.org/techniques/T1083/)"
+              },
+              {
+                "zh": "已执行文件与目录发现；早期不可读或异常被吞掉的结果不代表文件不存在。",
+                "en": "File and directory discovery was performed; unreadable locations or swallowed exceptions did not establish absence."
+              }
+            ],
+            [
+              {
+                "zh": "第五节：安装应答文件和 configdrive 元数据中的秘密",
+                "en": "Section 5: secrets in unattended setup files and configdrive metadata"
+              },
+              {
+                "zh": "[T1552.001 Credentials In Files](https://attack.mitre.org/techniques/T1552/001/)",
+                "en": "[T1552.001 Credentials In Files](https://attack.mitre.org/techniques/T1552/001/)"
+              },
+              {
+                "zh": "已确认文件中的凭据暴露；旧值失效与后续有效值必须分开。",
+                "en": "Credential exposure in files was established; obsolete and subsequently usable values remain distinct."
+              }
+            ],
+            [
+              {
+                "zh": "第二、五、六节：使用有效本地或域身份验证访问",
+                "en": "Sections 2, 5 and 6: using valid local or domain identities"
+              },
+              {
+                "zh": "[T1078 Valid Accounts](https://attack.mitre.org/techniques/T1078/)",
+                "en": "[T1078 Valid Accounts](https://attack.mitre.org/techniques/T1078/)"
+              },
+              {
+                "zh": "本地身份与域身份分别对应其 Local Accounts、Domain Accounts 子类；认证成功不自动等于获得所有权限。",
+                "en": "Local and domain identities relate to its Local Accounts and Domain Accounts sub-techniques; authentication does not imply unrestricted privileges."
+              }
+            ],
+            [
+              {
+                "zh": "第二、五节：成员服务器 RDP 会话与交互改密",
+                "en": "Sections 2 and 5: member-server RDP and interactive password change"
+              },
+              {
+                "zh": "[T1021.001 Remote Desktop Protocol](https://attack.mitre.org/techniques/T1021/001/)",
+                "en": "[T1021.001 Remote Desktop Protocol](https://attack.mitre.org/techniques/T1021/001/)"
+              },
+              {
+                "zh": "成员服务器入口及后续管理身份已验证；初始身份对域控的 RDP 登录失败必须保留。",
+                "en": "Member-server access and the later administrative identity were verified; the original domain-controller RDP failure remains a failure."
+              }
+            ],
+            [
+              {
+                "zh": "第六节：本地账户材料与部分 LSA secrets 返回",
+                "en": "Section 6: local account material and partial LSA secrets returned"
+              },
+              {
+                "zh": "[T1003.002 Security Account Manager](https://attack.mitre.org/techniques/T1003/002/)；[T1003.004 LSA Secrets](https://attack.mitre.org/techniques/T1003/004/)",
+                "en": "[T1003.002 Security Account Manager](https://attack.mitre.org/techniques/T1003/002/); [T1003.004 LSA Secrets](https://attack.mitre.org/techniques/T1003/004/)"
+              },
+              {
+                "zh": "两类结果分别有记录；不能将其写成 LSASS 内存提取成功。",
+                "en": "Each result has its own evidence; neither establishes successful LSASS memory extraction."
+              }
+            ],
+            [
+              {
+                "zh": "第六节：使用已有 NT 哈希进行域端认证",
+                "en": "Section 6: using an existing NT hash for domain-endpoint authentication"
+              },
+              {
+                "zh": "[T1550.002 Pass the Hash](https://attack.mitre.org/techniques/T1550/002/)",
+                "en": "[T1550.002 Pass the Hash](https://attack.mitre.org/techniques/T1550/002/)"
+              },
+              {
+                "zh": "对应使用哈希作为认证材料的行为；跨账户凭据复用是导致范围扩大的环境条件。",
+                "en": "This describes the use of hash material for authentication; cross-account credential reuse was the environmental condition widening impact."
+              }
+            ],
+            [
+              {
+                "zh": "第六节：域账户材料导出及结果文件核对",
+                "en": "Section 6: domain credential export and output-file verification"
+              },
+              {
+                "zh": "[T1003.006 DCSync](https://attack.mitre.org/techniques/T1003/006/)",
+                "en": "[T1003.006 DCSync](https://attack.mitre.org/techniques/T1003/006/)"
+              },
+              {
+                "zh": "与文中 secretsdump 的目录复制路径相符；属于依据工具模式及结果作出的映射，未额外声称保留了复制协议抓包。",
+                "en": "Consistent with the directory-replication path of the documented secretsdump mode; this interpretation does not claim additional retained protocol captures."
+              }
+            ],
+            [
+              {
+                "zh": "第八节：在用户目录找到可用于远端认证的私钥",
+                "en": "Section 8: finding a user private key accepted for remote authentication"
+              },
+              {
+                "zh": "[T1552.004 Private Keys](https://attack.mitre.org/techniques/T1552/004/)",
+                "en": "[T1552.004 Private Keys](https://attack.mitre.org/techniques/T1552/004/)"
+              },
+              {
+                "zh": "已确认用户私钥暴露；服务器主机密钥不等于用户登录私钥。",
+                "en": "User private-key exposure was verified; server host keys are not equivalent to user login keys."
+              }
+            ],
+            [
+              {
+                "zh": "第八节：私钥与 Linux 服务账户匹配后成功登录",
+                "en": "Section 8: matching the key to a Linux service account and logging in"
+              },
+              {
+                "zh": "[T1021.004 SSH](https://attack.mitre.org/techniques/T1021/004/)",
+                "en": "[T1021.004 SSH](https://attack.mitre.org/techniques/T1021/004/)"
+              },
+              {
+                "zh": "成功的是具体账户与公钥信任关系，不能由 Windows 域权限直接推导。",
+                "en": "The verified path was a specific account and public-key trust relationship, not an automatic consequence of domain privileges."
+              }
+            ],
+            [
+              {
+                "zh": "第九、十节：经数据库接口读取对象并导出向量",
+                "en": "Sections 9 and 10: reading objects and exporting vectors through database APIs"
+              },
+              {
+                "zh": "[T1213 Data from Information Repositories](https://attack.mitre.org/techniques/T1213/)",
+                "en": "[T1213 Data from Information Repositories](https://attack.mitre.org/techniques/T1213/)"
+              },
+              {
+                "zh": "对应信息库数据收集；读取成立，不证明写入权限、投毒能力或模型输出操控成立。",
+                "en": "This describes information collection; read access did not establish write access, poisoning or control over model output."
+              }
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "PowerShell、WMI 和计划任务是文中出现的执行或尝试执行通道，可分别参考 [T1059.001 PowerShell](https://attack.mitre.org/techniques/T1059/001/)、[T1047 Windows Management Instrumentation](https://attack.mitre.org/techniques/T1047/) 与 [T1053.005 Scheduled Task](https://attack.mitre.org/techniques/T1053/005/)。映射只描述所用机制；本文没有把一次性任务执行写成持久化，也没有把 WMI 拒绝访问写成成功提权。",
+            "en": "The documented execution or attempted-execution channels also relate to [T1059.001 PowerShell](https://attack.mitre.org/techniques/T1059/001/), [T1047 Windows Management Instrumentation](https://attack.mitre.org/techniques/T1047/) and [T1053.005 Scheduled Task](https://attack.mitre.org/techniques/T1053/005/). These identify mechanisms only. A one-off task is not presented as persistence, and WMI access denied is not presented as successful privilege escalation."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "2. 向量访问与反演：OWASP 和 MITRE ATLAS",
+            "en": "2. Vector Access and Inversion: OWASP and MITRE ATLAS"
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "zh": "本文问题",
+              "en": "Issue in this article"
+            },
+            {
+              "zh": "官方分类与出处",
+              "en": "Official classification and source"
+            },
+            {
+              "zh": "适用程度",
+              "en": "Applicability"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "向量库读取缺少独立认证，敏感正文移除后仍保留向量",
+                "en": "Vector reads lacked separate authentication; vectors remained after sensitive body text was removed"
+              },
+              {
+                "zh": "[OWASP LLM08:2025 Vector and Embedding Weaknesses](https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/)",
+                "en": "[OWASP LLM08:2025 Vector and Embedding Weaknesses](https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/)"
+              },
+              {
+                "zh": "直接相关。该条目明确覆盖访问控制缺陷、数据泄漏与 embedding inversion；本文主要对应这些部分。",
+                "en": "Directly relevant: this entry explicitly covers access-control weaknesses, leakage and embedding inversion. These are the portions implicated here."
+              }
+            ],
+            [
+              {
+                "zh": "从目标向量得到并独立确认敏感值候选",
+                "en": "A sensitive-value candidate was recovered and independently validated"
+              },
+              {
+                "zh": "[OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/)",
+                "en": "[OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/)"
+              },
+              {
+                "zh": "对应机密性影响；实际入口仍是向量数据面，不应改写为聊天模型直接泄露答案。",
+                "en": "Relevant to the confidentiality impact; the entry point was the vector data interface, not a chatbot directly revealing the answer."
+              }
+            ],
+            [
+              {
+                "zh": "利用模型表示推断原始敏感信息",
+                "en": "Inferring sensitive source information from model representations"
+              },
+              {
+                "zh": "[MITRE ATLAS 官方数据更新](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437)：Invert AI Model，新编号 AML.T0137.002，旧编号 AML.T0024.001",
+                "en": "[Official MITRE ATLAS data update](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437): Invert AI Model, current AML.T0137.002, formerly AML.T0024.001"
+              },
+              {
+                "zh": "概念相关，不作完整等同。ATLAS 此条位于模型训练数据信息相关分类；本文恢复的是外部文档嵌入中的候选值，没有证明它来自编码器训练集。",
+                "en": "Conceptually related, not an exact equivalence. This ATLAS entry sits under training-data information; the case recovered a candidate from an external document embedding, without establishing that the document belonged to encoder training data."
+              }
+            ],
+            [
+              {
+                "zh": "AI 系统知识库数据收集",
+                "en": "Collecting knowledge-base information associated with an AI system"
+              },
+              {
+                "zh": "同一 [ATLAS 官方数据更新](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437)中的 AML.T0085.000 RAG Databases",
+                "en": "AML.T0085.000 RAG Databases in the same [official ATLAS update](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437)"
+              },
+              {
+                "zh": "作为相邻技术参考；本文直接访问数据库接口，不据此声称通过提示词诱导 AI 服务检索。",
+                "en": "An adjacent reference; direct database API access here does not establish prompting an AI service to retrieve the data."
+              }
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "ATLAS 在 v6.1.0 / 内容版本 v2026.10 中将 Invert AI Model 从 AML.T0024.001 迁移到 AML.T0137.002。部分旧文章及 OWASP 2025 页仍引用旧编号；这里同时保留新旧编号并说明版本。技术详情页本次未能稳定读取，因此编号变更引用 MITRE 自己的发布记录，而不是第三方转载。对本案例而言，最直接的风险对应仍是 OWASP LLM08 中的嵌入反演与访问控制问题。",
+            "en": "ATLAS v6.1.0 / content v2026.10 moved Invert AI Model from AML.T0024.001 to AML.T0137.002. Older articles and the OWASP 2025 page may retain the old identifier. Both are included with version context. Technique detail pages were not consistently retrievable during this check, so the migration is sourced to MITRE's release record rather than a third-party copy. OWASP LLM08's embedding-inversion and access-control categories remain the most direct fit for this case."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "3. 哪些条目不能写成已完成攻击",
+            "en": "3. Entries That Must Not Be Reported as Completed Attacks"
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "zh": "[T1003.001 LSASS Memory](https://attack.mitre.org/techniques/T1003/001/)：第六节有尝试但未取得成功结果；与 SAM、LSA secrets 的成功结果分开。",
+              "en": "[T1003.001 LSASS Memory](https://attack.mitre.org/techniques/T1003/001/): attempted in Section 6 without a successful result; separate from the SAM and LSA secrets results."
+            },
+            {
+              "zh": "[T1110.002 Password Cracking](https://attack.mitre.org/techniques/T1110/002/)：第六节对域口令材料做过词表候选核对但未命中。第十二节的嵌入模板匹配不是密码哈希破解，不能因为都使用候选词表就归成同一机制。",
+              "en": "[T1110.002 Password Cracking](https://attack.mitre.org/techniques/T1110/002/): Section 6 records unsuccessful wordlist checks against domain credential material. Section 12's embedding-template matching is not password-hash cracking merely because it also uses candidate lists."
+            },
+            {
+              "zh": "[T1552.005 Cloud Instance Metadata API](https://attack.mitre.org/techniques/T1552/005/)：本文读取的是挂载介质中的元数据文件，不是请求云实例元数据 API；实际凭据来源按 T1552.001 描述。",
+              "en": "[T1552.005 Cloud Instance Metadata API](https://attack.mitre.org/techniques/T1552/005/): this case read metadata files on mounted media, not a cloud instance metadata API. The actual credential source is mapped to T1552.001."
+            },
+            {
+              "zh": "提示注入、RAG 投毒、检索劫持、成员推断和模型窃取：本文没有相应执行与验证证据；向量可读和候选恢复成功，不足以证明这些技术成立。",
+              "en": "Prompt injection, RAG poisoning, retrieval hijacking, membership inference and model theft: no corresponding execution and validation evidence is retained here. Vector read access and candidate recovery do not establish these techniques."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": {
+            "zh": "4. 嵌入反演的原始研究",
+            "en": "4. Original Research on Embedding Inversion"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "[Song 与 Raghunathan：Information Leakage in Embedding Models（2020）](https://arxiv.org/abs/2004.00053)研究了嵌入表示中的信息泄漏，支持“嵌入不能自动视为脱敏数据”的风险判断。该论文不是本次客户实验的验证记录，其实验指标不能直接搬来充当本文的成功率。",
+            "en": "[Song and Raghunathan: Information Leakage in Embedding Models (2020)](https://arxiv.org/abs/2004.00053) investigates information leakage from embedding representations, supporting the warning that embeddings are not automatically sanitized data. Its experiments are not validation records for this engagement, and its metrics cannot be reused as this case's success rate."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "[Morris 等：Text Embeddings Reveal (Almost) As Much As Text（EMNLP 2023）](https://aclanthology.org/2023.emnlp-main.765/)研究了从文本嵌入重建文本，并关联 Vec2Text 实现。本文仅把 Vec2Text 列为备选，没有实际运行这条路线；实际结果来自第十二节所述的受限模板与候选匹配，不宣称复现了该论文。",
+            "en": "[Morris et al.: Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023)](https://aclanthology.org/2023.emnlp-main.765/) studies text reconstruction from embeddings and links to Vec2Text. Vec2Text was an unexecuted alternative in this case. The observed result came from the constrained template and candidate matching described in Section 12, not a claimed reproduction of that paper."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这些出处解释技术分类及研究背景，不会消除第十三节保留的对照失败。目标候选独立确认、对照实验未通过、通用恢复能力未验证，是三个应当同时保留的结论。",
+            "en": "These references explain the taxonomy and research context; they do not erase the failed control in Section 13. Independent confirmation of the target candidate, failure of the control experiment, and unverified general recovery capability must all remain in the conclusion."
+          }
         }
       ],
       "sourcePath": "posts/2026-11-09-embedding-inversion-environment-and-ai-errors.md",
