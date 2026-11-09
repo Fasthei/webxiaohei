@@ -33,7 +33,7 @@ def enrich(s,path,lang,post,data,config):
  key=config.get('ahrefsAnalytics',{}).get(lang,'')
  if key:s=s.replace('</head>','<script defer src="/analytics-loader.js?v=1" data-key="'+html.escape(key,quote=True)+'"></script></head>')
  s=re.sub(r'<link rel="stylesheet" href="/music\.css[^"]*">|<script defer src="/music\.js[^"]*"></script>','',s)
- s=s.replace('</head>','<link rel="stylesheet" href="/music.css?v=1"><script defer src="/music.js?v=1"></script></head>')
+ s=s.replace('</head>','<link rel="stylesheet" href="/music.css?v=2"><script defer src="/music.js?v=2"></script></head>')
  feed=canonical('/feed.xml',lang)
  s=s.replace('</head>','<link rel="alternate" type="application/rss+xml" title="TR Notes" href="'+feed+'"><script defer src="/growth.js"></script></head>')
  s=s.replace('<footer class="site-footer">','<footer class="site-footer"><a href="'+('/zh' if lang=='zh' else '')+'/feed.xml">RSS</a>')
