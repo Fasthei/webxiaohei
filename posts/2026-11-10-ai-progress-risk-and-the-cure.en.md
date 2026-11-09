@@ -38,6 +38,8 @@ Even within that hypothetical, I find it difficult to condemn someone who wants 
 
 Yet the story hides a premise: where does the claimed hope come from? Reliable evidence, or a model's confident assertion? Incomplete mechanistic understanding despite evidence of benefit is different from an absence of evidence that something works. The first cannot justify the second.
 
+This also gives me pause: when AI becomes powerful enough to save all of humanity, it may also possess the power to destroy it.
+
 ## 3. Real AI drug research matters more than miracle stories
 
 One verifiable example is rentosertib. A randomized, double-blind, placebo-controlled phase 2a study published in Nature Medicine in 2025 tested this candidate, discovered and designed with generative AI, for idiopathic pulmonary fibrosis. It enrolled 71 participants over a 12-week treatment period and reported findings warranting further study.[4]
