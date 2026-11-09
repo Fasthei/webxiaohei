@@ -375,6 +375,458 @@
   },
   "posts": [
     {
+      "id": "mcp-stdio-configuration-trust-boundary",
+      "date": "2026-11-09",
+      "title": {
+        "zh": "从 MCP 配置到服务端执行：一次信任边界错位的复盘",
+        "en": "From MCP Configuration to Server-Side Execution: A Trust-Boundary Case Study"
+      },
+      "summary": {
+        "zh": "从接口读不到密钥、制品没有配置、数据库外部不通，到重新审视 MCP stdio 的进程启动权限。记录路径排除、选择依据，以及配置权如何跨过应用与运行环境的边界。",
+        "en": "An API that omits secrets, artifacts without runtime configuration, and an unreachable database led to a closer look at MCP stdio process-launch privileges. A case study in eliminating paths and separating configuration authority from runtime authority."
+      },
+      "category": {
+        "zh": "Agent 与 MCP 安全",
+        "en": "Agent and MCP Security"
+      },
+      "body": [
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这次复盘来自一个真实客户的自部署智能体环境。最初的问题很直接：应用能调用外部模型，调用凭据究竟放在哪里？接口没有返回密钥，制品里也没有找到运行配置，数据库从外部连不上。继续盯着这些入口，收益已经很低。",
+            "en": "This case study comes from a real client's self-hosted agent environment. The initial question was straightforward: where did the application keep the credentials it used to call external models? The API did not return them, inspected artifacts contained no runtime configuration, and the database could not be reached from the external test location. Continuing to focus on those entry points offered little value."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "转折出现在 MCP 配置。系统允许网页管理员配置本地工具进程，而后端会在测试连接时启动它。于是，原本只是应用内的管理权限，变成了应用运行环境里的进程执行能力。",
+            "en": "The turning point was MCP configuration. A web administrator could configure a local tool process, and the backend would start that process when testing its connection. An application-level management privilege had become process-execution capability inside the application's runtime environment."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "本文按已有测试记录重建判断过程，不把没有走过的分支写成实验结果。客户名称、产品名称、账号、口令、地址、接口路径、表名和部署标识均已省略；涉及实现的代码为示意，不提供目标复现载荷。这里讨论的是这套集成的权限设计，不能据此认定所有 MCP 应用都有同样问题。",
+            "en": "This article reconstructs the reasoning from existing test notes. Unexplored branches are not presented as experiments. Client and product names, accounts, passwords, addresses, endpoint paths, table names, and deployment identifiers have been omitted. Implementation snippets are illustrative, not target-specific exploit payloads. The issue concerns this integration's permission model; it does not establish that every MCP application has the same weakness."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "一、先问凭据如何被应用使用",
+            "en": "1. Start With How the Application Uses Credentials"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "自部署应用能调用模型，说明调用链上存在某种可用身份。但这不等于本机数据库一定存着明文 API key。工作负载身份、外部密钥服务、模型网关代持凭据，都是可能的实现。",
+            "en": "An application that can call a model has access to some usable identity along the call chain. That does not prove its local database contains a plaintext API key. Workload identity, an external secret service, and a model gateway holding credentials are all possible designs."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这次记录中的配置逻辑和数据库访问代码，把范围收敛到了应用侧保存的提供方凭据。这个证据很重要：它把“模型调用需要身份”变成了“本环境有一处需要核查的存储位置”。没有这一步，直接跳到查库只是猜测。",
+            "en": "In these notes, configuration handling and database-access code narrowed the question to provider credentials stored by the application. That evidence matters: it turns “model calls require an identity” into “this environment has a particular storage location to examine.” Without it, jumping straight to the database would be guesswork."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "接口不返回敏感字段，只能说明这个读接口做了输出控制。服务端为了发起调用，仍需通过某条路径取得可用凭据。接下来要找的是那条路径，以及它依赖的执行身份。",
+            "en": "Omitting a sensitive field from an API response demonstrates output control for that read interface. The server still needs a path to obtain usable credentials when making a call. The next questions concern that path and the execution identity it relies on."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "二、为什么放下其他候选路径",
+            "en": "2. Why Other Candidate Paths Were Set Aside"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "路径排除要说明排除了什么，也要保留证据的边界。",
+            "en": "Eliminating a path requires explaining what was ruled out and where the evidence stops."
+          }
+        },
+        {
+          "type": "table",
+          "headers": [
+            {
+              "zh": "候选路径",
+              "en": "Candidate path"
+            },
+            {
+              "zh": "当时的判断",
+              "en": "Decision at the time"
+            },
+            {
+              "zh": "支持判断的证据与限制",
+              "en": "Supporting evidence and limits"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "zh": "从应用读接口取得密钥",
+                "en": "Retrieve credentials through application read APIs"
+              },
+              {
+                "zh": "不继续投入",
+                "en": "Stop investing in this path"
+              },
+              {
+                "zh": "查询和返回逻辑没有暴露密钥字段；这只覆盖已检查接口",
+                "en": "Inspected query and response logic omitted the secret field; this conclusion covers only those interfaces"
+              }
+            ],
+            [
+              {
+                "zh": "从对象存储制品寻找环境配置",
+                "en": "Find runtime configuration in object-storage artifacts"
+              },
+              {
+                "zh": "暂时排除",
+                "en": "Set aside provisionally"
+              },
+              {
+                "zh": "已检查制品没有命中，打包规则也排除了该配置；不能外推为所有历史制品都不存在",
+                "en": "Inspected artifacts produced no match, and packaging rules excluded the configuration; this does not cover every historical artifact"
+              }
+            ],
+            [
+              {
+                "zh": "从外部直接连接数据库",
+                "en": "Connect directly to the database from outside"
+              },
+              {
+                "zh": "当前路线不成立",
+                "en": "Not a viable route from that location"
+              },
+              {
+                "zh": "指定探测位置连接超时；超时本身不足以证明数据库只在某个网络内可达",
+                "en": "Connections timed out from the specified test position; timeout alone does not establish the database's full network exposure"
+              }
+            ],
+            [
+              {
+                "zh": "在技能或文档中寻找凭据",
+                "en": "Search skills or documents for credentials"
+              },
+              {
+                "zh": "未走",
+                "en": "Not pursued"
+              },
+              {
+                "zh": "当时已有更直接的存储线索；这是优先级选择，不是“内容面绝不泄漏”的证据",
+                "en": "More direct storage evidence already existed; this was prioritization, not proof that content could never leak a secret"
+              }
+            ],
+            [
+              {
+                "zh": "通过主机管理通道读取配置",
+                "en": "Read configuration through host-management channels"
+              },
+              {
+                "zh": "缺少直接入口",
+                "en": "No direct entry point"
+              },
+              {
+                "zh": "当前身份没有可用的远程管理权限；不代表应用没有其他执行能力",
+                "en": "The current identity lacked usable remote-management access; that does not rule out application-level execution capabilities"
+              }
+            ],
+            [
+              {
+                "zh": "利用 MCP 本地进程配置获得应用内执行点",
+                "en": "Obtain an application-side execution point through MCP process configuration"
+              },
+              {
+                "zh": "采用",
+                "en": "Selected"
+              },
+              {
+                "zh": "记录中的命令配置缺少有效限制，测试流程启动进程，应用又显式传入了完整环境变量",
+                "en": "Notes showed insufficient command restrictions, process startup during connection tests, and explicit inheritance of the full application environment"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "排除之后，问题变得具体：数据库从当前外部位置不可达，而应用正常运行时必须访问它。需要检查一个与应用处于相同访问条件的执行点。",
+            "en": "After those exclusions, the problem became specific: the database was unreachable from the current external location, while the functioning application needed database access. The investigation therefore focused on an execution point with the application's access conditions."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "三、MCP stdio 为什么会涉及命令执行",
+            "en": "3. Why MCP stdio Involves Process Execution"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "MCP 用 JSON-RPC 交换消息。stdio 模式下，客户端启动一个工具服务子进程，再通过它的标准输入和标准输出通信。Streamable HTTP 则连接独立运行的 HTTP 服务，不以启动本地子进程作为这条传输的前提。见 [MCP 传输规范](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports)。",
+            "en": "MCP exchanges JSON-RPC messages. With stdio, the client launches a tool-server subprocess and communicates over its standard input and output. Streamable HTTP connects to an independently running HTTP service; launching a local subprocess is not a prerequisite of that transport. See the [MCP transport specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports)."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "在本案例的部署里，智能体后端承担宿主角色，其中的 MCP 客户端连接工具服务。网页保存的命令配置，最终被交给后端的本地进程启动逻辑。",
+            "en": "In this deployment, the agent backend acted as the host, with an MCP client connecting to tool servers. Command configuration saved through the web application eventually reached the backend's local process-launching code."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这里有个容易写错的时序：创建 `StdioClientTransport` 对象通常只是保存参数；连接过程调用传输的 `start()` 时，才真正启动子进程。随后才进行初始化握手、获取工具列表和工具调用。这个顺序可以在 [TypeScript SDK 的 stdio 实现](https://github.com/modelcontextprotocol/typescript-sdk/blob/v1.x/src/client/stdio.ts)中核对，具体项目仍应以锁定版本为准。",
+            "en": "One timing detail is easy to get wrong: constructing a `StdioClientTransport` generally stores parameters; the subprocess starts when the connection flow calls the transport's `start()` method. Initialization, tool discovery, and tool calls follow. The order is visible in the [TypeScript SDK stdio implementation](https://github.com/modelcontextprotocol/typescript-sdk/blob/v1.x/src/client/stdio.ts); an individual project must still be checked against its pinned version."
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "保存工具配置\n  → 后端加载配置\n  → 连接流程启动 stdio 子进程\n  → 初始化握手\n  → 获取工具列表\n  → 模型选择工具\n  → 工具调用与结果返回",
+            "en": "Save tool configuration\n  → Backend loads configuration\n  → Connection flow starts the stdio subprocess\n  → Initialization handshake\n  → Tool discovery\n  → Model selects a tool\n  → Tool call and result"
+          },
+          "language": "text"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "因此，握手报错不能证明命令没有运行。进程可能已经启动，只是没有按协议返回消息。工具调用阶段的审批，也不能自动补上更早发生的进程启动审批。",
+            "en": "A handshake error therefore does not prove that the command never ran. The process may have started and simply failed to respond with valid protocol messages. Approval at the tool-call stage does not automatically cover the earlier process-launch decision."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "四、真正跨过去的是哪道权限边界",
+            "en": "4. Which Permission Boundary Was Crossed?"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "测试记录里的入口，是仍可使用的初始化管理员凭据。它首先带来的是网页管理权限，不是操作系统管理员权限。问题出在后续设计：网页管理员可以指定后端要启动的工具程序，而这项能力没有与机器上的执行权限分开。",
+            "en": "The recorded entry point was an initialization administrator credential that still worked. It provided web-administration rights, not operating-system administrator rights. The subsequent design made the difference: a web administrator could choose which tool program the backend would launch, without a separate machine-execution permission boundary."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "长度限制不能替代可执行程序与参数的约束。即使进程创建没有启用 shell，只要调用者能选择危险的解释器或任意可执行程序，仍然可能获得超出“配置工具”预期的执行能力。是否能注入 shell 元字符，是另一个具体问题。",
+            "en": "A length limit cannot replace restrictions on executables and arguments. Even when process creation does not enable a shell, allowing the caller to select a dangerous interpreter or arbitrary executable may grant more capability than “configure a tool” suggests. Whether shell metacharacters can be injected is a separate implementation question."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这也不是一次自动获得宿主机 root 的提权。首先得到的是应用进程所处执行环境中的能力；如果应用在容器里，边界首先是该容器。能否到达物理宿主机，需要额外证据，不能因为文章里写了“宿主”就默认完成了容器逃逸。",
+            "en": "Nor does this automatically grant root on the physical host. The initial capability exists inside the application's execution environment; if the application runs in a container, that container is the first boundary. Reaching the physical host requires additional evidence. Using the word “host” in a description does not establish a container escape."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "五、环境变量和网络位置让后续路径成立",
+            "en": "5. Environment and Network Position Enable the Next Step"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "记录中的应用显式把自身环境变量传给工具子进程。下面只保留这个危险决定的形状：",
+            "en": "The recorded application explicitly passed its own environment to the tool subprocess. The example retains only the shape of that risky decision:"
+          }
+        },
+        {
+          "type": "code",
+          "text": {
+            "zh": "// 实现模式示意，不是客户源码原文\nconst toolEnvironment = { ...process.env };",
+            "en": "// Illustrative implementation pattern, not the client's source code\nconst toolEnvironment = { ...process.env };"
+          },
+          "language": "javascript"
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "全量继承是这套应用的集成选择，不是 MCP 协议要求。SDK 的默认环境策略和应用自行传入完整环境，是两回事。",
+            "en": "Full inheritance was this application's integration choice, not a requirement of MCP. The SDK's default environment policy and an application explicitly supplying its entire environment are different things."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这种传递会扩大子进程能看到的信息范围：如果数据库连接参数、签名秘密或其他服务凭据存在于父进程环境里，子进程也会拿到。哪些值实际存在、对应权限有多大，仍要逐项验证，不能把所有可能的环境变量都写成已经泄漏。",
+            "en": "This broadens the information visible to the subprocess. If database connection settings, signing secrets, or other service credentials exist in the parent environment, the child receives them too. Which values actually exist and what privileges they grant still require individual verification. A list of plausible environment variables is not evidence that all of them were exposed."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "网络位置同样关键。子进程通常沿用应用所在的网络环境，而不是神奇地“绕过云路由”。当应用本来就能访问数据库、子进程又能使用应用身份时，外部直连失败并不会阻止这条内部路径。最后能读哪些数据，取决于数据库账户的实际权限和存储方式。",
+            "en": "Network position matters as well. A subprocess normally uses the application's network environment; it does not magically bypass cloud routing. When the application already reaches the database and the child can use its identity, failed external connectivity does not block that internal route. The data it can read depends on the database account's actual privileges and the storage design."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "六、把整条链串起来",
+            "en": "6. Connecting the Entire Chain"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "根据原始记录，这条链的成立条件可以压缩成五步。每一步都依赖前一步的能力，不应省略中间条件。",
+            "en": "The recorded chain can be reduced to five prerequisites. Each step depends on the capability established before it; those intermediate conditions should remain explicit."
+          }
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "zh": "初始化管理员凭据仍然有效，取得应用管理权限。",
+              "en": "Initialization administrator credentials remain valid, granting application-management access."
+            },
+            {
+              "zh": "管理配置能影响后端本地进程的启动参数。",
+              "en": "Management configuration controls parameters used to start a backend process."
+            },
+            {
+              "zh": "测试连接触发进程启动，不需要先完成模型工具调用。",
+              "en": "Testing the connection starts that process without waiting for a model-driven tool call."
+            },
+            {
+              "zh": "子进程获得应用侧的环境信息和网络访问条件。",
+              "en": "The subprocess receives application-side environment information and network access conditions."
+            },
+            {
+              "zh": "在数据库身份权限允许的范围内，访问应用保存的提供方凭据。",
+              "en": "Within the database identity's privileges, it can access provider credentials stored by the application."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "记录还涉及一个输出风险：应用可写的位置同时被作为公网静态资源提供。两种能力组合后，原本留在服务端的数据就可能进入公开读取范围。这里不保留实际目录、文件名和输出内容。静态文件服务与写入目录之间的隔离，本身也是独立的整改点。",
+            "en": "The notes also describe an output risk: an application-writable location was served publicly as static content. Together, these capabilities could move server-side information into a publicly readable location. Actual directories, filenames, and output contents are omitted here. Separating static-file serving from writable application storage is an independent remediation point."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "从路径选择看，MCP 提供的是执行点；环境和数据库权限决定这个执行点能做什么；公开静态目录决定结果是否可能被外部读取。把三者分开，才看得出每一层该怎么修。",
+            "en": "In this chain, MCP supplied the execution point; environment and database privileges determined what it could do; public static storage determined whether its output could become externally readable. Keeping those roles separate makes the required fixes easier to identify."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "七、哪些是本次路径，哪些只是相关风险",
+            "en": "7. The Observed Path Versus Related Risks"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "实际路径涉及四类边界：身份到管理配置、配置到进程执行、子进程到应用秘密和数据权限、服务端写入到公开读取。",
+            "en": "The actual path involved four boundary types: identity to management configuration, configuration to process execution, subprocess to application secrets and data privileges, and server-side writes to public reads."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "另外三类风险需要单独讨论，不能混成“这次也验证过”：工具名称与描述可能影响模型判断；工具返回文本可能携带提示注入；工作区级配置可能把管理员的选择扩散到其他成员的会话。前两项属于模型输入信任问题，最后一项涉及配置作用域与触发范围。",
+            "en": "Three related risks deserve separate treatment rather than being presented as tested findings: tool names and descriptions can influence model decisions; tool results can carry prompt injection; workspace-wide configuration can extend an administrator's choices to other members' sessions. The first two concern model-input trust. The third concerns configuration scope and execution triggers."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "本次选择并不依赖诱导模型做决定。关键动作发生在工具服务连接阶段，所以仅加强提示词或工具调用审批，覆盖不到这条已经存在的进程启动路径。",
+            "en": "The chosen path did not depend on persuading a model to act. Its decisive action occurred while connecting a tool server. Stronger prompts or tool-call approval alone would not cover that existing process-launch path."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": {
+            "zh": "八、修复要落在启动之前",
+            "en": "8. Put Controls Before Process Startup"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "本地工具进程天然具有代码执行属性。桌面程序里，通常是机器使用者主动安装并运行自己选择的工具；搬到多用户 Web 服务后，必须重新定义谁能授予这种能力。不能直接把“网页管理员”视为“后端机器的所有者”。",
+            "en": "A local tool process inherently executes code. In a desktop application, the machine's user typically chooses which tools to install and run. Moving this capability into a multi-user web service requires a new definition of who may grant it. Web-administration rights cannot simply stand in for ownership of the backend machine."
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "zh": "初始化凭据必须失效或完成强制轮换，避免默认身份成为管理入口。",
+              "en": "Invalidate initialization credentials or require their rotation so a default identity cannot become the management entry point."
+            },
+            {
+              "zh": "将工具安装、运行授权与普通业务管理权限分离，记录配置来源和变更。",
+              "en": "Separate tool installation and execution authorization from ordinary business administration, and record configuration provenance and changes."
+            },
+            {
+              "zh": "多用户服务优先使用受控工具目录；确有本地进程需求时，限制程序与参数，并隔离执行身份、文件系统、网络和资源。",
+              "en": "Prefer a controlled tool catalog for multi-user services. Where local processes are necessary, constrain executables and arguments and isolate execution identity, filesystem, network, and resources."
+            },
+            {
+              "zh": "环境变量按工具需要显式传入，不把整个应用环境复制给子进程。",
+              "en": "Pass only the environment variables each tool needs, rather than copying the entire application environment."
+            },
+            {
+              "zh": "数据库账户按业务最小权限配置；模型凭据的存储、解密和使用路径分开审视。",
+              "en": "Give database accounts the minimum privileges needed and examine credential storage, decryption, and use as separate paths."
+            },
+            {
+              "zh": "把审批放在进程启动前；测试连接同样要执行安全检查，不能当作无副作用操作。",
+              "en": "Place approval before process launch. Connection tests need the same controls and must not be treated as side-effect-free operations."
+            },
+            {
+              "zh": "应用可写目录与公开静态目录分离，对工具进程启动、异常文件写入和敏感数据访问保留审计。",
+              "en": "Separate application-writable storage from publicly served directories, and audit tool-process launches, unusual file writes, and sensitive data access."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这次路径选择的依据并不复杂：接口不返回密钥，就检查调用凭据的存储与使用路径；外部连接不成立，就核对应用内部的访问条件；发现配置可以启动进程，就沿着进程的身份、环境和数据权限继续分析。真正的问题是，一项面向工具集成的配置权，最终承载了后端执行权，却没有被当作同等级别的权限管理。",
+            "en": "The reasoning was straightforward: when an API omits credentials, inspect how the application stores and uses them; when an external connection fails, examine the application's internal access conditions; when configuration can launch a process, follow that process's identity, environment, and data privileges. A tool-integration setting had acquired backend execution authority without being managed as an equivalent privilege."
+          }
+        }
+      ],
+      "sourcePath": "posts/2026-11-09-mcp-stdio-configuration-trust-boundary.md",
+      "topic": "agents"
+    },
+    {
       "id": "embedding-inversion-environment-and-ai-errors",
       "date": "2026-11-09",
       "title": {
