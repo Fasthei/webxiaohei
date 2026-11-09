@@ -27,7 +27,7 @@ The task was split into five independently verifiable questions: where the real 
 | WIN-A | Research portal, Qdrant, MongoDB, and Windows management interfaces | Did the portal connect to real data, and was there a verifiable path to local privileges? |
 | LINUX-A | Primarily SSH visible externally | Did it host local-only services, and which authentication methods were usable? |
 
-Initial network discovery was misleading: a broad host-discovery scan marked many addresses as alive, while subsequent port checks found no corresponding host services. The initial analysis attributed this to gateway responses. The defensible conclusion is narrower: an alive marker did not establish the number of real assets, and the specific response mechanism remained unproven without packet captures.
+Initial network discovery was misleading: a broad host-discovery scan marked many addresses as alive, while subsequent port checks found no corresponding host services. The initial analysis attributed this to gateway responses. The defensible conclusion is narrower: an alive marker did not establish the number of real assets, and the specific response mechanism remained unproven without packet captures. These port and service checks map to [ATT&CK T1046: Network Service Discovery](https://attack.mitre.org/techniques/T1046/).
 
 ~~~bash
 ip route
@@ -38,7 +38,7 @@ The relevant question was whether a given address returned stable, interpretable
 
 ## 2. Establish Identity Boundaries Before Assuming Remote Execution
 
-The known identity had different capabilities across hosts and protocols. File sharing and Remote Desktop worked on WIN-A. Domain shares and some directory queries were readable on DC-A, but administrative shares, WMI, and remote management interfaces rejected access. SSH did not automatically accept credentials simply because they worked on Windows.
+The known identity had different capabilities across hosts and protocols. File sharing and Remote Desktop worked on WIN-A. Domain shares and some directory queries were readable on DC-A, but administrative shares, WMI, and remote management interfaces rejected access. SSH did not automatically accept credentials simply because they worked on Windows. Use of existing identities maps to [T1078: Valid Accounts](https://attack.mitre.org/techniques/T1078/), and established RDP sessions to [T1021.001](https://attack.mitre.org/techniques/T1021/001/); rejected domain-controller logins remain unsuccessful attempts.
 
 | Validation surface | Observation | Supported conclusion |
 | --- | --- | --- |
@@ -220,7 +220,7 @@ The key finding was not a drive letter. It was the distinction between removing 
 }
 ~~~
 
-This established that an initialization secret remained readable. It did not establish that any particular unmount option performed secure erasure. Cleanup needed to cover the media, backend attachment, and secret rotation, with actual readability used to verify the result.
+This established that an initialization secret remained readable. It did not establish that any particular unmount option performed secure erasure. Cleanup needed to cover the media, backend attachment, and secret rotation, with actual readability used to verify the result. This maps to [T1552.001: Credentials In Files](https://attack.mitre.org/techniques/T1552/001/). The source was a file on configuration media, not a cloud instance metadata API; metadata fields alone do not justify T1552.005.
 
 The cleanup logic used mountvol /D primarily to remove a mount point. Continued readability through the volume GUID path was the key evidence in this instance. Simply replacing that command with another unmount operation would not establish that the metadata had been destroyed. This distinction determined whether remediation actually blocked the same access path.
 
@@ -265,7 +265,7 @@ lsadump::secrets
   Returned some LSA secrets
 ~~~
 
-Local account credential material and some local secrets were eventually obtained. LSASS memory extraction failed, but separate reads of local account storage had succeeded. Credential extraction was not a single action with only a binary success or failure outcome.
+Local account credential material and some local secrets were eventually obtained. LSASS memory extraction failed, but separate reads of local account storage had succeeded. Credential extraction was not a single action with only a binary success or failure outcome. The successful sources map to [T1003.002: SAM](https://attack.mitre.org/techniques/T1003/002/) and [T1003.004: LSA Secrets](https://attack.mitre.org/techniques/T1003/004/); [T1003.001: LSASS Memory](https://attack.mitre.org/techniques/T1003/001/) was an unsuccessful attempt here.
 
 ~~~text
 LOCAL_ADMIN_A:
@@ -283,7 +283,7 @@ LSASS memory extraction:
 
 Validation then proceeded identity by identity, avoiding the assumption that any local hash was a domain credential. The decisive finding was that material from the local built-in administrator authenticated as the domain administrator. Other candidate combinations did not succeed in the same way.
 
-This established at least one effective instance of credential reuse across identities. Identical hashes alone did not imply identical authorization. Authentication at the domain endpoint and subsequent privilege verification established that the impact extended beyond the local host.
+This established at least one effective instance of credential reuse across identities. Identical hashes alone did not imply identical authorization. Authentication at the domain endpoint and subsequent privilege verification established that the impact extended beyond the local host. Authentication with existing NT hash material maps to [T1550.002: Pass the Hash](https://attack.mitre.org/techniques/T1550/002/). Reuse widened the impact; it does not make every local hash usable as a domain identity.
 
 Directory credential auditing within the authorized scope subsequently obtained domain-account material and cross-checked the identity relationships. The sanitized command preserves the tool and parameter relationships; the target, account, and hash are not disclosed:
 
@@ -297,11 +297,11 @@ impacket-secretsdump \
 
 Result files were stored by purpose and checked for existence, expected record types, and consistency of material for the same identity across sources. These files and all actual credentials are excluded from the public article.
 
-The domain export produced files for NTLM material, Kerberos keys, and other account records. Local machine-account material was also cross-checked against the corresponding domain record. An initial invocation encountered Network unreachable and completed only after network recovery and retry. Network failure could not establish invalid credentials.
+The domain export produced files for NTLM material, Kerberos keys, and other account records. Local machine-account material was also cross-checked against the corresponding domain record. An initial invocation encountered Network unreachable and completed only after network recovery and retry. Network failure could not establish invalid credentials. The documented directory-replication mode and output support a mapping to [T1003.006: DCSync](https://attack.mitre.org/techniques/T1003/006/), without claiming additional retained protocol captures.
 
 Historical secrets in the local output matched the old value in the installation answer file, while LOCAL_ADMIN_A's current and historical material corresponded to the states after and before the password change. These relationships explained why secrets from different stages appeared on the same machine. A template or deployment process might have caused reuse, but without build-pipeline evidence the specific provisioning process remained unconfirmed.
 
-The available wordlist was later used to check some domain-password candidates without a match. That showed only that the tested candidates did not match, not that the password was unrecoverable. More importantly, domain privileges did not automatically provide SSH access to LINUX-A. Windows domain identities and Linux account and authentication configuration required separate validation.
+The available wordlist was later used to check some domain-password candidates without a match. That showed only that the tested candidates did not match, not that the password was unrecoverable. More importantly, domain privileges did not automatically provide SSH access to LINUX-A. Windows domain identities and Linux account and authentication configuration required separate validation. This relates to [T1110.002: Password Cracking](https://attack.mitre.org/techniques/T1110/002/), with no match. The later embedding-template search is not password-hash cracking.
 
 ## 7. Kerberos, Clocks, and Unproductive Service Leads
 
@@ -352,7 +352,7 @@ Match Group administrators
 
 The local OpenSSH Users group was empty, and the initial identity was not an administrator. This was consistent with that identity's inability to access WIN-A over SSH, but did not replace inspection of LINUX-A. The two sshd instances had separate authentication boundaries; Windows rules could not be applied to Linux.
 
-User profiles were examined next. Some administrative profiles had been unreadable under the initial low-privilege identity. The first traversal after obtaining administrative privileges then returned zero matches because the script swallowed exceptions. These two errors caused the same files to be missed twice. A direct recheck of the restricted profile finally located a user SSH private key and its public key.
+User profiles were examined next. Some administrative profiles had been unreadable under the initial low-privilege identity. The first traversal after obtaining administrative privileges then returned zero matches because the script swallowed exceptions. These two errors caused the same files to be missed twice. A direct recheck of the restricted profile finally located a user SSH private key and its public key. Directory discovery and private-key discovery map respectively to [T1083: File and Directory Discovery](https://attack.mitre.org/techniques/T1083/) and [T1552.004: Private Keys](https://attack.mitre.org/techniques/T1552/004/).
 
 ~~~powershell
 Get-ChildItem -LiteralPath "C:\Users\<PROFILE>\.ssh" -Force |
@@ -384,7 +384,7 @@ hostname
 ss -lntp
 ~~~
 
-The established cross-host relationship was a user private key on WIN-A matching a public key trusted by an account on LINUX-A. Domain privileges had helped broaden the investigation, but the direct authentication basis for Linux access was the key-and-account combination.
+The established cross-host relationship was a user private key on WIN-A matching a public key trusted by an account on LINUX-A. Domain privileges had helped broaden the investigation, but the direct authentication basis for Linux access was the key-and-account combination. This step maps to [T1021.004: SSH](https://attack.mitre.org/techniques/T1021/004/), supported by the verified remote session.
 
 ## 9. The Real Vector Database Appeared on Loopback
 
@@ -397,7 +397,7 @@ curl -sS http://127.0.0.1:<VECTOR_PORT>/v1/schema
 
 Response paths, service metadata, and the schema together identified Weaviate. Several paths guessed from other products returned 404, which did not establish a service fault. Requests using the actual API routes returned the schema successfully.
 
-Within the current access scope, reading the schema and target objects required no API credentials. This established a lack of independent authentication for those reads. The initial analysis extended that result to unrestricted reading and writing of all data, which exceeded the evidence. Without retained write-validation evidence, a read result could not establish arbitrary write access.
+Within the current access scope, reading the schema and target objects required no API credentials. This established a lack of independent authentication for those reads. The initial analysis extended that result to unrestricted reading and writing of all data, which exceeded the evidence. Without retained write-validation evidence, a read result could not establish arbitrary write access. Collection relates to [ATT&CK T1213](https://attack.mitre.org/techniques/T1213/), while vector-layer access-control weaknesses directly fit [OWASP LLM08:2025](https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/). Neither establishes prompt injection or RAG poisoning.
 
 | Object class | Object count | Visible properties | Relevance to the objective |
 | --- | --- | --- | --- |
@@ -486,7 +486,7 @@ Computation ran in the dedicated analysis environment, while the testing machine
 
 The basis was a target vector already in hand, a relatively narrow set of encoder candidates, text apparently related to password-reset notices, and a defined candidate wordlist. This allowed the problem to be narrowed to which candidate best explained the target vector within a given context. It was not general recovery of arbitrary unknown text.
 
-Not using other methods did not mean that those methods universally required a fixed training duration or write access. Implementations have different prerequisites. The choice here established only that the corresponding models, training resources, or interface conditions had not been prepared at the time.
+Not using other methods did not mean that those methods universally required a fixed training duration or write access. Implementations have different prerequisites. The choice here established only that the corresponding models, training resources, or interface conditions had not been prepared at the time. For the original Vec2Text research, see [Morris et al., Text Embeddings Reveal (Almost) As Much As Text, EMNLP 2023](https://aclanthology.org/2023.emnlp-main.765/). This route was not run, and the template result is not a claimed reproduction of that paper.
 
 File transfer also encountered a configuration error: SSH was set to BatchMode=yes while password interaction was still expected. That option suits already-configured noninteractive authentication and should not be added when password entry is required. Removing the option that conflicted with the authentication flow allowed transfer to complete, followed by content verification.
 
@@ -555,7 +555,7 @@ Tool label: Strong
 Independent validation: confirmed
 ~~~
 
-Independent validation confirmed the final sensitive value. This article retains that conclusion without disclosing the value, raw vectors, or artifacts that could reconstruct the client's sensitive material.
+Independent validation confirmed the final sensitive value. This article retains that conclusion without disclosing the value, raw vectors, or artifacts that could reconstruct the client's sensitive material. The confidentiality impact relates to [OWASP LLM02:2025](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/), while embedding inversion under LLM08 is the closer mechanism. ATLAS Invert AI Model is a conceptual reference: its [official v2026.10 update](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437) moved AML.T0024.001 to AML.T0137.002. That classification concerns training-data information; this case recovered a candidate from an external document embedding and does not establish training-set inversion.
 
 ## 13. Why the Failed Known-Text Check Needed Separate Analysis
 
@@ -687,57 +687,8 @@ Deployment secrets need a complete lifecycle. Removing a drive letter, hiding a 
 
 Local administrative accounts, the built-in administrator, domain administrators, and service identities need separately managed secrets. Reuse expanded a local credential exposure into domain-level impact, while an SSH private key available across hosts opened another access path. Passphrases, purpose restrictions, and usage auditing need to fit the deployment model rather than merely checking whether a key file exists.
 
-Vector databases need independent authentication and least privilege. Loopback binding reduces network exposure, but host access, a proxy, or forwarding can still expose an unauthenticated data interface. Sensitive documents need classification and a necessity review before entering a retrieval pipeline. Removing a body property does not mean its embedding has been sanitized.
+Vector databases need independent authentication and least privilege. Loopback binding reduces network exposure, but host access, a proxy, or forwarding can still expose an unauthenticated data interface. Sensitive documents need classification and a necessity review before entering a retrieval pipeline. Removing a body property does not mean its embedding has been sanitized. For original research on information leakage from representations, see [Song and Raghunathan, Information Leakage in Embedding Models (2020)](https://arxiv.org/abs/2004.00053). Its results neither replace this engagement's evidence nor establish this method's success rate.
 
 Logs need to support reconstruction of process origin, privilege changes, and data access. Missing common startup entries do not establish a particular host-side launch action; missing read events do not establish that a read never occurred. Each conclusion needs an explicit account of log coverage.
 
 Automated testing needs both domain knowledge and outcome verification. Inaccurate understanding of identities, protocols, and experimental methods repeatedly turns reachable, valid credentials, or tool-reported success into executed and verified. The essential record of this engagement is how those distinctions were lost, how evidence disproved the resulting assumptions, and how each correction restored a viable path.
-
-## 18. Attack Framework Mapping and Original Sources
-
-Added November 10, 2026. These mappings are the author's interpretation of the evidence retained in this article, not certification of the case by MITRE or OWASP. ATT&CK describes host and identity behaviors; ATLAS provides AI-related techniques; the OWASP LLM Top 10 is a risk taxonomy rather than a sequential attack matrix. An operation may relate to multiple entries, but identifiers cannot substitute for evidence or establish unperformed steps.
-
-### 1. Hosts, Credentials and Lateral Access: MITRE ATT&CK
-
-| Evidence and location | Official technique and source | Mapping and boundary |
-| --- | --- | --- |
-| Section 1: port scanning and service-response validation | [T1046 Network Service Discovery](https://attack.mitre.org/techniques/T1046/) | Discovery was performed; broad positive liveness markers did not establish that every reported host existed. |
-| Sections 2 and 8: inspecting local administrator, remote-login and SSH groups | [T1069.001 Local Groups](https://attack.mitre.org/techniques/T1069/001/) | Permission-group discovery was performed; membership must be interpreted alongside the target service's login rules. |
-| Sections 4, 5 and 8: inspecting volumes, deployment remnants and user profiles | [T1083 File and Directory Discovery](https://attack.mitre.org/techniques/T1083/) | File and directory discovery was performed; unreadable locations or swallowed exceptions did not establish absence. |
-| Section 5: secrets in unattended setup files and configdrive metadata | [T1552.001 Credentials In Files](https://attack.mitre.org/techniques/T1552/001/) | Credential exposure in files was established; obsolete and subsequently usable values remain distinct. |
-| Sections 2, 5 and 6: using valid local or domain identities | [T1078 Valid Accounts](https://attack.mitre.org/techniques/T1078/) | Local and domain identities relate to its Local Accounts and Domain Accounts sub-techniques; authentication does not imply unrestricted privileges. |
-| Sections 2 and 5: member-server RDP and interactive password change | [T1021.001 Remote Desktop Protocol](https://attack.mitre.org/techniques/T1021/001/) | Member-server access and the later administrative identity were verified; the original domain-controller RDP failure remains a failure. |
-| Section 6: local account material and partial LSA secrets returned | [T1003.002 Security Account Manager](https://attack.mitre.org/techniques/T1003/002/); [T1003.004 LSA Secrets](https://attack.mitre.org/techniques/T1003/004/) | Each result has its own evidence; neither establishes successful LSASS memory extraction. |
-| Section 6: using an existing NT hash for domain-endpoint authentication | [T1550.002 Pass the Hash](https://attack.mitre.org/techniques/T1550/002/) | This describes the use of hash material for authentication; cross-account credential reuse was the environmental condition widening impact. |
-| Section 6: domain credential export and output-file verification | [T1003.006 DCSync](https://attack.mitre.org/techniques/T1003/006/) | Consistent with the directory-replication path of the documented secretsdump mode; this interpretation does not claim additional retained protocol captures. |
-| Section 8: finding a user private key accepted for remote authentication | [T1552.004 Private Keys](https://attack.mitre.org/techniques/T1552/004/) | User private-key exposure was verified; server host keys are not equivalent to user login keys. |
-| Section 8: matching the key to a Linux service account and logging in | [T1021.004 SSH](https://attack.mitre.org/techniques/T1021/004/) | The verified path was a specific account and public-key trust relationship, not an automatic consequence of domain privileges. |
-| Sections 9 and 10: reading objects and exporting vectors through database APIs | [T1213 Data from Information Repositories](https://attack.mitre.org/techniques/T1213/) | This describes information collection; read access did not establish write access, poisoning or control over model output. |
-
-The documented execution or attempted-execution channels also relate to [T1059.001 PowerShell](https://attack.mitre.org/techniques/T1059/001/), [T1047 Windows Management Instrumentation](https://attack.mitre.org/techniques/T1047/) and [T1053.005 Scheduled Task](https://attack.mitre.org/techniques/T1053/005/). These identify mechanisms only. A one-off task is not presented as persistence, and WMI access denied is not presented as successful privilege escalation.
-
-### 2. Vector Access and Inversion: OWASP and MITRE ATLAS
-
-| Issue in this article | Official classification and source | Applicability |
-| --- | --- | --- |
-| Vector reads lacked separate authentication; vectors remained after sensitive body text was removed | [OWASP LLM08:2025 Vector and Embedding Weaknesses](https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/) | Directly relevant: this entry explicitly covers access-control weaknesses, leakage and embedding inversion. These are the portions implicated here. |
-| A sensitive-value candidate was recovered and independently validated | [OWASP LLM02:2025 Sensitive Information Disclosure](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/) | Relevant to the confidentiality impact; the entry point was the vector data interface, not a chatbot directly revealing the answer. |
-| Inferring sensitive source information from model representations | [Official MITRE ATLAS data update](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437): Invert AI Model, current AML.T0137.002, formerly AML.T0024.001 | Conceptually related, not an exact equivalence. This ATLAS entry sits under training-data information; the case recovered a candidate from an external document embedding, without establishing that the document belonged to encoder training data. |
-| Collecting knowledge-base information associated with an AI system | AML.T0085.000 RAG Databases in the same [official ATLAS update](https://github.com/mitre-atlas/atlas-data/commit/f56c1468731d6428e5bf875263b4643b46d67437) | An adjacent reference; direct database API access here does not establish prompting an AI service to retrieve the data. |
-
-ATLAS v6.1.0 / content v2026.10 moved Invert AI Model from AML.T0024.001 to AML.T0137.002. Older articles and the OWASP 2025 page may retain the old identifier. Both are included with version context. Technique detail pages were not consistently retrievable during this check, so the migration is sourced to MITRE's release record rather than a third-party copy. OWASP LLM08's embedding-inversion and access-control categories remain the most direct fit for this case.
-
-### 3. Entries That Must Not Be Reported as Completed Attacks
-
-- [T1003.001 LSASS Memory](https://attack.mitre.org/techniques/T1003/001/): attempted in Section 6 without a successful result; separate from the SAM and LSA secrets results.
-- [T1110.002 Password Cracking](https://attack.mitre.org/techniques/T1110/002/): Section 6 records unsuccessful wordlist checks against domain credential material. Section 12's embedding-template matching is not password-hash cracking merely because it also uses candidate lists.
-- [T1552.005 Cloud Instance Metadata API](https://attack.mitre.org/techniques/T1552/005/): this case read metadata files on mounted media, not a cloud instance metadata API. The actual credential source is mapped to T1552.001.
-- Prompt injection, RAG poisoning, retrieval hijacking, membership inference and model theft: no corresponding execution and validation evidence is retained here. Vector read access and candidate recovery do not establish these techniques.
-
-### 4. Original Research on Embedding Inversion
-
-[Song and Raghunathan: Information Leakage in Embedding Models (2020)](https://arxiv.org/abs/2004.00053) investigates information leakage from embedding representations, supporting the warning that embeddings are not automatically sanitized data. Its experiments are not validation records for this engagement, and its metrics cannot be reused as this case's success rate.
-
-[Morris et al.: Text Embeddings Reveal (Almost) As Much As Text (EMNLP 2023)](https://aclanthology.org/2023.emnlp-main.765/) studies text reconstruction from embeddings and links to Vec2Text. Vec2Text was an unexecuted alternative in this case. The observed result came from the constrained template and candidate matching described in Section 12, not a claimed reproduction of that paper.
-
-These references explain the taxonomy and research context; they do not erase the failed control in Section 13. Independent confirmation of the target candidate, failure of the control experiment, and unverified general recovery capability must all remain in the conclusion.
