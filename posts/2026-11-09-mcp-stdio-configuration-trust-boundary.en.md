@@ -104,7 +104,28 @@ Three related risks deserve separate treatment rather than being presented as te
 
 The chosen path did not depend on persuading a model to act. Its decisive action occurred while connecting a tool server. Stronger prompts or tool-call approval alone would not cover that existing process-launch path.
 
-## 8. Put Controls Before Process Startup
+## 8. Which Attack Techniques Describe This Chain?
+
+The mapping below follows the actions in the case. ATT&CK describes adversary behavior; CWE describes implementation weaknesses. The mapping is based on the existing notes. External references explain the categories, not independently prove what occurred in the client's environment.
+
+| Position in the chain | Technique and reference | Connection to this case |
+| --- | --- | --- |
+| Login with initialization credentials | Default-account abuse: [ATT&CK T1078.001](https://attack.mitre.org/techniques/T1078/001/) | A still-valid preset administrator identity provided application access; this did not require password cracking or bypassing authentication |
+| MCP configuration triggers server-side execution | Attacker-controlled program selection leading to arbitrary command execution: [CWE-78](https://cwe.mitre.org/data/definitions/78.html) | Web configuration selected the program launched by the backend. CWE-78 also discusses control over the entire program selection, not only shell-metacharacter injection; the underlying failure was configuration authority crossing the execution-authorization boundary |
+| Subprocess receives application secrets | Unsecured credentials: [ATT&CK T1552](https://attack.mitre.org/techniques/T1552/) | Passing a credential-bearing runtime environment to a controllable child broadens access to secrets. The mapping stays at the parent technique; environment inheritance is not described as reading a configuration file |
+| Querying the database with the application identity | Data from databases: [ATT&CK T1213.006](https://attack.mitre.org/techniques/T1213/006/) | Existing network position and database credentials allow access to application data. The targeted provider credentials also serve a credential-access objective. The notes do not establish SQL injection |
+| Writing output to a publicly readable location | Related local-staging pattern: [ATT&CK T1074.001](https://attack.mitre.org/techniques/T1074/001/) | If data is written locally before external retrieval, that write can be understood as local staging. This article retains an output risk; a writable, readable directory alone does not prove completed exfiltration |
+
+Several other labels need care:
+
+- Searching artifacts for runtime configuration follows the investigation direction of [Credentials in Files (T1552.001)](https://attack.mitre.org/techniques/T1552/001/), but produced no match here. It should not be listed as a successful credential-access step.
+- Map execution to [Command and Scripting Interpreter (T1059)](https://attack.mitre.org/techniques/T1059/) only when a shell or scripting interpreter is established. A call to `spawn` alone does not identify an interpreter or justify a particular sub-technique.
+- Tool-description poisoning and indirect prompt injection in tool results follow a separate model-input path, described by [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/). Process execution here preceded model tool selection and did not use that path.
+- Reaching the database from inside the application does not by itself establish lateral movement, routing bypass, or container escape. Each requires evidence of the identity, network, or isolation boundary actually crossed.
+
+The observed chain is concise: a default identity grants configuration authority; configuration triggers server-side execution; the process inherits application access conditions; and the database identity's privileges determine which data is accessible. MCP stdio supplies the process-start mechanism. The protocol does not require web-administration rights to become backend execution authority.
+
+## 9. Put Controls Before Process Startup
 
 A local tool process inherently executes code. In a desktop application, the machine's user typically chooses which tools to install and run. Moving this capability into a multi-user web service requires a new definition of who may grant it. Web-administration rights cannot simply stand in for ownership of the backend machine.
 
