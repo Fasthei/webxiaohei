@@ -8,7 +8,8 @@ from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-ENDPOINT = 'https://api.indexnow.org/indexnow'
+# Official IndexNow participant; accepted URLs are shared across the network.
+ENDPOINT = 'https://yandex.com/indexnow'
 ERROR_BODY_LIMIT = 1024
 
 

@@ -59,6 +59,8 @@ class IndexNowTests(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn('2 URLs; HTTP 200', output)
         self.assertIn('not a guarantee of indexing', output)
+        self.assertEqual(request.call_args_list[1].args[0].full_url,
+                         'https://yandex.com/indexnow')
         payload = json.loads(request.call_args_list[1].args[0].data)
         self.assertEqual(payload['urlList'], ['https://www.example.com/', 'https://www.example.com/zh/'])
         self.assertEqual(payload['keyLocation'], 'https://www.example.com/test-key.txt')
@@ -70,7 +72,7 @@ class IndexNowTests(unittest.TestCase):
         self.assertIn('ownership validation pending', output)
 
     def test_403_body_is_reported_and_fails(self):
-        error = HTTPError('https://api.indexnow.org/indexnow', 403, 'Forbidden', {},
+        error = HTTPError(submit_indexnow.ENDPOINT, 403, 'Forbidden', {},
                           io.BytesIO(b'{"code":"InvalidKey","message":"Site ownership is not verified"}'))
         result, output, _ = self.invoke([Response(body=b'test-key'), error])
         self.assertEqual(result, 1)
@@ -79,7 +81,7 @@ class IndexNowTests(unittest.TestCase):
         self.assertIn('NOT submitted', self.summary.read_text())
 
     def test_error_body_is_bounded(self):
-        error = HTTPError('https://api.indexnow.org/indexnow', 403, 'Forbidden', {},
+        error = HTTPError(submit_indexnow.ENDPOINT, 403, 'Forbidden', {},
                           io.BytesIO(b'x' * 10000))
         result, output, _ = self.invoke([Response(body=b'test-key'), error])
         self.assertEqual(result, 1)

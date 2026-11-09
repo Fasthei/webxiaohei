@@ -96,3 +96,9 @@ node --test tests/content.test.cjs
 文章永久地址为 `/articles/<slug>/`，中文对应 `/zh/articles/<slug>/`。旧 `post.html?id=...` 链接仍可阅读，但不作为收录入口。`scripts/build_posts.py` 自动调用 `scripts/build_seo.py` 生成全文页面、语言标记、结构化数据、robots.txt 和 sitemap.xml。
 
 上线后应在 Google Search Console 验证 `www.xiaohei.co`，提交 `/sitemap.xml` 和 `/zh/sitemap.xml`。本仓库无法替代 DNS、TLS、CDN/WAF 配置或站长平台验证；需确认搜索引擎能实际访问最终网址。
+
+## IndexNow 部署通知
+
+生产部署后，`scripts/submit_indexnow.py` 检查公开所有权文件，再向官方参与端点 `https://yandex.com/indexnow` 提交规范 URL。[IndexNow 协议](https://www.indexnow.org/faq)会在参与搜索引擎之间共享提交，无需向每个端点重复推送。
+
+HTTP 200 表示已收到提交，不保证收录；HTTP 202 表示请求已接收、所有权验证尚待完成。提交失败会使通知步骤以非零状态退出，不会撤销已完成的网站部署。应查看具体响应，不能只凭部署成功判断搜索引擎已收到更新。
