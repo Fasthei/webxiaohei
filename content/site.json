@@ -491,6 +491,13 @@
           }
         },
         {
+          "type": "paragraph",
+          "text": {
+            "zh": "这也让我警惕：当 AI 拥有足以拯救全人类的能力时，它也可能同时拥有毁灭全人类的能力。",
+            "en": "This also gives me pause: when AI becomes powerful enough to save all of humanity, it may also possess the power to destroy it."
+          }
+        },
+        {
           "type": "heading",
           "level": 2,
           "text": {
