@@ -1,121 +1,91 @@
-"""Notify IndexNow after deployment; a successful receipt does not mean indexing."""
+"""Notify participating search engines after a successful production deployment."""
 import json
 import os
-import time
+from pathlib import Path
 import urllib.error
 import urllib.request
-import xml.etree.ElementTree as ET
-from pathlib import Path
 from urllib.parse import urlparse
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-# A supported IndexNow participant; accepted URLs are shared across the network.
+# Official IndexNow participant; accepted URLs are shared across the network.
 ENDPOINT = 'https://yandex.com/indexnow'
-MAX_ATTEMPTS = 3
-BODY_LIMIT = 1024
+ERROR_BODY_LIMIT = 1024
 
 
-class SubmissionError(Exception):
-    """An ownership check or submission could not be completed."""
+def response_detail(response):
+    """Keep server diagnostics useful without copying an unbounded response into CI."""
+    body = response.read(ERROR_BODY_LIMIT + 1)
+    detail = ' '.join(body[:ERROR_BODY_LIMIT].decode('utf-8', errors='replace').split())
+    if len(body) > ERROR_BODY_LIMIT:
+        detail += ' [truncated]'
+    return detail
 
 
-def response_detail(body):
-    """Keep remote diagnostics bounded and on one line in logs and summaries."""
-    text = body[:BODY_LIMIT].decode('utf-8', errors='replace')
-    text = ''.join(c if c.isprintable() else ' ' for c in text)
-    return ' '.join(text.split()) + (' [truncated]' if len(body) > BODY_LIMIT else '')
+def submit(root=ROOT):
+    """Print each host's outcome and return a process exit code."""
+    config = json.loads((root / 'config/marketing.json').read_text())
+    urls = []
+    for sitemap in [root / 'site/sitemap.xml', root / 'site/zh/sitemap.xml']:
+        if sitemap.exists():
+            urls.extend(node.text for node in ET.parse(sitemap).iter(
+                '{http://www.sitemaps.org/schemas/sitemap/0.9}loc') if node.text)
 
-
-def request_with_retry(request, stage, timeout):
-    """Retry network/5xx errors only, with at most three attempts and 1s/2s waits."""
-    for attempt in range(MAX_ATTEMPTS):
-        try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
-                status = response.status
-                retry_after = response.headers.get('Retry-After') if status == 429 else None
-                body = response.read(BODY_LIMIT + 1)
-        except urllib.error.HTTPError as exc:
-            status = exc.code
-            retry_after = exc.headers.get('Retry-After') if exc.headers else None
-            try:
-                body = exc.read(BODY_LIMIT + 1)
-            except OSError:
-                body = b'(response body unavailable)'
-            finally:
-                exc.close()
-        except (urllib.error.URLError, OSError) as exc:
-            if attempt + 1 < MAX_ATTEMPTS:
-                time.sleep(2 ** attempt)
-                continue
-            raise SubmissionError(
-                f'{stage}: network error after {MAX_ATTEMPTS} attempts '
-                f'({type(exc).__name__}); check connectivity and retry'
-            ) from exc
-        if status == 429:
-            detail = response_detail(body) or '(empty response body)'
-            hint = ('; Retry-After: ' + response_detail(retry_after.encode())
-                    if retry_after else '')
-            raise SubmissionError(f'{stage}: HTTP 429: rate limited; retry later{hint}; {detail}')
-        if 500 <= status <= 599:
-            if attempt + 1 < MAX_ATTEMPTS:
-                time.sleep(2 ** attempt)
-                continue
-        return status, body
-
-
-def require_status(status, body, allowed, stage):
-    if status not in allowed:
-        detail = response_detail(body) or '(empty response body)'
-        hint = ('; verify the public ownership file and IndexNow host/keyLocation; '
-                '403 is not retried' if status == 403 else '')
-        raise SubmissionError(f'{stage}: HTTP {status}: {detail}{hint}')
-
-
-def submit():
-    """Report every configured host and return a process exit code."""
     results = []
     failed = False
-    try:
-        config = json.loads((ROOT / 'config/marketing.json').read_text())
-        urls = []
-        for sitemap in [ROOT / 'site/sitemap.xml', ROOT / 'site/zh/sitemap.xml']:
-            if sitemap.exists():
-                urls.extend(n.text for n in ET.parse(sitemap).iter(
-                    '{http://www.sitemaps.org/schemas/sitemap/0.9}loc') if n.text)
-        if not config['indexNow']:
-            raise ValueError('No IndexNow hosts configured')
-        for host, key in config['indexNow'].items():
+    for host, key in config['indexNow'].items():
+        selected = sorted(set(url for url in urls if urlparse(url).netloc == host))
+        if not selected:
+            results.append(f'{host}: SKIPPED — no sitemap URLs for this host')
+            continue
+        key_url = f'https://{host}/{key}.txt'
+        try:
+            with urllib.request.urlopen(key_url, timeout=12) as response:
+                final_url = urlparse(response.geturl())
+                if final_url.scheme != 'https' or final_url.netloc != host:
+                    raise ValueError('Published ownership file redirected away from its HTTPS host')
+                body = response.read(257)
+                if response.status != 200 or len(body) > 256 or body.decode().strip() != key:
+                    raise ValueError('Published ownership file does not match')
+            payload = json.dumps({
+                'host': host,
+                'key': key,
+                'keyLocation': key_url,
+                'urlList': selected,
+            }).encode()
+            request = urllib.request.Request(
+                ENDPOINT,
+                data=payload,
+                headers={'Content-Type': 'application/json; charset=utf-8'},
+                method='POST',
+            )
+            with urllib.request.urlopen(request, timeout=18) as response:
+                status = response.status
+                if status not in (200, 202):
+                    detail = response_detail(response)
+                    raise ValueError(f'Unexpected IndexNow HTTP {status}: {detail}')
+            outcome = ('received; ownership validation pending' if status == 202
+                       else 'received (not a guarantee of indexing)')
+            results.append(f'{host}: {len(selected)} URLs; HTTP {status} — {outcome}')
+        except urllib.error.HTTPError as exc:
+            failed = True
             try:
-                key_url = f'https://{host}/{key}.txt'
-                selected = sorted(set(u for u in urls if urlparse(u).netloc == host))
-                if not selected:
-                    raise SubmissionError('sitemap selection: no URLs for configured host')
-                status, body = request_with_retry(key_url, 'ownership file GET', 12)
-                require_status(status, body, {200}, 'ownership file GET')
-                if body.decode('utf-8', errors='replace').strip() != key:
-                    raise SubmissionError('ownership file GET: HTTP 200 but file content '
-                                          'does not match the configured public key')
-                payload = json.dumps({'host': host, 'key': key, 'keyLocation': key_url,
-                                      'urlList': selected}).encode()
-                request = urllib.request.Request(
-                    ENDPOINT, data=payload,
-                    headers={'Content-Type': 'application/json; charset=utf-8'}, method='POST')
-                status, body = request_with_retry(request, 'IndexNow POST', 18)
-                require_status(status, body, {200, 202}, 'IndexNow POST')
-                outcome = ('submission confirmed (not a guarantee of indexing)' if status == 200
-                           else 'accepted; ownership validation pending; indexing not confirmed')
-                results.append(f'{host}: {len(selected)} URLs; HTTP {status} — {outcome}')
-            except SubmissionError as exc:
-                failed = True
-                results.append(f'{host}: NOT confirmed — {exc}')
-    except (OSError, ValueError, KeyError, TypeError, ET.ParseError) as exc:
-        failed = True
-        results.append(f'IndexNow configuration/sitemap error: {type(exc).__name__}: {exc}')
+                detail = response_detail(exc)
+            except (OSError, ValueError) as read_error:
+                detail = f'Could not read error response: {read_error}'
+            finally:
+                exc.close()
+            results.append(f'{host}: NOT submitted — HTTP {exc.code} {exc.reason}: {detail}')
+        except Exception as exc:
+            failed = True
+            results.append(f'{host}: NOT submitted — {type(exc).__name__}: {exc}')
+
     for line in results:
         print(line)
     if os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-            summary.write('## IndexNow submission\n\n' + '\n'.join('- ' + x for x in results) + '\n')
+            summary.write('## IndexNow submission\n\n'
+                          + '\n'.join('- ' + line for line in results) + '\n')
     return 1 if failed else 0
 
 

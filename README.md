@@ -99,13 +99,6 @@ node --test tests/content.test.cjs
 
 ## IndexNow 部署通知
 
-生产部署后运行 `python scripts/submit_indexnow.py`。脚本先检查公开所有权文件，再向 IndexNow 提交规范 URL；日志与 GitHub Actions 摘要会区分这两个阶段。
+生产部署后，`scripts/submit_indexnow.py` 检查公开所有权文件，再向官方参与端点 `https://yandex.com/indexnow` 提交规范 URL。[IndexNow 协议](https://www.indexnow.org/faq)会在参与搜索引擎之间共享提交，无需向每个端点重复推送。
 
-当前使用官方参与端点 `https://yandex.com/indexnow`。IndexNow 协议会在参与搜索引擎间共享提交，无需向每个端点重复推送。2026-11-09 验证时，主端点返回站点所有权 403，而该参与端点已使用同一公开校验文件完成验证并接收全部 36 个规范 URL（HTTP 200）。后续以每次提交的实际响应为准。协议说明：https://www.indexnow.org/faq 。
-
-- HTTP 200：已确认收到提交，不代表页面已收录。
-- HTTP 202：请求已接受，所有权验证仍待完成，不代表验证通过或已收录。
-- 所有权文件不匹配、HTTP 错误或网络错误：脚本以非零状态退出，避免把提交失败显示成成功。部署已完成时，这个后续通知步骤失败不会撤销网站部署。
-- 仅对 5xx 和网络错误最多尝试三次，间隔 1 秒、2 秒。429 不会自动重试，日志会提示限流及稍后重试，并在服务端提供时显示 Retry-After；应等待指定时间后再重试。403 也不会自动重试；应先检查摘要中的响应信息、公开所有权文件、host 与 keyLocation，再排查搜索引擎验证。
-
-`tests/test_submit_indexnow.py` 使用模拟 HTTP 响应，不会实际提交 URL。
+HTTP 200 表示已收到提交，不保证收录；HTTP 202 表示请求已接收、所有权验证尚待完成。提交失败会使通知步骤以非零状态退出，不会撤销已完成的网站部署。应查看具体响应，不能只凭部署成功判断搜索引擎已收到更新。
