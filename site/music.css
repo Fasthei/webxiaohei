@@ -1,0 +1,11 @@
+#site-music{position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:50;width:min(350px,calc(100vw - 32px));background:#17211c;color:#edf1e8;border:1px solid #61705d;border-radius:12px;box-shadow:0 8px 28px #0005;font:12px/1.5 system-ui,sans-serif;overflow:hidden}
+#site-music .music-bar{display:flex;align-items:center;gap:8px;padding:10px 12px}
+#site-music .music-bar span{flex:1;font-weight:600;white-space:nowrap}
+#site-music button{border:1px solid #61705d;border-radius:5px;background:transparent;color:inherit;padding:6px;cursor:pointer;font:inherit;min-height:32px}
+#site-music button:focus-visible,#site-music a:focus-visible{outline:2px solid #d5efae;outline-offset:2px}
+#site-music #music-panel{padding:0 10px 10px}
+#site-music [hidden]{display:none!important}
+#site-music iframe{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000;border-radius:5px}
+#site-music p{margin:8px 0 4px;color:#c7d0c1;font:inherit}
+#site-music a{color:#d5efae;font:inherit}
+@media print{#site-music{display:none}}
