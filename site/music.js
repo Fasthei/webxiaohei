@@ -1,48 +1,50 @@
-/* Official Bilibili embed; never infer playback state across the iframe boundary. */
 (() => {
   'use strict';
   if (document.getElementById('site-music')) return;
   const zh = document.documentElement.lang.startsWith('zh');
-  const labels = zh ? {
-    music: '背景音乐', stop: '关闭音乐', start: '开启音乐', retry: '播放音乐',
-  } : {
-    music: 'Background music', stop: 'Turn music off', start: 'Turn music on', retry: 'Play music',
-  };
-  const key = 'tr-music-enabled';
-  let enabled = true;
-  try { enabled = localStorage.getItem(key) !== 'false'; } catch (_) {}
+  const words = zh ? {play:'播放音乐',pause:'暂停音乐',loading:'正在加载音乐',error:'音乐加载失败，点击重试'} : {play:'Play music',pause:'Pause music',loading:'Loading music',error:'Music unavailable — retry'};
+  const key = 'tr-audio-enabled';
   const widget = document.createElement('aside');
   widget.id = 'site-music';
-  widget.setAttribute('aria-label', labels.music);
-  widget.innerHTML = `<div class="music-bar"><button type="button" class="music-retry" title="Restar sutri">♫ ${labels.retry}</button><button type="button" class="music-toggle"></button></div><div class="music-frame" aria-hidden="true" inert></div>`;
+  widget.setAttribute('aria-label', zh ? '背景音乐' : 'Background music');
+  const bar = document.createElement('div');
+  bar.className = 'music-bar';
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.title = 'Restar sutri';
+  const status = document.createElement('span');
+  status.className = 'music-status';
+  status.setAttribute('role','status');
+  const audio = document.createElement('audio');
+  audio.src = '/audio/restar-sutri.mp3';
+  audio.loop = true;
+  audio.preload = 'auto';
+  audio.volume = 0.35;
+  audio.setAttribute('playsinline','');
+  bar.append(button,status);
+  widget.append(bar,audio);
   document.body.append(widget);
-  const toggle = widget.querySelector('.music-toggle');
-  const retry = widget.querySelector('.music-retry');
-  const frameHost = widget.querySelector('.music-frame');
-  function mount() {
-    frameHost.replaceChildren();
-    if (enabled) {
-      const frame = document.createElement('iframe');
-      frame.title = 'Restar sutri — Bilibili';
-      frame.allow = 'autoplay';
-      frame.tabIndex = -1;
-      frame.src = 'https://player.bilibili.com/player.html?bvid=BV1F5qjBBESv&autoplay=1&muted=0&danmaku=0';
-      frameHost.append(frame);
-    }
-    toggle.textContent = enabled ? labels.stop : labels.start;
-    toggle.setAttribute('aria-pressed', String(enabled));
+  function show(playing, message = '') {
+    button.textContent = `♫ ${playing ? words.pause : words.play}`;
+    button.setAttribute('aria-label', playing ? words.pause : words.play);
+    button.setAttribute('aria-pressed', String(playing));
+    status.textContent = message;
   }
-  toggle.addEventListener('click', () => {
-    enabled = !enabled;
-    try { localStorage.setItem(key, String(enabled)); } catch (_) {}
-    mount();
-
+  function save(value) { try { localStorage.setItem(key,String(value)); } catch (_) {} }
+  async function play() {
+    show(false,words.loading);
+    try { await audio.play(); }
+    catch (error) { show(false,error.name === 'NotAllowedError' ? '' : words.error); }
+  }
+  audio.addEventListener('playing', () => show(true));
+  audio.addEventListener('pause', () => show(false));
+  audio.addEventListener('error', () => show(false,words.error));
+  button.addEventListener('click', () => {
+    if (!audio.paused) { audio.pause(); save(false); }
+    else { save(true); if (audio.error) audio.load(); play(); }
   });
-  retry.addEventListener('click', () => {
-    enabled = true;
-    try { localStorage.setItem(key, 'true'); } catch (_) {}
-    mount();
-  });
-  mount();
-
+  show(false);
+  let enabled = true;
+  try { enabled = localStorage.getItem(key) !== 'false'; } catch (_) {}
+  if (enabled) play();
 })();
