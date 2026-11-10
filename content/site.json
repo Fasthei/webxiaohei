@@ -378,12 +378,12 @@
       "id": "ai-progress-risk-and-the-cure",
       "date": "2026-11-10",
       "title": {
-        "zh": "对 AI 的思考：当它能救命，我们还会在意风险吗？",
-        "en": "Thinking About AI: When It Can Save Lives, Will We Still Care About Risk?"
+        "zh": "对 AI 保持警惕：便利背后，还有什么？",
+        "en": "Staying Alert to AI: What Comes With the Convenience?"
       },
       "summary": {
-        "zh": "从黑箱医生的思想实验出发，讨论 AI 数学突破、药物发现与双重用途：当收益变得具体，人类如何面对尚未理解的风险，又由谁决定让其他人共同承担？",
-        "en": "A reflection on black-box medicine, AI mathematics and dual-use research: when benefits become personal, how should we weigh uncertainty, and who may accept risks on behalf of others?"
+        "zh": "从 AI 药物研究、双重用途实验与 MCP 安全案例出发，讨论能力和便利增长时伴随的安全问题，以及依赖如何让人放下警惕。",
+        "en": "AI drug research, dual-use experiments and an MCP security case illustrate the risks that accompany growing capability and convenience, and how dependence can weaken vigilance."
       },
       "category": {
         "zh": "AI 与社会思考",
@@ -393,295 +393,251 @@
         {
           "type": "paragraph",
           "text": {
-            "zh": "AI 还没来到身边时，我们觉得它很遥远；等它的车轮真正碾过生活，才发现疼痛已经具体到了每一个人。",
-            "en": "AI feels distant until its wheels roll through our lives. Then the pain becomes personal."
+            "zh": "AI 带来的便利越具体，人越容易把风险放到后面。它能帮人写代码、做研究、寻找治疗机会，这些收益看得见，也值得期待。但能力变强，并不会让伴随它的安全问题自动消失。",
+            "en": "The more tangible AI's benefits become, the easier it is to put its risks aside. Writing code, supporting research and finding treatment candidates offer real reasons for hope. Greater capability does not make the accompanying security problems disappear."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "我用这句话概括一种感受。它不是一条已经核实出处的名人名言。过去，人们谈 AI，常常是在谈一个将来；现在，工作方式、知识的价值，以及人怎样证明自己的能力，都已经开始变化。",
-            "en": "That is my way of describing a feeling, not a verified quotation from a famous person. We used to discuss AI as a future event. Now it is changing how we work, what knowledge is worth, and how people demonstrate their abilities."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "但我更在意另一面：如果 AI 带来的不只是效率，而是原本没有的治疗机会、材料和科学发现，人类会怎样重新衡量风险？一个人面对抽象的技术风险，和面对自己只剩几个月的生命，恐怕很难给出同一个答案。",
-            "en": "But another possibility concerns me more: what if AI brings not just efficiency, but treatments, materials and discoveries that did not exist before? How would we reassess its risks? Someone considering an abstract technological danger may answer very differently when facing only a few months of life."
+            "zh": "我想讨论的就是这一点：当 AI 越来越有用，我们是否还愿意正视它带来的问题？",
+            "en": "That is the question I want to examine: as AI becomes more useful, will we still be willing to look closely at its problems?"
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "zh": "一、当突破开始超出我们的理解速度",
-            "en": "1. When discoveries outpace understanding"
+            "zh": "一、结果来得越来越快，理解却未必跟得上",
+            "en": "1. Results can arrive faster than understanding"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "最近 OpenAI 公布的数学成果，让这个问题变得更加具体。2026 年 9 月 8 日，OpenAI 发布了关于 Navier–Stokes 千年难题的结果，称其内部系统给出了证明，并提供论文和 Lean 形式化证明。[1] 10 月 6 日，它又集中公开了一批数学成果及部分形式化证明，并在后续更新中提出支持数学界审查、理解和发展这些结果。[2]",
-            "en": "Recent mathematical announcements make this question concrete. On September 8, 2026, OpenAI published a result on the Navier–Stokes Millennium Prize Problem, reporting a proof from an internal system and releasing a paper and Lean formalization.[1] On October 6, it released a further collection of mathematical results and formalizations, later announcing support for mathematicians to examine and develop them.[2]"
+            "zh": "2026 年 9 月 8 日，OpenAI 公布了关于 Navier–Stokes 千年难题的结果，称其内部系统给出了证明，并提供论文和 Lean 形式化证明。[1] 10 月 6 日，它又公开了一批数学成果及部分形式化证明。[2]",
+            "en": "On September 8, 2026, OpenAI announced a result on the Navier–Stokes Millennium Prize Problem, reporting a proof from an internal system and releasing a paper and Lean formalization.[1] On October 6, it published a further collection of mathematical results and formalizations.[2]"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "这里必须把几件事分开：机构发布结果、形式化系统检查证明、研究者理解证明，以及学术共同体评估成果的意义，各有各的工作。不能把一条发布消息直接写成“所有争议都已结束”，也不能因为人类尚未充分理解某项结果，就自动断言它不可能成立。",
-            "en": "An institutional announcement, formal proof checking, human understanding and the mathematical community's assessment of significance are separate things. A release does not establish that every question has been settled. Equally, incomplete human understanding does not automatically make a result false."
+            "zh": "这些是机构发布的结果。形式化检查、研究者理解证明，以及学术共同体评价成果的意义，仍是不同的事。一次发布不能直接等同于独立审查已经全部完成。",
+            "en": "These are institutional announcements. Formal checking, researchers understanding a proof and the mathematical community assessing its significance remain separate activities. Publication alone does not establish that independent scrutiny is complete."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "这让我想到一个越来越现实的局面：我们可能先获得有用的结果，随后才逐渐建立对它的理解。问题是，验证能不能跟上生成？如果生成一个答案比可靠地检查它便宜得多，瓶颈就会从“谁能提出答案”移到“谁能判断答案值得相信”。",
-            "en": "We may increasingly obtain useful results before developing a full understanding of them. Can verification keep pace with generation? If proposing an answer becomes much cheaper than checking it reliably, the bottleneck shifts toward deciding which answers deserve trust."
+            "zh": "值得注意的是这个变化：我们可能先拿到有用的结果，随后才逐渐理解它。生成答案的速度在提高，判断答案是否可靠的工作却没有因此消失。",
+            "en": "Useful results may arrive before we fully understand them. Faster generation does not remove the work of deciding whether an answer deserves trust."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "数学至少有相对明确的形式化验证路径。药物和材料还必须走进物理世界：一种结构可以被预测出来，不代表它已经能稳定制造；一种分子可以表现出潜力，不代表它已经能安全治疗患者。发现、验证和应用，是不同阶段。",
-            "en": "Mathematics at least offers relatively well-defined routes to formal verification. Drugs and materials must also survive contact with the physical world. A predicted structure is not necessarily manufacturable; a promising molecule is not yet a safe treatment. Discovery, validation and application remain different stages."
+            "zh": "数学还有相对明确的形式化验证路径。药物和材料最终要进入物理世界，预测出的结构、候选分子和能投入使用的产品之间，隔着实验、制造和长期观察。漂亮的结果越多，人越容易把这些尚未完成的工作一并算成已经兑现的进步。",
+            "en": "Mathematics has relatively explicit routes for formal verification. Drugs and materials must eventually work in the physical world. Predicted structures and candidate molecules still face experiments, manufacturing and long-term observation. A stream of impressive results can make unfinished work look like progress already delivered."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "zh": "二、那个“你到底吃不吃”的例子，原文是什么？",
-            "en": "2. Where does the “would you take it?” example come from?"
+            "zh": "二、当它能救命，我们还会在意风险吗？",
+            "en": "2. If it can save a life, will we still care about risk?"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "我记得一个极端设问：假如你已身患绝症，AI 给出一种人类尚未完全理解的治疗方案；尝试还有一线希望，不尝试就没有希望。你会不会接受？",
-            "en": "I remember an extreme hypothetical: you have a terminal illness, and AI offers a treatment humans do not fully understand. Trying it leaves some hope; refusing leaves none. Would you accept it?"
+            "zh": "假如一个人已身患绝症，AI 给出一种人类尚未完全理解的治疗方案。尝试还有一线希望，不尝试就没有希望，他会怎么选？",
+            "en": "Imagine someone with a terminal illness. AI offers a treatment that people do not fully understand. Trying it offers some hope; refusing it offers none. What would that person choose?"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "核对资料后，找到的相近出处，是 Geoffrey Hinton 于 2020 年 2 月 20 日提出的黑箱外科医生思想实验：在设定中，AI 医生的治愈率高于人类医生，但不能解释自身如何工作。他追问，这是否足以成为禁止它的理由。[3] 原帖讨论的是可解释性与疗效的关系，并不是一款已经研制成功、却无人看得懂的抗癌药。",
-            "en": "The closest source I could trace is Geoffrey Hinton's February 20, 2020 thought experiment about a black-box surgeon. His hypothetical gives the AI a higher cure rate than a human surgeon, despite its inability to explain how it works, and asks whether that opacity justifies prohibition.[3] It concerns explainability and outcomes, not an existing cancer drug that nobody understands."
+            "zh": "这个设问与 Geoffrey Hinton 在 2020 年提出的黑箱外科医生思想实验相近：假设 AI 医生的治愈率高于人类医生，但无法解释自身如何工作，仅凭这一点是否足以禁止它？[3] 原帖讨论的是可解释性与疗效，并不是一款已经成功研制的未知抗癌药。这里的绝症患者和药物，是进一步的假设，不是临床案例。",
+            "en": "This resembles Geoffrey Hinton's 2020 black-box surgeon thought experiment: if an AI surgeon has a better cure rate than a human surgeon but cannot explain how it works, is that alone a reason to prohibit it?[3] The original concerned explainability and outcomes, not a successful but mysterious cancer drug. The patient and medicine here extend that hypothetical; they are not a clinical case."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "因此，本文的“绝症患者面对未知药物”是我对这个问题的进一步设问，不能当作原话，也不能当作临床案例。尤其是“不吃就毫无希望”，只属于这个极端假设，不能拿来概括现实中的晚期癌症。",
-            "en": "The terminal patient and unknown medicine in this essay are therefore my extension of the question, not Hinton's original wording or a clinical case. In particular, “no hope without it” belongs only to this deliberately extreme hypothetical. It does not describe advanced cancer in general."
+            "zh": "我很难责备那个愿意尝试的人。对他而言，损失已经确定，治疗可能是剩下的全部希望。抽象的技术风险，很难与眼前的生命放在同一个天平上。",
+            "en": "I find it difficult to blame someone who would try. Their loss is already concrete, and treatment may represent all their remaining hope. An abstract technological risk is hard to weigh against that."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "即使在假设里，我也很难轻易责备那个愿意尝试的人。对他而言，眼前的损失已经非常确定，治疗的收益却可能是剩下的全部未来。一个健康的人要求更多时间验证，和一个正在失去时间的人要求尽快尝试，背后是完全不同的处境。",
-            "en": "Even within that hypothetical, I find it difficult to condemn someone who wants to try. The loss confronting them is already tangible; the possible benefit represents their remaining future. A healthy person asking for more time to validate a treatment and a dying person asking for earlier access occupy profoundly different positions."
+            "zh": "也正因如此，这个例子让我警惕。希望足够强烈时，人是否还会追问：所谓有效，来自什么证据？有疗效证据但机制尚不清楚，与只有模型给出的自信回答，是两回事。可是在迫切需要答案的人面前，这个区别很容易被一句“它可能救命”盖过去。",
+            "en": "That also makes me uneasy. When hope is strong enough, will people still ask what supports the claim of effectiveness? Evidence of benefit with an incomplete account of the mechanism is different from a confident model answer without evidence of benefit. Someone desperate for an answer can lose that distinction behind the words “it could save your life.”"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "但这个故事藏着一个前提：所谓“还有希望”，究竟来自可靠证据，还是只来自模型自信的说法？有一定证据但机制尚不完全清楚，与连有效性都未证实，是两种不同的未知。不能借前一种情况的合理性，为后一种情况背书。",
-            "en": "Yet the story hides a premise: where does the claimed hope come from? Reliable evidence, or a model's confident assertion? Incomplete mechanistic understanding despite evidence of benefit is different from an absence of evidence that something works. The first cannot justify the second."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "这也让我警惕：当 AI 拥有足以拯救全人类的能力时，它也可能同时拥有毁灭全人类的能力。",
-            "en": "This also gives me pause: when AI becomes powerful enough to save all of humanity, it may also possess the power to destroy it."
+            "zh": "当 AI 拥有足以拯救全人类的能力时，它也可能同时拥有毁灭全人类的能力。这是对能力双重用途的警惕，不是对现有系统能力的事实认定，也不是灾难必然发生的预言。",
+            "en": "If AI acquires the capability to save all of humanity, it may also acquire the capability to destroy it. This is a warning about dual use, not a factual claim about current systems or a prediction that catastrophe is inevitable."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "zh": "三、真实的 AI 药物，比神奇故事更值得关注",
-            "en": "3. Real AI drug research matters more than miracle stories"
+            "zh": "三、真实进展越具体，警惕越容易退到后面",
+            "en": "3. Tangible progress can push vigilance into the background"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "一个可以核实的例子是 rentosertib。2025 年发表于《Nature Medicine》的随机、双盲、安慰剂对照 IIa 期研究，测试了这一借助生成式 AI 发现和设计的候选药物，用于特发性肺纤维化。试验纳入 71 人、治疗观察期为 12 周，报告了值得进一步研究的结果。[4]",
-            "en": "One verifiable example is rentosertib. A randomized, double-blind, placebo-controlled phase 2a study published in Nature Medicine in 2025 tested this candidate, discovered and designed with generative AI, for idiopathic pulmonary fibrosis. It enrolled 71 participants over a 12-week treatment period and reported findings warranting further study.[4]"
+            "zh": "2025 年发表于《Nature Medicine》的 rentosertib IIa 期研究，是一个具体例子。这项随机、双盲、安慰剂对照试验测试了借助生成式 AI 发现和设计的候选药物，用于特发性肺纤维化，纳入 71 人，治疗观察期为 12 周。[4]",
+            "en": "The 2025 rentosertib phase IIa study in Nature Medicine provides a concrete example. This randomized, double-blind, placebo-controlled trial studied an AI-discovered and designed drug candidate for idiopathic pulmonary fibrosis. It enrolled 71 participants over a 12-week treatment period.[4]"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "它不是这里设想的抗癌药。这项研究也不等于已经证明长期疗效，或完成上市所需的全部验证。它的重要性在于：AI 参与发现的候选方案，已经能够进入由患者数据检验的临床研究，而不是只停留在模型输出里。",
-            "en": "This is not the hypothetical cancer drug. Nor does the study establish long-term efficacy or completion of all requirements for approval. Its significance is that an AI-assisted candidate reached clinical investigation, where patient data can test the promise."
+            "zh": "它说明 AI 参与发现的候选方案已经进入临床研究。71 人、12 周的结果，也不能代替长期疗效观察或上市所需的全部验证。这两个事实可以同时成立。",
+            "en": "AI-assisted discovery has reached clinical research. A 71-person, 12-week trial also cannot replace long-term observation or every step required for approval. Both facts remain true."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "材料领域也有类似的边界。Google DeepMind 在 2023 年介绍 GNoME 时，报告了约 220 万种预测晶体结构，其中约 38 万种被认为是更稳定、值得实验探索的候选。[5] 这些数字代表搜索和预测能力的扩展，不能直接换算成同等数量的成熟工业材料。",
-            "en": "Materials research has a similar boundary. In 2023, Google DeepMind reported roughly 2.2 million predicted crystal structures from GNoME, including around 380,000 more stable candidates for experimental exploration.[5] Those numbers represent expanded predictive search, not an equal number of mature industrial materials."
+            "zh": "材料领域同样如此。Google DeepMind 在 2023 年介绍 GNoME 时，报告了约 220 万种预测晶体结构，其中约 38 万种被认为更稳定、值得实验探索。[5] 这代表候选搜索能力的扩展，不是已经得到同等数量的成熟工业材料。",
+            "en": "Materials research offers a similar distinction. When Google DeepMind introduced GNoME in 2023, it reported around 2.2 million predicted crystal structures, including roughly 380,000 considered more stable and worth experimental exploration.[5] That expands the search for candidates; it does not mean an equal number of mature industrial materials already exist."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "我期待的是这些工作逐步兑现，而不是把候选结果提前算成人类已经得到的收益。真正能改变公众态度的，终究是可重复的实验、可靠的治疗和买得到、用得起的产品。",
-            "en": "I want to see this work deliver, rather than count candidates as benefits humanity already possesses. Reproducible experiments, reliable treatments and affordable products will ultimately matter more to public trust than impressive predictions."
+            "zh": "这些研究有真实价值。问题出在它们传播到公众面前时，候选、实验结果和实际应用常常被压缩成一句“AI 已经做到了”。一个成功案例足够醒目，未知和限制却通常留在论文里。",
+            "en": "These studies have real value. But as they reach a wider audience, candidates, experimental results and practical applications can collapse into a single claim: “AI has done it.” One successful example is memorable. Unknowns and limitations tend to stay in the paper."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "我担心的是，进步越值得兴奋，我们越容易把尚未知道的部分当成不重要。",
+            "en": "My concern is that the more exciting progress becomes, the easier it is to treat what remains unknown as unimportant."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "zh": "四、人类会忽略风险，还是重新排列风险？",
-            "en": "4. Do people ignore risk, or reorder it?"
+            "zh": "四、救命的能力，不只会被用来救命",
+            "en": "4. A life-saving capability need not be used to save lives"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "我最初的直觉是：面对足够大的利益，人类天性会忽略安全。想得更深一点，这个说法过于绝对。更准确的描述可能是：当收益足够切身、等待的代价足够高，人会改变自己愿意承担风险的程度。",
-            "en": "My first instinct was that human nature ignores safety when the reward is large enough. That is too absolute. A more defensible description is that personal benefits and the cost of waiting change how much risk people are willing to bear."
+            "zh": "2022 年，《Nature Machine Intelligence》发表的《Dual use of artificial-intelligence-powered drug discovery》，讨论了药物发现 AI 的双重用途，并给出了生成潜在有毒分子候选的计算概念验证。[6]",
+            "en": "The 2022 Nature Machine Intelligence paper “Dual use of artificial-intelligence-powered drug discovery” examined this directly. It presented a computational proof of concept generating potentially toxic molecular candidates using drug-discovery technology.[6]"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "延后使用一项技术也有代价。如果某种治疗最终确实有效，等待期间未能获益的患者，同样不能从讨论中消失。但“可能救命”也不应成为免于验证的理由，否则希望越强烈的人，越容易承受虚假承诺的伤害。",
-            "en": "Delaying a technology also has costs. If a treatment eventually proves effective, patients who missed its benefits while waiting cannot disappear from the discussion. But a promise to save lives cannot exempt a treatment from validation. Otherwise, those with the strongest hopes become the most exposed to false promises."
+            "zh": "这不是一次实际武器制造演示。计算得到候选分子，与完成合成、验证毒性或造成现实伤害之间，还有距离。化学风险也不能直接等同于能够传播的生物武器。",
+            "en": "This was not a demonstration of manufacturing a weapon. Computational candidates still have to cross the distance to synthesis, toxicity testing and real-world harm. Chemical hazards cannot simply be equated with transmissible biological weapons."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "我的担心是，具体的收益与分散的风险很难在同一场讨论里获得同等分量。一位患者重获生活，可以被看见；某种能力普及后增加的事故或滥用概率，却很难对应到一张明确的面孔。决策者可能因此低估风险，也可能用遥远风险忽视眼前痛苦。两种偏差都值得警惕。",
-            "en": "I worry that concrete benefits and dispersed risks receive unequal attention. A patient returning to ordinary life is visible. An increase in the probability of accidents or misuse is harder to give a face. Decision-makers may underestimate that risk, or invoke distant dangers while neglecting immediate suffering. Both distortions matter."
+            "zh": "但这项研究已经指出一个具体问题：用于寻找治疗方案的计算能力，可以被转向有害目标。系统擅长搜索和优化，不意味着它的能力只服务于最初设想的用途。",
+            "en": "Yet it identifies a specific issue: capability intended to find treatments can be redirected toward harmful objectives. Being good at search and optimization does not confine a system to its original purpose."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "所以，争论不能停在“支持进步”或者“重视安全”。还得追问：收益是谁的，风险是谁承担的？证据由谁提供，失败由谁解释？如果受益者与承担代价的人不是同一群人，单纯计算总收益就会漏掉最重要的问题。",
-            "en": "The debate must therefore ask whose benefits and whose risks are being counted. Who supplies the evidence? Who explains failure? If the beneficiaries and those bearing the costs are different groups, a simple total of expected benefits misses a central issue."
+            "zh": "不能把计算候选夸大成已经发生的灾难，也不能因为后续还需要材料、设备和实验，就认为前面的能力增长没有安全意义。原本困难的探索工作被缩短，本身就是变化。",
+            "en": "There is no need to inflate candidates into a disaster that has already happened. Nor does the continuing need for materials, equipment and experiments make the computational advance irrelevant. Shortening a previously difficult search is itself a change."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "我警惕的不是一句“AI 什么都能做”，而是同一项进步在带来便利时，也可能降低有害活动的门槛。",
+            "en": "The same advance can make useful work easier while lowering barriers to harmful activity."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "在安全测试中，这种变化已经能落到具体系统上。[此前的 MCP 案例](/zh/articles/mcp-stdio-configuration-trust-boundary/)记录了一条从配置权限到服务端执行的路径：应用允许配置 stdio 工具，测试连接时启动对应进程；子进程继承应用环境，并处于应用能够访问内部资源的网络位置。",
+            "en": "Security testing shows another concrete form of this problem. An [earlier MCP case](/articles/mcp-stdio-configuration-trust-boundary/) traced a path from configuration access to server-side execution. The application allowed a stdio tool to be configured and launched its process when testing the connection. The child process inherited the application's environment and occupied a network position from which internal resources were reachable."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "接入工具原本是为了让 AI 做更多事。但工具背后同时存在进程、环境变量、网络和数据库权限。模型界面上的一次连接测试，放到后端看，可能已经是一次具有实际权限的执行。",
+            "en": "Connecting tools was meant to let the AI application do more. Behind those tools were processes, environment variables, network access and database permissions. A connection test in the interface could already be an execution with real privileges on the backend."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "这个案例不能证明所有 MCP 应用都存在同样的问题。stdio 启动本地进程也是正常机制，问题出在具体应用如何把配置权、执行权和数据访问权连在一起。",
+            "en": "This does not establish the same flaw in every MCP application. Launching a local process is normal stdio behavior. The issue lay in how that application connected configuration rights, execution rights and data access."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "它说明了便利附带的另一面：能力不再只是一段文字。AI 被接入业务以后，能够调用什么、操作什么，会成为系统实际风险的一部分。只看回答是否正常，很容易忽略已经发生在回答之外的事情。",
+            "en": "The capability is no longer just text. Once AI is connected to a business system, what it can call and operate becomes part of that system's risk. Looking only at whether an answer appears normal can miss what has happened outside the answer."
           }
         },
         {
           "type": "heading",
           "level": 2,
           "text": {
-            "zh": "五、能研发救命药，就能研发伤人的东西吗？",
-            "en": "5. Could tools for saving lives also help cause harm?"
+            "zh": "五、越离不开它，越容易替风险找理由",
+            "en": "5. Dependence can make us explain risks away"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "这个担忧有现实依据。2022 年，《Nature Machine Intelligence》发表的《Dual use of artificial-intelligence-powered drug discovery》讨论了药物发现 AI 的双重用途，展示了相关技术被用于生成潜在有毒分子候选的计算概念验证。[6]",
-            "en": "There is evidence behind this concern. The 2022 Nature Machine Intelligence paper “Dual use of artificial-intelligence-powered drug discovery” examined misuse of drug-discovery AI and demonstrated a computational proof of concept involving potentially toxic molecular candidates.[6]"
+            "zh": "更深的担忧可能出现在成功之后。如果 AI 确实让人更健康、更高效，越来越多的工作也依赖它，那么承认它存在问题，就不再只是接受一个观点。",
+            "en": "A deeper concern may appear after success. If AI makes people healthier and more productive, and more work depends on it, acknowledging a problem will involve more than accepting an argument."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "这项工作支持的是一个有限但重要的判断：服务于治疗的计算能力，存在被转用于有害目的的可能。它不是一次实际武器制造演示；分子层面的化学风险，也不能直接等同于具有传播能力的生物武器。把这些阶段混成一句“AI 已经能制造生化武器”，反而会削弱讨论的准确性。",
-            "en": "It supports a limited but important conclusion: computational capabilities developed for therapy can potentially be redirected toward harm. It was not a demonstration of actual weapon production. Chemical risks at the molecular level also differ from biological weapons capable of spreading. Collapsing those distinctions into “AI can already manufacture bioweapons” would weaken the argument."
+            "zh": "承认问题可能意味着重新面对成本、效率和已经习惯的生活。到那时，人会不会因为离不开它，而不断告诉自己：这个风险可以先放一放？",
+            "en": "It may mean confronting costs, lost efficiency and a way of life we have grown accustomed to. Could dependence make us keep telling ourselves that a risk can wait?"
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "但是，不能因为现实伤害还需要实验条件、材料、设备和专业能力，就认为计算环节的进步无关紧要。我的判断是：只要某项技术减少了原本困难的探索工作，就值得重新评估后续环节的防护是否仍然足够。我们需要讨论能力如何抵达现实，而不是只看聊天界面会不会拒绝一句危险问题。",
-            "en": "Real-world harm still requires resources, facilities and expertise. That does not make computational advances irrelevant. My judgment is that reducing a difficult research bottleneck should prompt a fresh assessment of the safeguards that remain. We need to examine how capabilities reach the physical world, beyond whether a chatbot refuses one dangerous question."
+            "zh": "这是我对依赖的担忧，不是已经得到验证的社会结局。前面的研究与案例也不足以证明 AI 必然失控。它们能说明的是，能力带来的收益与安全问题可以同时增长，便利不会替我们消除后者。",
+            "en": "That is a concern about dependence, not an established social outcome. The studies and case above do not prove that AI must become uncontrollable. They show that benefits and security problems can grow together. Convenience does not erase the latter."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "从安全研究的角度看，这意味着边界要覆盖整条使用链：模型能接触什么资料、调用什么工具、提交什么实验任务，谁有权批准行动，以及异常发生后能否追溯和停止。把安全全部压在模型的一次回答上，很难应对逐步累积的风险。",
-            "en": "From a security perspective, boundaries must cover the whole chain: what information a model accesses, which tools it invokes, what experimental work it can request, who approves actions, and whether incidents can be traced and stopped. One refusal at the conversational interface cannot carry that entire burden."
-          }
-        },
-        {
-          "type": "heading",
-          "level": 2,
-          "text": {
-            "zh": "六、一个人的“我愿意”，不能替所有人签字",
-            "en": "6. One person's consent cannot speak for everyone"
+            "zh": "我写这些，不是想把 AI 的危害推到最大，也没有一套解决所有问题的方案。AI 的成果值得认真看，它伴随的问题同样值得认真看。",
+            "en": "I am not trying to magnify AI's harms or offer a plan that solves every problem. Its achievements deserve attention. So do the problems that come with them."
           }
         },
         {
           "type": "paragraph",
           "text": {
-            "zh": "这里是我认为最重要的分界。患者在知情条件下，选择承担与自身治疗有关的风险，是一个问题；为了推进某项能力，让许多没有参与选择的人承担更大风险，是另一个问题。",
-            "en": "This is the distinction I consider most important. A patient making an informed choice about risks attached to their treatment is one question. Developing or deploying a capability that exposes uninvolved people to risk is another."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "前一个问题里的同意，不能自动成为后一个问题里的同意。一个人愿意尝试实验性治疗，并不意味着他愿意让相关技术在任何场景下不受限制地使用，更不意味着其他人已经接受了这些后果。",
-            "en": "Consent to the first does not establish consent to the second. Choosing an experimental treatment does not mean accepting unrestricted use of the underlying technology in every setting. It certainly does not mean everyone else has accepted the consequences."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "同样，某个 AI 系统在数学上表现出色，也不能替它在医学、安全或现实操作中的可靠性担保。信任需要落在具体任务、具体证据和具体边界上，不能从一个令人震撼的成功无限外推。",
-            "en": "Likewise, mathematical success cannot certify a system's reliability in medicine, security or physical operations. Trust must attach to a particular task, body of evidence and boundary. It cannot expand indefinitely from one spectacular achievement."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "我倾向于接受一种有边界的做法：允许在证据支持的范围内推进应用，同时要求独立验证、明确责任、持续监测，以及在出现问题时确实能收回的权限。可解释性尚不完整，不必自动封死所有用途；但无法完全解释，也不能成为放弃检查的借口。",
-            "en": "I favor bounded application supported by evidence, independent validation, clear responsibility, continuing monitoring and permissions that can actually be withdrawn. Incomplete explainability need not prohibit every use. It also cannot excuse abandoning scrutiny."
-          }
-        },
-        {
-          "type": "heading",
-          "level": 2,
-          "text": {
-            "zh": "七、当我们越来越离不开它，谁还能说“等一下”？",
-            "en": "7. When we depend on it, who can still ask us to wait?"
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "更深一层的风险，可能出现在成功之后。如果 AI 确实让我们更健康、更高效，又越来越多地承担关键工作，暂停使用它的代价也会随之增加。到那时，一项新风险即使被发现，人们也可能因为无法承受退出成本而继续依赖它。",
-            "en": "Another risk may emerge after success. If AI makes us healthier and more productive while taking on essential work, the cost of suspending it rises. Even when new risks are discovered, people may continue using it because withdrawal has become too costly."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "这是我的担忧，不是已经注定的结局。应对它，需要在便利形成依赖之前保留选择：让关键结果能被外部检验，让系统能被替换，让人类保有必要的知识和行动能力。否则，我们可能在一次次合理的局部选择之后，走到一个很难再作选择的位置。",
-            "en": "That is a concern, not a predetermined outcome. Preserving choice means acting before convenience becomes dependence: allowing external scrutiny, keeping systems replaceable, and retaining necessary human knowledge and practical skills. Otherwise, a series of locally reasonable decisions may leave us with very little freedom to decide later."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "因此，我不会简单断言，人类到那一天一定无法接受风险，或者一定会把风险抛到脑后。人类很可能接受更多风险，但这不等于所有风险都应该被接受。能否接受，取决于证据、代价、替代方案，以及谁有权决定。",
-            "en": "I cannot conclude that humanity will reject these risks, or that everyone will ignore them. People may accept more risk without every risk becoming acceptable. The answer depends on evidence, consequences, alternatives and who has the right to decide."
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "当 AI 真能拿出救命的方案，最难的问题或许才刚刚开始：我们能否在真心希望它继续进步的同时，仍然保留检查它、限制它、必要时暂停它的能力？",
-            "en": "When AI offers a genuinely lifesaving option, the hardest question may only be beginning: can we sincerely want further progress while retaining the ability to inspect, constrain and, when necessary, pause its use?"
-          }
-        },
-        {
-          "type": "paragraph",
-          "text": {
-            "zh": "我希望那时我们有资格说：我们接受这项风险，是因为看清了它，而不是因为已经没有别的选择。",
-            "en": "I hope we will be able to say that we accepted a risk because we understood what we were accepting, rather than because we had run out of choices."
+            "zh": "尤其当它越来越有用，甚至成为我们不愿失去的东西时，不要把“我需要它”当成“它没有问题”。",
+            "en": "Especially when AI becomes something we do not want to lose, “I need it” must not quietly become “there is nothing wrong with it.”"
           }
         },
         {
@@ -695,39 +651,51 @@
         {
           "type": "paragraph",
           "text": {
-            "zh": "本文是观点文章，事实依据截至 2026 年 11 月 10 日核对。开篇“车轮”的表达未找到可靠原始出处，作为个人感想改写。绝症患者与未知药物的情节明确为思想实验，不是用药建议，也不是已发生的治疗案例。",
-            "en": "This is an opinion essay with factual sources checked as of November 10, 2026. The opening wheel metaphor has no verified original attribution and is presented as a personal reflection. The terminal patient and unknown medicine are a thought experiment, not medical advice or a reported treatment case."
+            "zh": "本文是观点文章，沿用原文所列事实来源。绝症患者与未知药物属于思想实验，不是用药建议或现实治疗案例；对未来依赖的讨论属于作者判断。",
+            "en": "This is an opinion article retaining the original article's cited factual sources. The patient and unknown medicine are a thought experiment, not treatment advice or a real clinical case. The discussion of future dependence is the author's judgment."
           }
         },
         {
-          "type": "list",
-          "ordered": false,
-          "items": [
-            {
-              "zh": "[1] [OpenAI：On the Navier–Stokes Millennium Prize Problem](https://openai.com/index/navier-stokes-solution/)，2026-09-08。本文按机构发布内容描述，不据此宣称奖项认定或全部独立审查已经完成。",
-              "en": "[1] [OpenAI: On the Navier–Stokes Millennium Prize Problem](https://openai.com/index/navier-stokes-solution/), September 8, 2026. This essay describes the institutional announcement without asserting prize recognition or completion of all independent review."
-            },
-            {
-              "zh": "[2] [OpenAI：Sharing AI progress in mathematics](https://openai.com/index/sharing-ai-progress-in-mathematics/)，2026-10-06，含 10 月 15 日更新。",
-              "en": "[2] [OpenAI: Sharing AI progress in mathematics](https://openai.com/index/sharing-ai-progress-in-mathematics/), October 6, 2026, including the October 15 update."
-            },
-            {
-              "zh": "[3] [Geoffrey Hinton 原帖链接](https://twitter.com/geoffreyhinton/status/1230592238490615816/)，2020-02-20。原帖当前未能直接读取；通过 [InfoQ 2020 年报道及其原帖链接](https://www.infoq.com/news/2020/03/explainable-ai-survey/)和[保留原帖截图的教学材料](https://ai.ethicsworkshop.org/Library/AI-Case-Disease.pdf)交叉核对。本文使用概述，没有把“未知抗癌药”归为 Hinton 原话。",
-              "en": "[3] [Geoffrey Hinton's original post](https://twitter.com/geoffreyhinton/status/1230592238490615816/), February 20, 2020. Direct retrieval was unavailable; the attribution was cross-checked through [InfoQ's contemporary report and original-post link](https://www.infoq.com/news/2020/03/explainable-ai-survey/) and [teaching material preserving a screenshot](https://ai.ethicsworkshop.org/Library/AI-Case-Disease.pdf). This essay paraphrases the thought experiment and does not attribute the unknown-drug scenario to Hinton."
-            },
-            {
-              "zh": "[4] [Xu 等：A generative AI-discovered TNIK inhibitor for idiopathic pulmonary fibrosis: a randomized phase 2a trial](https://www.nature.com/articles/s41591-025-03743-2)，Nature Medicine，2025-06-03。",
-              "en": "[4] [Xu et al.: A generative AI-discovered TNIK inhibitor for idiopathic pulmonary fibrosis: a randomized phase 2a trial](https://www.nature.com/articles/s41591-025-03743-2), Nature Medicine, June 3, 2025."
-            },
-            {
-              "zh": "[5] [Google DeepMind：Millions of new materials discovered with deep learning](https://deepmind.google/blog/millions-of-new-materials-discovered-with-deep-learning/)，2023-11-29。",
-              "en": "[5] [Google DeepMind: Millions of new materials discovered with deep learning](https://deepmind.google/blog/millions-of-new-materials-discovered-with-deep-learning/), November 29, 2023."
-            },
-            {
-              "zh": "[6] [Urbina 等：Dual Use of Artificial Intelligence-powered Drug Discovery](https://pmc.ncbi.nlm.nih.gov/articles/PMC9544280/)，Nature Machine Intelligence，2022-03-07。引用其双重用途结论，不将计算候选描述为经实验证实的武器。",
-              "en": "[6] [Urbina et al.: Dual Use of Artificial Intelligence-powered Drug Discovery](https://pmc.ncbi.nlm.nih.gov/articles/PMC9544280/), Nature Machine Intelligence, March 7, 2022. The citation concerns dual-use potential, not experimentally validated weapons."
-            }
-          ]
+          "type": "paragraph",
+          "text": {
+            "zh": "[1] [OpenAI：On the Navier–Stokes Millennium Prize Problem](https://openai.com/index/navier-stokes-solution/)，2026-09-08。按机构发布内容描述，不据此宣称奖项认定或全部独立审查已经完成。",
+            "en": "[1] [OpenAI: On the Navier–Stokes Millennium Prize Problem](https://openai.com/index/navier-stokes-solution/), September 8, 2026. This essay describes the institutional announcement without asserting prize recognition or completion of all independent review."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "[2] [OpenAI：Sharing AI progress in mathematics](https://openai.com/index/sharing-ai-progress-in-mathematics/)，2026-10-06，含 10 月 15 日更新。",
+            "en": "[2] [OpenAI: Sharing AI progress in mathematics](https://openai.com/index/sharing-ai-progress-in-mathematics/), October 6, 2026, including the October 15 update."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "[3] [Geoffrey Hinton 原帖](https://twitter.com/geoffreyhinton/status/1230592238490615816/)，2020-02-20。原文通过 [InfoQ 报道](https://www.infoq.com/news/2020/03/explainable-ai-survey/)及[保留原帖截图的教学材料](https://ai.ethicsworkshop.org/Library/AI-Case-Disease.pdf)交叉核对；没有把“未知抗癌药”归为 Hinton 原话。",
+            "en": "[3] [Geoffrey Hinton's original post](https://twitter.com/geoffreyhinton/status/1230592238490615816/), February 20, 2020. Direct retrieval was unavailable; the attribution was cross-checked through [InfoQ's contemporary report and original-post link](https://www.infoq.com/news/2020/03/explainable-ai-survey/) and [teaching material preserving a screenshot](https://ai.ethicsworkshop.org/Library/AI-Case-Disease.pdf). This essay paraphrases the thought experiment and does not attribute the unknown-drug scenario to Hinton."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "[4] [Xu 等：A generative AI-discovered TNIK inhibitor for idiopathic pulmonary fibrosis: a randomized phase 2a trial](https://www.nature.com/articles/s41591-025-03743-2)，Nature Medicine，2025-06-03。",
+            "en": "[4] [Xu et al.: A generative AI-discovered TNIK inhibitor for idiopathic pulmonary fibrosis: a randomized phase 2a trial](https://www.nature.com/articles/s41591-025-03743-2), Nature Medicine, June 3, 2025."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "[5] [Google DeepMind：Millions of new materials discovered with deep learning](https://deepmind.google/blog/millions-of-new-materials-discovered-with-deep-learning/)，2023-11-29。",
+            "en": "[5] [Google DeepMind: Millions of new materials discovered with deep learning](https://deepmind.google/blog/millions-of-new-materials-discovered-with-deep-learning/), November 29, 2023."
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": {
+            "zh": "[6] [Urbina 等：Dual Use of Artificial Intelligence-powered Drug Discovery](https://pmc.ncbi.nlm.nih.gov/articles/PMC9544280/)，Nature Machine Intelligence，2022-03-07。计算候选不等于经实验证实的武器。",
+            "en": "[6] [Urbina et al.: Dual Use of Artificial Intelligence-powered Drug Discovery](https://pmc.ncbi.nlm.nih.gov/articles/PMC9544280/), Nature Machine Intelligence, March 7, 2022. The citation concerns dual-use potential, not experimentally validated weapons."
+          }
         }
       ],
       "sourcePath": "posts/2026-11-10-ai-progress-risk-and-the-cure.md",
