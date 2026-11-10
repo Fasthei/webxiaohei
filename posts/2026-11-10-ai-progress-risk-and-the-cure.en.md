@@ -34,7 +34,7 @@ I find it difficult to blame someone who would try. Their loss is already concre
 
 That also makes me uneasy. When hope is strong enough, will people still ask what supports the claim of effectiveness? Evidence of benefit with an incomplete account of the mechanism is different from a confident model answer without evidence of benefit. Someone desperate for an answer can lose that distinction behind the words “it could save your life.”
 
-If AI acquires the capability to save all of humanity, it may also acquire the capability to destroy it. This is a warning about dual use, not a factual claim about current systems or a prediction that catastrophe is inevitable.
+When the capacity exists to create something capable of saving all of humanity, it also carries the capacity to destroy all of humanity. This is a warning about dual use, not a factual claim about current systems or a prediction that catastrophe is inevitable.
 
 ## 3. Tangible progress can push vigilance into the background
 
