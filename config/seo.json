@@ -121,5 +121,15 @@
     "zh": {
       "description": "记录安全研究中的学习方法、背景介绍与实践反思，整理红队、云安全、身份认证及 AI 安全相关笔记。内容由 AI 协助撰写并经作者审核，持续补充实验与理解。"
     }
+  },
+  "/articles/mcp-stdio-configuration-trust-boundary/": {
+    "en": {
+      "description": "A red-team case study of MCP stdio: how tool configuration crosses process, environment and database trust boundaries, with evidence for each step."
+    }
+  },
+  "/articles/embedding-inversion-environment-and-ai-errors/": {
+    "en": {
+      "description": "A sanitized red-team case study tracing a misleading RAG stack, identity checks and embedding inversion, with ten lessons from AI reasoning errors."
+    }
   }
 }

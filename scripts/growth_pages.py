@@ -41,6 +41,12 @@ def enrich(s,path,lang,post,data,config):
 
 def build(root,data,templates,pages,write_page):
  site=root/'site'
+ related_path=root/'config/topic-related.json'
+ related_topics=json.loads(related_path.read_text()) if related_path.exists() else {}
+ post_ids={p['id'] for p in data['posts']}
+ for tid,ids in related_topics.items():
+  if tid not in {t['id'] for t in data['topics']} or not isinstance(ids,list) or any(pid not in post_ids for pid in ids):
+   raise ValueError('Invalid related topic or article in config/topic-related.json')
  for lang in ['en','zh']:
   prefix='/zh' if lang=='zh' else ''
   for topic in data['topics']:
@@ -50,6 +56,10 @@ def build(root,data,templates,pages,write_page):
    if posts:
     main+=''.join('<article class="post-preview"><time>'+p['date']+'</time><h2><a href="/articles/'+p['id']+'/">'+html.escape(p['title'][lang])+'</a></h2><p>'+html.escape(p['summary'][lang])+'</p></article>' for p in posts)
    else:main+='<p>'+('No articles published in this topic yet.' if lang=='en' else '此主题暂未发布文章。')+'</p>'
+   related_ids=related_topics.get(tid,[])
+   related=[p for p in data['posts'] if p['id'] in related_ids and topic_of(p)!=tid]
+   if related:
+    main+='<section class="topic-related"><h2>'+('Related research' if lang=='en' else '相关研究')+'</h2><ul class="directory-links">'+''.join('<li><a href="/articles/'+p['id']+'/">'+html.escape(p['title'][lang])+'</a></li>' for p in related)+'</ul></section>'
    main+='</main>'
    s=re.sub(r'<main\b.*?</main>',lambda _:main,templates['topics.html'],flags=re.S)
    path='/topics/'+tid+'/'

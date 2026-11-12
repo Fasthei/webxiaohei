@@ -1,0 +1,54 @@
+"""Regression coverage for the public-page SEO audit fixes."""
+import json
+from pathlib import Path
+import re
+import shutil
+import sys
+import tempfile
+import unittest
+
+sys.path.insert(0, str(Path(__file__).parents[1] / 'scripts'))
+import build_seo
+from growth_pages import topic_of
+
+
+class AuditFixTests(unittest.TestCase):
+    def test_identity_related_links_and_concise_search_descriptions(self):
+        root = Path(__file__).parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp)
+            for folder in ('site', 'content', 'config'):
+                shutil.copytree(root / folder, dest / folder)
+            build_seo.build(dest)
+            build_seo.build(dest)
+            data = json.loads((dest / 'content/site.json').read_text())
+            posts = {p['id']: p for p in data['posts']}
+            related = json.loads((dest / 'config/topic-related.json').read_text())['identity']
+            for prefix in ('', 'zh/'):
+                hub = (dest / 'site' / prefix / 'topics/identity/index.html').read_text()
+                self.assertEqual(hub.count('class="topic-related"'), 1)
+                for slug in related:
+                    self.assertIn('href="/' + prefix + 'articles/' + slug + '/"', hub)
+                    self.assertTrue((dest / 'site' / prefix / 'articles' / slug / 'index.html').exists())
+                    # Cross-topic links should not move the cloud articles out of their primary topic.
+                    self.assertEqual(topic_of(posts[slug]), 'cloud')
+            for slug in ('mcp-stdio-configuration-trust-boundary', 'embedding-inversion-environment-and-ai-errors'):
+                article = (dest / 'site/articles' / slug / 'index.html').read_text()
+                description = re.search(r'<meta name="description" content="([^"]+)"', article)[1]
+                self.assertLessEqual(len(description), 160)
+                # The short search snippet must not replace the complete article deck.
+                self.assertIn(posts[slug]['summary']['en'], article)
+
+    def test_invalid_related_article_fails_build(self):
+        root = Path(__file__).parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp)
+            for folder in ('site', 'content', 'config'):
+                shutil.copytree(root / folder, dest / folder)
+            (dest / 'config/topic-related.json').write_text('{"identity": ["missing-article"]}')
+            with self.assertRaisesRegex(ValueError, 'Invalid related topic'):
+                build_seo.build(dest)
+
+
+if __name__ == '__main__':
+    unittest.main()

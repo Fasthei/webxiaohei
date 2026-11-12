@@ -1,0 +1,10 @@
+{
+  "identity": [
+    "aws-identity-root-payer-trust",
+    "microsoft-cloud-identity-hybrid-auth",
+    "microsoft-identity-part2-m365-copilot",
+    "google-identity-part1-cloud-hierarchy-credentials-billing",
+    "google-identity-part2-workspace-gmail-apple",
+    "google-identity-part3-gemini-offense"
+  ]
+}
