@@ -32,6 +32,14 @@ class AuditFixTests(unittest.TestCase):
                     self.assertTrue((dest / 'site' / prefix / 'articles' / slug / 'index.html').exists())
                     # Cross-topic links should not move the cloud articles out of their primary topic.
                     self.assertEqual(topic_of(posts[slug]), 'cloud')
+            for prefix in ('', 'zh/'):
+                for slug, post in posts.items():
+                    article = (dest / 'site' / prefix / 'articles' / slug / 'index.html').read_text()
+                    schemas = [json.loads(raw) for raw in re.findall(r'<script type="application/ld\+json">(.*?)</script>', article)]
+                    posting = next(item for item in schemas if item.get('@type') == 'BlogPosting')
+                    self.assertEqual(posting['author'], {'@type': 'Person', 'name': 'xiaohei', 'url': 'https://www.xiaohei.co/' + prefix + 'about.html'})
+                    self.assertEqual(posting['datePublished'], post['date'])
+                    self.assertNotIn('dateModified', posting)
             for slug in ('mcp-stdio-configuration-trust-boundary', 'embedding-inversion-environment-and-ai-errors'):
                 article = (dest / 'site/articles' / slug / 'index.html').read_text()
                 description = re.search(r'<meta name="description" content="([^"]+)"', article)[1]
