@@ -13,6 +13,16 @@ from growth_pages import topic_of
 
 
 class AuditFixTests(unittest.TestCase):
+    def test_static_inline_citations(self):
+        self.assertEqual(build_seo.inline('[source](https://example.com/?a=1&b=2)'),
+                         '<a href="https://example.com/?a=1&amp;b=2">source</a>')
+        self.assertEqual(build_seo.inline('`[source](https://example.com)`'),
+                         '<code>[source](https://example.com)</code>')
+        self.assertNotIn('<a', build_seo.inline('[bad](javascript:alert(1))'))
+        self.assertIn('&lt;img', build_seo.inline('[<img>](https://example.com)'))
+        self.assertIn('<strong>source</strong>', build_seo.inline('[**source**](https://example.com)'))
+
+
     def test_identity_related_links_and_concise_search_descriptions(self):
         root = Path(__file__).parents[1]
         with tempfile.TemporaryDirectory() as tmp:

@@ -24,3 +24,15 @@ html[lang=en] .bloom-title{font-family:Georgia,"Iowan Old Style",serif;font-size
 /* Reading and touch-target fixes for narrow screens. */
 .article-column,.library-main{min-width:0}.article-header h1,.article-body p,.article-body li,.article-body a{overflow-wrap:anywhere}.article-body img{max-width:100%;height:auto}.article-body pre,.article-table{max-width:100%;overflow-x:auto}.analytics-notice{margin:0;padding:12px 20px;background:#ebe7dc;color:#282e27;text-align:center;font-size:14px}
 @media(max-width:760px){.languages button,.main-nav a{display:inline-flex;align-items:center;min-height:44px}.languages button{min-width:44px;justify-content:center}.search-field input{font-size:16px;min-height:44px}.catalog-tools select{font-size:13px;min-height:44px}.article-body{font-size:16px;line-height:1.85}.toc-panel summary{min-height:36px;display:flex;align-items:center}.article-body img{height:auto}}
+
+/* Put reading ahead of decoration on phones; retain the desktop composition. */
+@media(max-width:760px){
+ .page-home .bloom-hero{min-height:260px;padding:20px 20px 60px}
+ .page-home .bloom-title,html[lang=en] .page-home .bloom-title{font-size:50px;line-height:1.05;margin:18px 0 0}
+ .page-home .hero-art{top:0;right:-55px;width:65%;height:100%;opacity:.32}
+ .page-home .hero-bottom{bottom:18px}
+ .page-home .library-layout{padding-top:18px;gap:12px}
+ .page-home .notebook-heading{padding-bottom:12px}
+ .page-home .catalog-tools{margin-bottom:12px}
+ .page-home .post-preview{padding-top:16px}
+}

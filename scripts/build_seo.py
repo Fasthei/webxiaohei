@@ -11,10 +11,19 @@ HOST={'en':'https://www.xiaohei.co','zh':'https://www.xiaohei.co'}
 def url(path,lang):return HOST[lang]+('/zh' if lang=='zh' else '')+path
 
 def inline(s):
- s=html.escape(s)
- s=re.sub(r'`([^`]+)`',r'<code>\1</code>',s)
- s=re.sub(r'\*\*([^*]+)\*\*',r'<strong>\1</strong>',s)
- return s
+ # Tokenize before escaping: code remains literal and link destinations never
+ # become executable markup. Only the public web/mail schemes are supported.
+ parts=[];pos=0
+ token=re.compile(r'`([^`]+)`|\[([^\]\n]+)\]\(((?:https?://|mailto:)[^\s<>]+?)\)')
+ def emphasis(text):
+  return re.sub(r'\*\*([^*]+)\*\*',r'<strong>\1</strong>',html.escape(text))
+ for m in token.finditer(s):
+  parts.append(emphasis(s[pos:m.start()]))
+  if m[1] is not None:parts.append('<code>'+html.escape(m[1])+'</code>')
+  else:parts.append('<a href="'+html.escape(m[3],quote=True)+'">'+emphasis(m[2])+'</a>')
+  pos=m.end()
+ parts.append(emphasis(s[pos:]))
+ return ''.join(parts)
 
 def blocks(body,lang):
  out=[];i=0
