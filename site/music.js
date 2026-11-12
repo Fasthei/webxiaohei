@@ -23,7 +23,10 @@
   audio.setAttribute('playsinline','');
   bar.append(button,status);
   widget.append(bar,audio);
-  document.body.append(widget);
+  // Keep a real layout slot on phones; desktop positioning remains floating.
+  const header = document.querySelector('.site-header');
+  if (header) header.insertAdjacentElement('afterend', widget);
+  else document.body.prepend(widget);
   function show(playing, message = '') {
     button.textContent = `♫ ${playing ? words.pause : words.play}`;
     button.setAttribute('aria-label', playing ? words.pause : words.play);

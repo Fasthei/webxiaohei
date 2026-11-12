@@ -27,7 +27,7 @@ jobs:
       - name: Test and prepare static website
         run: |
           python3 -m unittest discover -s tests -v
-          node --test tests/content.test.cjs tests/analytics.test.cjs
+          node --test tests/content.test.cjs tests/analytics.test.cjs tests/music.test.cjs
           python3 scripts/build_posts.py
           cp content/site.json site/content/site.json
           test -s site/index.html

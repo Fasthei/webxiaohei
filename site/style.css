@@ -27,7 +27,7 @@ html[lang=en] .bloom-title{font-family:Georgia,"Iowan Old Style",serif;font-size
 
 /* Put reading ahead of decoration on phones; retain the desktop composition. */
 @media(max-width:760px){
- .page-home .bloom-hero{min-height:260px;padding:20px 20px 60px}
+ .page-home .bloom-hero{min-height:208px;padding:20px 20px 60px}
  .page-home .bloom-title,html[lang=en] .page-home .bloom-title{font-size:50px;line-height:1.05;margin:18px 0 0}
  .page-home .hero-art{top:0;right:-55px;width:65%;height:100%;opacity:.32}
  .page-home .hero-bottom{bottom:18px}
@@ -35,4 +35,10 @@ html[lang=en] .bloom-title{font-family:Georgia,"Iowan Old Style",serif;font-size
  .page-home .notebook-heading{padding-bottom:12px}
  .page-home .catalog-tools{margin-bottom:12px}
  .page-home .post-preview{padding-top:16px}
+}
+
+@media(max-width:760px){
+ body{font-size:16px}
+ .page-home .post-preview p{font-size:16px;line-height:1.75}
+ .page-home .notebook-heading p{font-size:16px}
 }
